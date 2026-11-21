@@ -58,26 +58,40 @@ export function buildYouTubeMetadata(manifest, config) {
     'atomslice3d',
   ];
 
-  return { title, description, tags };
+  const tiktokCaption = `${title.replace(/\s*#shorts/i, '').trim()} — ${maxCubes && maxCubes !== '0' ? `${maxCubes} cubes ` : ''}#satisfying #asmr #3dart #oddlysatisfying #fyp #infiniteslice`;
+
+  return { title, description, tags, tiktokCaption };
 }
 
 /**
- * Method A: Upload-Post.com (Google-audited YouTube Shorts API — publishes PUBLIC Shorts immediately!)
+ * Method A: Upload-Post.com (Google-audited YouTube Shorts + optional TikTok API)
  * Requires: UPLOAD_POST_API_KEY and UPLOAD_POST_USER (profile username created in Upload-Post dashboard).
+ * Optional: UPLOAD_POST_PLATFORMS (comma-separated, e.g. "youtube" or "youtube,tiktok"; default "youtube").
  */
 async function publishViaUploadPost(videoPath, meta) {
   const apiKey = process.env.UPLOAD_POST_API_KEY;
   const user = process.env.UPLOAD_POST_USER;
   if (!apiKey || !user) return null;
 
-  console.log('[youtube] Uploading Short via Upload-Post API (pre-audited public YouTube Shorts)...');
+  const platforms = (process.env.UPLOAD_POST_PLATFORMS || 'youtube')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+
+  console.log(`[social] Uploading via Upload-Post API -> platforms=[${platforms.join(', ')}]...`);
   const fileBuf = fs.readFileSync(videoPath);
   const form = new FormData();
   form.append('user', user);
-  form.append('platform[]', 'youtube');
+  for (const p of platforms) {
+    form.append('platform[]', p);
+  }
   form.append('title', meta.title);
   form.append('description', meta.description);
   form.append('privacyStatus', 'public');
+  if (platforms.includes('tiktok')) {
+    form.append('tiktok_title', meta.tiktokCaption);
+    form.append('privacy_level', process.env.TIKTOK_PRIVACY_LEVEL || 'PUBLIC_TO_EVERYONE');
+  }
   form.append('video', new Blob([fileBuf], { type: 'video/mp4' }), path.basename(videoPath));
 
   const res = await fetch('https://api.upload-post.com/api/upload', {
@@ -91,8 +105,8 @@ async function publishViaUploadPost(videoPath, meta) {
   if (!res.ok) {
     throw new Error(`Upload-Post failed (${res.status}): ${JSON.stringify(json)}`);
   }
-  console.log('[youtube] Published via Upload-Post:', JSON.stringify(json));
-  return { provider: 'upload-post', response: json };
+  console.log('[social] Published via Upload-Post:', JSON.stringify(json));
+  return { provider: 'upload-post', platforms, response: json };
 }
 
 /**
