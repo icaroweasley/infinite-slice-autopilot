@@ -88,7 +88,7 @@ const COPY = {
     chk3: '10 Built-in Volumetric Objects + Free-Text Prompt 3D Generator',
     chk4: '9 Cutters, 10 Cutting Surfaces & 8 Studio Environments + Custom AI Slots',
     chk5: 'Deterministic 60 FPS H.264 MP4 + 48 kHz Stereo ASMR Audio Engine',
-    chk6: 'Full Commercial Monetization Rights (Instagram, TikTok, YouTube)',
+    chk6: '4-Page Illustrated Quick-Start PDF Manual + Full Commercial Rights',
     buyMainCta: 'Get Instant Access Now →',
     guarantee: '🔒 Secure checkout • Instant automatic .zip delivery • Works on Windows & macOS',
 

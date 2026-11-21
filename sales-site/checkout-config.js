@@ -14,12 +14,10 @@ window.SITE_CONFIG = {
   supportEmail: 'hello@atomslice3d.com',
 
   // Global Checkout URL (USD — Gumroad / Lemon Squeezy / Stripe Payment Link)
-  // Example: 'https://atomslice3d.gumroad.com/l/infinite-slice-3d'
-  checkoutUrlUSD: '',
+  checkoutUrlUSD: 'https://icaroweasley.gumroad.com/l/atomslice3d',
 
-  // Brazil Checkout URL (BRL — Kiwify / Hotmart / Stripe BRL; falls back to checkoutUrlUSD if empty)
-  // Example: 'https://pay.kiwify.com.br/SEU-CODIGO'
-  checkoutUrlBRL: '',
+  // Fallback Checkout URL
+  checkoutUrlBRL: 'https://icaroweasley.gumroad.com/l/atomslice3d',
 
   pricing: {
     en: {
