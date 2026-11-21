@@ -26,26 +26,44 @@ jobs:
     timeout-minutes: 25
 
     steps:
+      - name: Check if scheduled run has publishing secrets configured
+        id: guard
+        env:
+          N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ -z "$N8N_WEBHOOK_URL" ] && [ -z "$IG_ACCESS_TOKEN" ]; then
+            echo "No Instagram publishing secrets configured yet — skipping scheduled run so free Actions minutes are not wasted. Add IG_ACCESS_TOKEN (or N8N_WEBHOOK_URL) to activate 24/7 auto-posting."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout repository
+        if: steps.guard.outputs.skip != 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js 22
+        if: steps.guard.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
 
       - name: Install system FFmpeg & Chromium dependencies
+        if: steps.guard.outputs.skip != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
       - name: Install npm dependencies & Playwright Chromium
+        if: steps.guard.outputs.skip != 'true'
         run: |
           npm ci || npm install
           npx playwright-core install chromium --with-deps
 
       - name: Run Autonomous AI Creator + 60 FPS MP4 Render + Instagram Reels Publish
+        if: steps.guard.outputs.skip != 'true'
         env:
           # Free Gemini API key (Google AI Studio) OR Anthropic Claude API key
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -69,7 +87,7 @@ jobs:
           fi
 
       - name: Upload MP4 Artifact (Dry-Run Inspection)
-        if: ${{ inputs.dry_run == true }}
+        if: steps.guard.outputs.skip != 'true' && inputs.dry_run == true
         uses: actions/upload-artifact@v4
         with:
           name: rendered-reel-mp4
@@ -77,6 +95,7 @@ jobs:
           retention-days: 3
 
       - name: Commit updated anti-repetition history.json
+        if: steps.guard.outputs.skip != 'true' && inputs.dry_run != true
         run: |
           git config user.name "Infinite Slice Bot"
           git config user.email "bot@infinite-slice.local"
