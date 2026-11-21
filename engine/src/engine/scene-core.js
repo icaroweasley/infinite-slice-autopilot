@@ -528,19 +528,21 @@ export class InfiniteSliceEngine {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    const topGrad = ctx.createLinearGradient(0, 0, 0, 175 * s);
-    topGrad.addColorStop(0, 'rgba(0,0,0,0.42)');
+    const topGrad = ctx.createLinearGradient(0, 0, 0, 195 * s);
+    topGrad.addColorStop(0, 'rgba(0,0,0,0.40)');
     topGrad.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = topGrad;
-    ctx.fillRect(0, 0, W, 175 * s);
+    ctx.fillRect(0, 0, W, 195 * s);
 
-    const botGrad = ctx.createLinearGradient(0, H - 155 * s, 0, H);
+    // Subtle bottom vignette that frames the Reels/TikTok/Shorts safe-zone counter without darkening the board
+    const botGrad = ctx.createLinearGradient(0, H - 280 * s, 0, H);
     botGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    botGrad.addColorStop(1, 'rgba(0,0,0,0.46)');
+    botGrad.addColorStop(0.55, 'rgba(0,0,0,0.16)');
+    botGrad.addColorStop(1, 'rgba(0,0,0,0.34)');
     ctx.fillStyle = botGrad;
-    ctx.fillRect(0, H - 155 * s, W, 155 * s);
+    ctx.fillRect(0, H - 280 * s, W, 280 * s);
 
-    const dotY = 36 * s;
+    const dotY = 48 * s;
     const dotGap = 16 * s;
     const startX = W * 0.5 - ((this.rounds.length - 1) * dotGap) * 0.5;
     for (let i = 0; i < this.rounds.length; i++) {
@@ -554,7 +556,7 @@ export class InfiniteSliceEngine {
 
     const cutScale = 1.0 + this.cutPulse * 0.045 + this.roundFlash * 0.10;
     ctx.save();
-    ctx.translate(W * 0.5, 92 * s);
+    ctx.translate(W * 0.5, 102 * s);
     ctx.scale(cutScale, cutScale);
     const headline = this.displayCuts === 0 ? `${formatNumber(this.targetCuts)} CUTS` : `${formatNumber(this.displayCuts)} CUTS`;
     ctx.font = `900 ${Math.round(52 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
@@ -569,40 +571,47 @@ export class InfiniteSliceEngine {
     if (this.displayCuts > 0 && this.displayCuts < this.targetCuts) {
       ctx.font = `700 ${Math.round(13 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
       ctx.fillStyle = 'rgba(255,255,255,0.72)';
-      ctx.fillText(`GOAL: ${formatNumber(this.targetCuts)} CUTS`, W * 0.5, 130 * s);
+      ctx.fillText(`GOAL: ${formatNumber(this.targetCuts)} CUTS`, W * 0.5, 140 * s);
     }
 
     if (this.handleText) {
       ctx.font = `700 ${Math.round(17 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
       ctx.lineWidth = 4 * s;
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
-      const handleY = this.displayCuts > 0 && this.displayCuts < this.targetCuts ? 156 * s : 140 * s;
+      const handleY = this.displayCuts > 0 && this.displayCuts < this.targetCuts ? 166 * s : 150 * s;
       ctx.strokeText(this.handleText, W * 0.5, handleY);
       ctx.fillStyle = 'rgba(255, 255, 255, 0.86)';
       ctx.fillText(this.handleText, W * 0.5, handleY);
     }
 
+    // Reels / TikTok / YouTube Shorts Safe Zone:
+    // Bottom ~20-23% of 9:16 is covered by captions, username & audio bar.
+    // Placing the CUBES counter at H - 250*s (~74.0% down, ~22.6% = 434px@1080p clear below label)
+    // keeps it 100% visible above all platform overlays (even 2-line captions) and cleanly below the object.
     const cubesVal = Math.round(this.displayCubes);
     if (cubesVal > 0) {
       const cubeScale = 1.0 + this.cubePulse * 0.06;
       ctx.save();
-      ctx.translate(W * 0.5, H - 78 * s);
+      ctx.translate(W * 0.5, H - 250 * s);
       ctx.scale(cubeScale, cubeScale);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      ctx.shadowBlur = 14 * s;
+      ctx.shadowOffsetY = 3 * s;
 
       const numStr = formatNumber(cubesVal);
       ctx.font = `900 ${Math.round(44 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
       ctx.lineJoin = 'round';
-      ctx.lineWidth = 6.5 * s;
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
+      ctx.lineWidth = 7.5 * s;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.82)';
       ctx.strokeText(numStr, 0, -10 * s);
       ctx.fillStyle = '#ffe169';
       ctx.fillText(numStr, 0, -10 * s);
 
       ctx.font = `800 ${Math.round(16 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
-      ctx.lineWidth = 4 * s;
-      ctx.strokeText('CUBES', 0, 24 * s);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-      ctx.fillText('CUBES', 0, 24 * s);
+      ctx.lineWidth = 4.5 * s;
+      ctx.strokeText('CUBES', 0, 23 * s);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillText('CUBES', 0, 23 * s);
       ctx.restore();
     }
 
