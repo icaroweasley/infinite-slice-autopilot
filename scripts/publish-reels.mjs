@@ -211,7 +211,13 @@ export async function publishReel({ videoPath, manifestPath, dryRun = false, cap
     : { videoFile: path.relative(ROOT, absVideo), englishName: path.basename(absVideo, '.mp4') };
 
   const caption = captionOverride || buildEnglishCaption(manifest, cfg);
-  const mode = dryRun ? 'dry-run' : (process.env.N8N_WEBHOOK_URL ? 'n8n' : process.env.IG_ACCESS_TOKEN ? 'meta-graph' : 'dry-run');
+  if (!dryRun && !process.env.N8N_WEBHOOK_URL && !process.env.IG_ACCESS_TOKEN) {
+    throw new Error(
+      'Publishing failed: neither IG_ACCESS_TOKEN nor N8N_WEBHOOK_URL is set. ' +
+      'Make sure IG_ACCESS_TOKEN is saved under GitHub Settings -> Secrets and variables -> Actions -> Repository secrets.'
+    );
+  }
+  const mode = dryRun ? 'dry-run' : (process.env.N8N_WEBHOOK_URL ? 'n8n' : 'meta-graph');
 
   if (mode === 'dry-run') {
     console.log('\n[publish] === DRY-RUN PREVIEW (No credentials configured or --dry-run set) ===');

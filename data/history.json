@@ -1,30 +1,5 @@
 {
   "version": 1,
   "brand": "@atomslice3d",
-  "entries": [
-    {
-      "id": "slice-1795282565678",
-      "createdAt": "2026-11-21T17:36:05.678Z",
-      "status": "rendered",
-      "source": "cloud-autopilot:fallback",
-      "objectId": "prompt-custom",
-      "slug": "fruta-do-dragao-pitaya-rosa-vibrante-com-p",
-      "name": "Fruta do Dragão (Pitaya) rosa vibrante com polpa branca e sementes pretas",
-      "englishName": "Fruta do Dragão (Pitaya) rosa vibrante com polpa branca e sementes pretas",
-      "cutterId": "custom",
-      "surfaceId": "custom",
-      "envId": "custom",
-      "rounds": [
-        10,
-        100,
-        1000
-      ],
-      "maxCubes": 32619793,
-      "durationSec": 19.033,
-      "resolution": "540x960",
-      "fps": 30,
-      "videoFile": "output/infinite-slice-fruta-do-dragao-pitaya-rosa-vibr-cozinha-rustica-toscana-com-pare-2026-11-21T17-28-13.mp4",
-      "caption": "Slicing a Fruta do Dragão (Pitaya) rosa vibrante com polpa branca e sementes pretas 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
-    }
-  ]
+  "entries": []
 }

@@ -84,10 +84,65 @@ CRITICAL RULES FOR ZERO ERRORS:
 ${previousError ? `\nPREVIOUS BUILD FAILED WITH THIS ERROR — FIX IT:\n${previousError}` : ''}`;
 }
 
+const CLOUD_EN_OBJECTS = [
+  'Vibrant Pink Dragon Fruit with white seed-speckled core',
+  'Ripe Avocado with glossy wooden pit',
+  'Cracked Obsidian Volcano with glowing magma core',
+  'Luxury Gold Mechanical Watch with internal gears',
+  'Transparent Crystal Heart filled with molten gold',
+  'Wagyu A5 Marble Steak with fine white marbling',
+  'Artisan Swiss Cheese Block with real hollow 3D holes',
+  'Matcha Mille-Crepe Cake with 14 alternating layers',
+  'Giant Neon Jawbreaker with 12 concentric candy rings',
+  'Stack of 100 Dollar Bills bound with a gold band',
+  'Blue Cut Diamond with radiant glowing core',
+  'Mirror Pokeball with cyan plasma core',
+  'Clay Brick hiding a rainbow layer cake inside',
+  'Arctic Ice Block with frozen pirate gold coins',
+  'Ripe Red Pomegranate packed with ruby seeds',
+  'Nintendo Switch OLED with copper circuit board inside',
+  'Galaxy Purple Translucent Soap with gold mica veins',
+  'Italian Tiramisu Cake with espresso and cocoa layers',
+];
+
+const CLOUD_EN_CUTTERS = [
+  '1000C glowing red-hot chef knife',
+  'Damascus steel samurai katana with gold guard',
+  'Neon purple plasma lightsaber',
+  'Solid 24k gold Chinese cleaver',
+  'Luxury metallic black credit card with gold chip',
+  'Translucent blue diamond crystal blade',
+  'Obsidian magma wakizashi with glowing lava edge',
+  'Emerald green neon lightsaber',
+];
+
+const CLOUD_EN_SURFACES = [
+  'Deep purple marble slab with liquid gold veins',
+  'Walnut wood and turquoise epoxy resin river board',
+  'Black volcanic stone with glowing ember veins',
+  'Frosted glass slab with cyan LED edge glow',
+  'Polished pink quartz stone block',
+  'Brushed copper architectural plate',
+  'Striped Japanese bamboo cutting board',
+  'Cracked glacial arctic ice slab',
+];
+
+const CLOUD_EN_ENVS = [
+  'Cyberpunk Japanese kitchen at night with cyan and magenta neon lights',
+  'Dark Michelin restaurant kitchen with brushed steel and warm spotlight',
+  'Minimalist Scandinavian studio with soft morning light',
+  'Futuristic ultra-white surgical lab studio',
+  'Luxury black jewelry studio with golden rim light',
+  'Deep purple galaxy studio with violet rim lighting',
+  'Cozy terracotta sunset atelier with warm amber light',
+  'Icy blue crystal cave with cool cinematic reflections',
+];
+
 async function callGemini(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const model = (process.env.GEMINI_MODEL || 'gemini-3.8-flash').trim();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  console.log(`[autopilot] Calling Gemini model: ${model}`);
 
   const res = await fetch(url, {
     method: 'POST',
@@ -104,7 +159,8 @@ async function callGemini(prompt) {
   if (!res.ok) throw new Error(`Gemini API error (${res.status}): ${JSON.stringify(json).slice(0, 400)}`);
   const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error('Gemini returned empty response');
-  return JSON.parse(text);
+  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  return JSON.parse(cleaned);
 }
 
 async function callClaude(prompt) {
@@ -177,13 +233,28 @@ async function main() {
 
   const provider = detectAiProvider();
   console.log(`\n=== Infinite Slice 24/7 Cloud Autopilot ===`);
-  console.log(`Provider: ${provider.toUpperCase()} | Previous creations: ${usedSlugs.length} | Mode: ${quick ? 'QUICK' : 'PRODUCTION'}`);
+  console.log(`Provider: ${provider.toUpperCase()} | Previous creations: ${usedSlugs.length} | Mode: ${quick ? 'QUICK' : 'PRODUCTION'} | Publish: ${shouldPublish && !dryRun ? 'LIVE' : 'DRY-RUN'}`);
+  console.log(
+    `[env-check] GEMINI_API_KEY=${process.env.GEMINI_API_KEY ? 'present' : 'MISSING'} | ` +
+    `IG_ACCESS_TOKEN=${process.env.IG_ACCESS_TOKEN ? 'present' : 'MISSING'} | ` +
+    `IG_USER_ID=${process.env.IG_USER_ID ? 'present' : 'MISSING'} | ` +
+    `CLOUDINARY=${process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_UPLOAD_PRESET ? 'present' : 'not-set'} | ` +
+    `N8N_WEBHOOK_URL=${process.env.N8N_WEBHOOK_URL ? 'present' : 'not-set'}`
+  );
 
-  // Choose fresh pacing rounds if not explicitly forced
+  // Fail-fast before spending minutes rendering if --publish is requested without credentials
+  if (shouldPublish && !dryRun && !process.env.N8N_WEBHOOK_URL && !process.env.IG_ACCESS_TOKEN) {
+    throw new Error(
+      'Cannot run with --publish: neither IG_ACCESS_TOKEN nor N8N_WEBHOOK_URL is set! ' +
+      'Add IG_ACCESS_TOKEN (and IG_USER_ID if using an EAA... token) under GitHub -> Settings -> Secrets and variables -> Actions -> Repository secrets.'
+    );
+  }
+
+  // Choose high-retention 4-round viral pacing if not explicitly forced
   const roundPresets = [
-    [10, 50, 100, 250, 500, 1000],
-    [10, 50, 100, 500, 1000],
-    [10, 100, 250, 1000],
+    [10, 50, 250, 1000],
+    [10, 100, 500, 1000],
+    [10, 50, 100, 1000],
   ];
   const roundsArg = getFlag('rounds', quick ? '10,100,1000' : null);
   const rounds = roundsArg
@@ -192,8 +263,8 @@ async function main() {
 
   const resStr = getFlag('res', quick ? '540x960' : `${cfg.render.width || 720}x${cfg.render.height || 1280}`);
   const [width, height] = resStr.split('x').map(Number);
-  const fps = Number(getFlag('fps', quick ? '30' : String(cfg.render.fps || 60)));
-  const durationScale = quick ? 0.55 : Number(getFlag('scale', '1.0'));
+  const fps = Number(getFlag('fps', quick ? '30' : String(cfg.render.fps || 30)));
+  const durationScale = quick ? 0.55 : Number(getFlag('scale', '0.78'));
 
   let renderOpts = {
     handle: getFlag('handle', cfg.brand?.handle || '@atomslice3d'),
@@ -257,11 +328,11 @@ async function main() {
   }
 
   if (!aiSucceeded) {
-    console.log('[autopilot] Using built-in zero-API semantic 3D composer (picking fresh non-repeated concept)...');
-    const objPrompt = pickUnusedSuggestion(AI_OBJECT_SUGGESTIONS, usedStrings);
-    const cutterPrompt = pickUnusedSuggestion(AI_CUTTER_SUGGESTIONS, []);
-    const surfacePrompt = pickUnusedSuggestion(AI_SURFACE_SUGGESTIONS, []);
-    const envPrompt = pickUnusedSuggestion(AI_ENV_SUGGESTIONS, []);
+    console.log('[autopilot] Using built-in zero-API semantic 3D composer (picking fresh non-repeated English concept)...');
+    const objPrompt = pickUnusedSuggestion(CLOUD_EN_OBJECTS, usedStrings);
+    const cutterPrompt = pickUnusedSuggestion(CLOUD_EN_CUTTERS, []);
+    const surfacePrompt = pickUnusedSuggestion(CLOUD_EN_SURFACES, []);
+    const envPrompt = pickUnusedSuggestion(CLOUD_EN_ENVS, []);
     console.log(`[autopilot] Concept:\n  Object:  ${objPrompt}\n  Cutter:  ${cutterPrompt}\n  Surface: ${surfacePrompt}\n  Env:     ${envPrompt}`);
     renderOpts = {
       ...renderOpts,
