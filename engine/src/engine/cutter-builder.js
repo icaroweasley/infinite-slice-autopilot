@@ -2,27 +2,27 @@ import * as THREE from 'three';
 import { customCutter } from './custom-cutter.js';
 
 export const CUTTER_LIST = [
-  { id: 'chef-knife',      name: 'Faca do Chef (Gyuto)',   subtitle: 'Aço escovado japonês + cabo ebony rebitado', blurHex: 0xdff2ff },
-  { id: 'hot-knife-1000c', name: 'Faca a 1000°C 🔥',       subtitle: 'Lâmina incandescente em brasa laranja-vermelha', blurHex: 0xff6b1a },
-  { id: 'katana',          name: 'Katana Samurai ⚔️',      subtitle: 'Lâmina curva espelhada + tsuba dourada', blurHex: 0xe6f4ff },
-  { id: 'cleaver',         name: 'Cutelo Chinês Pesado',   subtitle: 'Lâmina retangular larga de açougueiro', blurHex: 0xd8e2ec },
-  { id: 'lightsaber',      name: 'Sabre de Luz Laser ⚡',  subtitle: 'Feixe de plasma ciano brilhante + cabo metálico', blurHex: 0x38bdf8 },
-  { id: 'golden-blade',    name: 'Lâmina de Ouro 24k ✨',  subtitle: 'Ouro maciço polido + cabo obsidian luxo', blurHex: 0xffd65c },
-  { id: 'crystal-blade',   name: 'Lâmina de Cristal ❄️',   subtitle: 'Lâmina de diamante/gelo azul translúcida', blurHex: 0x7dd3fc },
-  { id: 'credit-card',     name: 'Cartão Black Afiado 💳', subtitle: 'Cartão metálico preto/ouro cortando como manteiga', blurHex: 0xf5d07a },
-  { id: 'steel-scraper',   name: 'Espátula / Régua Aço',   subtitle: 'Lâmina reta fina estilo ASMR confeitaria', blurHex: 0xe2e8f0 },
+  { id: 'chef-knife',      name: 'Japanese Chef Knife (Gyuto)', subtitle: 'Brushed steel blade + riveted ebony grip', blurHex: 0xdff2ff },
+  { id: 'hot-knife-1000c', name: '1000°C Glowing Knife 🔥',     subtitle: 'Incandescent red-orange molten steel edge', blurHex: 0xff6b1a },
+  { id: 'katana',          name: 'Samurai Katana ⚔️',           subtitle: 'Mirror-curved blade + gold tsuba guard', blurHex: 0xe6f4ff },
+  { id: 'cleaver',         name: 'Heavy Chinese Cleaver',       subtitle: 'Wide rectangular butcher steel blade', blurHex: 0xd8e2ec },
+  { id: 'lightsaber',      name: 'Plasma Lightsaber ⚡',         subtitle: 'Glowing cyan laser beam + metallic hilt', blurHex: 0x38bdf8 },
+  { id: 'golden-blade',    name: '24k Solid Gold Blade ✨',      subtitle: 'Mirror-polished gold + obsidian grip', blurHex: 0xffd65c },
+  { id: 'crystal-blade',   name: 'Crystal Ice Blade ❄️',        subtitle: 'Translucent diamond/ice blue edge', blurHex: 0x7dd3fc },
+  { id: 'credit-card',     name: 'Razor Black Metal Card 💳',   subtitle: 'Luxury black & gold card slicing like butter', blurHex: 0xf5d07a },
+  { id: 'steel-scraper',   name: 'Steel Pastry Scraper',        subtitle: 'Ultra-thin straight ASMR chrome blade', blurHex: 0xe2e8f0 },
 ];
 
 export const RANDOM_CUTTER_PROMPTS = [
-  'Faca a 1000°C incandescente',
-  'Katana samurai de aço azul',
-  'Sabre de luz roxo neon',
-  'Cutelo de ouro 24k',
-  'Cartão de crédito black dourado',
-  'Lâmina de cristal de gelo',
-  'Serra metálica dentada',
-  'Espada de esmeralda brilhante',
-  'Machado viking de aço escuro',
+  '1000°C glowing red-hot knife',
+  'Blue Damascus steel samurai katana',
+  'Neon purple plasma lightsaber',
+  '24k solid gold cleaver',
+  'Luxury black & gold metal credit card',
+  'Translucent arctic ice crystal blade',
+  'Serrated metallic precision saw',
+  'Glowing emerald crystal sword',
+  'Dark forged steel Viking axe',
 ];
 
 function normalizeText(str) {

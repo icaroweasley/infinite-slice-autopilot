@@ -171,7 +171,7 @@ export async function renderHeadlessVideo({
   const estTotalFrames = Math.max(30, Math.round(estDuration * FPS));
 
   try {
-    onProgress?.({ stage: 'boot', percent: 3, message: 'Abrindo motor 3D WebGL2 & Rapier3D…' });
+    onProgress?.({ stage: 'boot', percent: 3, message: 'Booting WebGL2 & Rapier3D engine…' });
     const isLinux = process.platform === 'linux';
     const launchArgs = isLinux
       ? [
@@ -273,7 +273,7 @@ export async function renderHeadlessVideo({
       if (frameCount % Math.max(10, Math.floor(FPS / 2)) === 0 || frame.done) {
         const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
         const pct = Math.min(86, Math.max(5, Math.round((frameCount / estTotalFrames) * 84)));
-        const statusMsg = `Rodada ${frame.roundIndex + 1}/${ROUNDS.length} (${frame.cutsDone}/${frame.cutsTarget} CUTS) • ${frameCount} frames (${frame.simTime.toFixed(1)}s)`;
+        const statusMsg = `Round ${frame.roundIndex + 1}/${ROUNDS.length} (${frame.cutsDone}/${frame.cutsTarget} CUTS) • ${frameCount} frames (${frame.simTime.toFixed(1)}s)`;
         onProgress?.({ stage: 'frames', percent: pct, frames: frameCount, message: statusMsg });
         process.stdout.write(`\r[render] ${statusMsg} in ${elapsed}s   `);
       }
@@ -353,7 +353,7 @@ export async function renderHeadlessVideo({
 
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
     console.log(`[render] DONE! ${finalMp4Path} (${fileSizeMb} MB, ${summary.durationSec}s @ ${FPS}fps, ${summary.maxCubes.toLocaleString('en-US')} max cubes)`);
-    onProgress?.({ stage: 'done', percent: 100, frames: frameCount, message: 'Vídeo MP4 pronto!', manifest });
+    onProgress?.({ stage: 'done', percent: 100, frames: frameCount, message: 'MP4 Video Ready!', manifest });
     return manifest;
   } finally {
     if (browser) await browser.close();

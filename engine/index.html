@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Infinite Slice 3D — Creator Studio (IA + Skill)</title>
+    <title>Infinite Slice 3D — Creator Studio (AI + Skill)</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
@@ -15,15 +15,15 @@
           <canvas id="studioCanvas" width="540" height="960"></canvas>
           <div id="loadingOverlay" class="loading-overlay">
             <div class="spinner"></div>
-            <span>Inicializando Rapier3D WASM & Campo Volumétrico 3D…</span>
+            <span>Initializing Rapier3D WASM &amp; 3D Volumetric Field…</span>
           </div>
         </div>
 
         <!-- Compact Live Preview Controls Bar -->
         <div class="stage-controls">
-          <button id="btnPreviewSeq" class="btn-secondary btn-sm">▶ Prévia Sequência</button>
-          <button id="btnPlayPause" class="btn-secondary btn-sm">⏸ Pausar</button>
-          <button id="btnRestart" class="btn-secondary btn-sm">↺ Reiniciar</button>
+          <button id="btnPreviewSeq" class="btn-secondary btn-sm">▶ Preview Sequence</button>
+          <button id="btnPlayPause" class="btn-secondary btn-sm">⏸ Pause</button>
+          <button id="btnRestart" class="btn-secondary btn-sm">↺ Restart</button>
           <div class="speed-group" id="speedGroup">
             <button data-speed="0.25" class="speed-btn">0.25x</button>
             <button data-speed="0.5" class="speed-btn">0.5x</button>
@@ -41,20 +41,20 @@
       <aside class="control-pane">
         <header class="brand-header">
           <div>
-            <div class="brand-pill">INFINITE SLICE SKILL • ANTIGRAVITY & CLAUDE CODE</div>
+            <div class="brand-pill">INFINITE SLICE SKILL • ANTIGRAVITY &amp; CLAUDE CODE</div>
             <h1>Creator Studio 3D</h1>
-            <p class="subtitle">Escreva o que a IA deve criar, peça sugestões inéditas ou deixe no aleatório pela IA</p>
+            <p class="subtitle">Type what the AI should create, get original ideas, or switch to AI Random</p>
           </div>
           <div class="fps-chip"><span id="fpsVal">60</span> FPS</div>
         </header>
 
         <!-- Global AI Randomizer Bar -->
         <div class="magic-bar">
-          <button id="btnSuggestAll" class="btn-magic-outline" title="Preenche os 4 campos com sugestões criativas inéditas (nunca presets)">
-            💡 Sugerir 4 Ideias Inéditas
+          <button id="btnSuggestAll" class="btn-magic-outline" title="Fills all 4 fields with original non-preset AI ideas">
+            💡 Suggest 4 Original Ideas
           </button>
-          <button id="btnRandomAll" class="btn-magic" title="Deixa a IA inventar os 4 elementos do zero sem repetir do histórico">
-            🎲 Tudo Aleatório (IA inventa)
+          <button id="btnRandomAll" class="btn-magic" title="Let AI invent all 4 elements from scratch with anti-repetition memory">
+            🎲 All Random (AI Invents)
           </button>
         </div>
 
@@ -62,31 +62,31 @@
         <div class="telemetry-strip">
           <span id="diagPhase" class="phase-pill phase-IDLE">IDLE</span>
           <span id="diagTier" class="telemetry-text">Tier 1 • Rapier3D</span>
-          <span id="diagStats" class="telemetry-num">0 cubos</span>
+          <span id="diagStats" class="telemetry-num">0 cubes</span>
         </div>
 
         <!-- 1. OBJECT TO BE CREATED BY AI -->
         <section class="panel builder-card" id="cardObject">
           <div class="panel-head">
-            <h2>1. Objeto a ser cortado</h2>
+            <h2>1. Object to Slice</h2>
             <div class="card-actions">
-              <button id="btnSuggestObj" class="btn-idea" title="Gerar sugestão inédita para a IA criar">💡 Sugerir</button>
-              <button id="btnRandomObj" class="btn-dice" title="Deixar a IA inventar um objeto inédito">🎲 Aleatório (IA)</button>
+              <button id="btnSuggestObj" class="btn-idea" title="Suggest an original object for the AI to build">💡 Suggest</button>
+              <button id="btnRandomObj" class="btn-dice" title="Let AI invent a brand-new object">🎲 Random (AI)</button>
             </div>
           </div>
           <div class="prompt-row">
             <input
               id="inpObjectPrompt"
               type="text"
-              placeholder="Escreva o que a IA deve criar (ex: Relógio Rolex de ouro com engrenagens dentro…)"
+              placeholder="Describe what the AI should build (e.g. Gold Rolex watch with real gears inside…)"
             />
-            <button id="btnApplyObject" class="btn-apply" title="Pré-visualizar rascunho 3D agora">Ver</button>
+            <button id="btnApplyObject" class="btn-apply" title="Preview 3D draft now">Preview</button>
           </div>
           <div id="objModeBadge" class="mode-badge hidden">
-            ✨ <strong>Aleatório pela IA:</strong> Claude / Antigravity vai inventar um objeto 100% inédito (anti-repetição).
+            ✨ <strong>AI Random Mode:</strong> Claude / Antigravity will invent a 100% original object (never repeated).
           </div>
           <details class="preset-drawer">
-            <summary>Ou escolher um preset pronto / slot da IA</summary>
+            <summary>Or pick a built-in preset / AI slot</summary>
             <select id="selObject" class="studio-select"></select>
           </details>
         </section>
@@ -94,25 +94,25 @@
         <!-- 2. CUTTER / KNIFE TO BE CREATED BY AI -->
         <section class="panel builder-card" id="cardCutter">
           <div class="panel-head">
-            <h2>2. Faca ou Outro Objeto Cortador</h2>
+            <h2>2. Knife or Cutting Tool</h2>
             <div class="card-actions">
-              <button id="btnSuggestCutter" class="btn-idea" title="Sugestão inédita de ferramenta cortadora">💡 Sugerir</button>
-              <button id="btnRandomCutter" class="btn-dice" title="Deixar a IA inventar o cortador">🎲 Aleatório (IA)</button>
+              <button id="btnSuggestCutter" class="btn-idea" title="Suggest a unique cutting tool">💡 Suggest</button>
+              <button id="btnRandomCutter" class="btn-dice" title="Let AI invent a custom blade">🎲 Random (AI)</button>
             </div>
           </div>
           <div class="prompt-row">
             <input
               id="inpCutterPrompt"
               type="text"
-              placeholder="Descreva a faca ou outro objeto que corta (ex: Espada de obsidiana com lava, Cartão Black…)"
+              placeholder="Describe the blade or object that slices (e.g. Obsidian lava sword, Black Metal Card…)"
             />
-            <button id="btnApplyCutter" class="btn-apply">Ver</button>
+            <button id="btnApplyCutter" class="btn-apply">Preview</button>
           </div>
           <div id="cutterModeBadge" class="mode-badge hidden">
-            ✨ <strong>Aleatório pela IA:</strong> Claude / Antigravity vai criar uma ferramenta de corte exclusiva.
+            ✨ <strong>AI Random Mode:</strong> Claude / Antigravity will design a bespoke cutting tool.
           </div>
           <details class="preset-drawer">
-            <summary>Ou escolher um cortador pronto / slot da IA</summary>
+            <summary>Or pick a built-in cutter / AI slot</summary>
             <select id="selCutter" class="studio-select"></select>
           </details>
         </section>
@@ -120,25 +120,25 @@
         <!-- 3. CUTTING SURFACE TO BE CREATED BY AI -->
         <section class="panel builder-card" id="cardSurface">
           <div class="panel-head">
-            <h2>3. Tábua / Superfície de Corte</h2>
+            <h2>3. Cutting Board / Surface</h2>
             <div class="card-actions">
-              <button id="btnSuggestSurface" class="btn-idea" title="Sugestão inédita de superfície de corte">💡 Sugerir</button>
-              <button id="btnRandomSurface" class="btn-dice" title="Deixar a IA inventar a tábua">🎲 Aleatório (IA)</button>
+              <button id="btnSuggestSurface" class="btn-idea" title="Suggest a unique cutting surface">💡 Suggest</button>
+              <button id="btnRandomSurface" class="btn-dice" title="Let AI invent a custom surface">🎲 Random (AI)</button>
             </div>
           </div>
           <div class="prompt-row">
             <input
               id="inpSurfacePrompt"
               type="text"
-              placeholder="Descreva a superfície da vez (ex: Folha de vitória-régia, Mármore roxo com ouro…)"
+              placeholder="Describe the surface (e.g. Giant emerald lily pad, Purple marble with gold veins…)"
             />
-            <button id="btnApplySurface" class="btn-apply">Ver</button>
+            <button id="btnApplySurface" class="btn-apply">Preview</button>
           </div>
           <div id="surfaceModeBadge" class="mode-badge hidden">
-            ✨ <strong>Aleatório pela IA:</strong> Claude / Antigravity vai criar uma superfície de corte exclusiva.
+            ✨ <strong>AI Random Mode:</strong> Claude / Antigravity will craft a custom cutting surface.
           </div>
           <details class="preset-drawer">
-            <summary>Ou escolher uma tábua pronta / slot da IA</summary>
+            <summary>Or pick a built-in surface / AI slot</summary>
             <select id="selSurface" class="studio-select"></select>
           </details>
         </section>
@@ -146,25 +146,25 @@
         <!-- 4. STUDIO ENVIRONMENT TO BE CREATED BY AI -->
         <section class="panel builder-card" id="cardEnv">
           <div class="panel-head">
-            <h2>4. Ambiente / Cenário</h2>
+            <h2>4. Studio Environment &amp; Lighting</h2>
             <div class="card-actions">
-              <button id="btnSuggestEnv" class="btn-idea" title="Sugestão inédita de ambiente e iluminação">💡 Sugerir</button>
-              <button id="btnRandomEnv" class="btn-dice" title="Deixar a IA inventar o ambiente">🎲 Aleatório (IA)</button>
+              <button id="btnSuggestEnv" class="btn-idea" title="Suggest a unique studio backdrop &amp; lighting">💡 Suggest</button>
+              <button id="btnRandomEnv" class="btn-dice" title="Let AI invent the environment">🎲 Random (AI)</button>
             </div>
           </div>
           <div class="prompt-row">
             <input
               id="inpEnvPrompt"
               type="text"
-              placeholder="Descreva o ambiente (ex: Cozinha cyberpunk japonesa à noite, Estúdio joalheria preto…)"
+              placeholder="Describe the setting (e.g. Cyberpunk Tokyo kitchen at night, Luxury black jewelry studio…)"
             />
-            <button id="btnApplyEnv" class="btn-apply">Ver</button>
+            <button id="btnApplyEnv" class="btn-apply">Preview</button>
           </div>
           <div id="envModeBadge" class="mode-badge hidden">
-            ✨ <strong>Aleatório pela IA:</strong> Claude / Antigravity vai criar o cenário e iluminação exclusivos.
+            ✨ <strong>AI Random Mode:</strong> Claude / Antigravity will design custom backdrop &amp; lighting.
           </div>
           <details class="preset-drawer">
-            <summary>Ou escolher um ambiente pronto / slot da IA</summary>
+            <summary>Or pick a built-in environment / AI slot</summary>
             <select id="selEnv" class="studio-select"></select>
           </details>
         </section>
@@ -172,14 +172,14 @@
         <!-- 5. CUSTOM CUT ROUNDS SELECTION -->
         <section class="panel builder-card">
           <div class="panel-head">
-            <h2>5. Cortes que vão sair no vídeo</h2>
-            <button id="btnRandomRounds" class="btn-idea" title="Sortear sequência de cortes">🎲 Sortear</button>
+            <h2>5. Cut Rounds in Final Video</h2>
+            <button id="btnRandomRounds" class="btn-idea" title="Randomize cut progression">🎲 Randomize</button>
           </div>
-          <p class="field-tip">Clique para ativar/desativar quais rodadas entram no vídeo (duplo-clique testa na prévia):</p>
+          <p class="field-tip">Click chips to toggle rounds in the video (double-click any round to preview live):</p>
           <div id="cutsChipGrid" class="cuts-chip-grid"></div>
           <div class="prompt-row">
-            <input id="inpCustomCut" type="number" min="3" max="2000" placeholder="Outro nº de cortes (ex: 25, 200, 750)" />
-            <button id="btnAddCut" class="btn-apply">+ Adicionar</button>
+            <input id="inpCustomCut" type="number" min="3" max="2000" placeholder="Custom cut count (e.g. 25, 200, 750)" />
+            <button id="btnAddCut" class="btn-apply">+ Add</button>
           </div>
           <div id="roundsSummary" class="active-hint accent-hint"></div>
         </section>
@@ -187,21 +187,21 @@
         <!-- 6. FINAL AI BRIEF + 1-CLICK MP4 RENDER & VAULT -->
         <section class="panel render-card">
           <div class="panel-head">
-            <h2>6. Gerar & Renderizar Vídeo MP4</h2>
-            <button id="btnLoadAiSlots" class="btn-link" title="Carrega na prévia os 4 arquivos 3D gerados pela IA">↻ Carregar Cena IA</button>
+            <h2>6. Generate &amp; Render MP4 Video</h2>
+            <button id="btnLoadAiSlots" class="btn-link" title="Load all 4 AI-authored custom 3D slot files into preview">↻ Load AI Scene</button>
           </div>
 
           <div class="render-options-grid">
             <div class="opt-field">
-              <label for="handleInput">@Handle no HUD</label>
+              <label for="handleInput">@Handle on HUD</label>
               <input id="handleInput" type="text" value="@atomslice3d" maxlength="28" />
             </div>
             <div class="opt-field">
-              <label for="selQuality">Qualidade & FPS</label>
+              <label for="selQuality">Quality &amp; FPS</label>
               <select id="selQuality">
                 <option value="1080x1920|60|1.0">1080×1920 • 60 FPS (Reels Full HD)</option>
-                <option value="720x1280|60|1.0" selected>720×1280 • 60 FPS (Reels HD Rápido)</option>
-                <option value="540x960|30|0.65">540×960 • 30 FPS (Teste Ultra-Rápido)</option>
+                <option value="720x1280|60|1.0" selected>720×1280 • 60 FPS (Fast Reels HD)</option>
+                <option value="540x960|30|0.65">540×960 • 30 FPS (Ultra-Fast Test)</option>
               </select>
             </div>
           </div>
@@ -213,33 +213,33 @@
             </label>
             <label class="toggle-chip">
               <input id="chkFastPacing" type="checkbox" />
-              <span>Ritmo Dinâmico (~35% mais rápido)</span>
+              <span>Fast Pacing (~35% Snappier)</span>
             </label>
           </div>
 
           <div class="cta-stack">
             <button id="btnSendBrief" class="btn-ai-cta">
-              ✨ Enviar Pedido para IA (Claude / Antigravity)
+              ✨ Send Creative Brief to AI (Claude / Antigravity)
             </button>
             <button id="btnRenderMp4" class="btn-render-cta">
-              🎬 Renderizar Vídeo MP4 Agora (Prévia Atual)
+              🎬 Render MP4 Video Now (Current Preview)
             </button>
           </div>
 
           <!-- Live AI Brief Bridge Status -->
           <div id="briefStatusBox" class="brief-box hidden">
             <div class="brief-head">
-              <strong id="briefTitle">Pedido salvo em data/studio-brief.json</strong>
-              <button id="btnCopyTrigger" class="btn-secondary btn-sm">📋 Copiar Comando</button>
+              <strong id="briefTitle">Brief saved to data/studio-brief.json</strong>
+              <button id="btnCopyTrigger" class="btn-secondary btn-sm">📋 Copy Command</button>
             </div>
             <p id="briefDesc" class="brief-desc"></p>
-            <code id="briefCmd" class="brief-cmd">Executa o brief da infinite-slice-skill</code>
+            <code id="briefCmd" class="brief-cmd">Run the infinite-slice-skill brief</code>
           </div>
 
           <!-- Live Render Progress Box -->
           <div id="renderProgressBox" class="progress-box hidden">
             <div class="progress-head">
-              <span id="progressMsg">Iniciando renderização…</span>
+              <span id="progressMsg">Starting render…</span>
               <strong id="progressPct">0%</strong>
             </div>
             <div class="progress-track">
@@ -250,24 +250,24 @@
           <!-- Inline Video Player -->
           <div id="playerBox" class="player-box hidden">
             <div class="player-head">
-              <strong id="playerTitle">Vídeo Renderizado</strong>
+              <strong id="playerTitle">Rendered Video</strong>
               <button id="btnClosePlayer" class="btn-close">✕</button>
             </div>
             <video id="mp4Player" controls playsinline></video>
             <div class="player-actions">
-              <a id="playerDownload" class="btn-primary btn-sm" download>⬇ Baixar MP4</a>
-              <button id="btnCopyCaption" class="btn-secondary btn-sm">📋 Copiar Legenda EN</button>
+              <a id="playerDownload" class="btn-primary btn-sm" download>⬇ Download MP4</a>
+              <button id="btnCopyCaption" class="btn-secondary btn-sm">📋 Copy Viral Caption</button>
             </div>
           </div>
 
           <!-- Persistent MP4 Video Vault -->
           <div class="vault-section">
             <div class="panel-head">
-              <h3>Cofre de Vídeos MP4 (output/)</h3>
-              <button id="btnRefreshVault" class="btn-link">↻ Atualizar</button>
+              <h3>MP4 Video Vault (output/)</h3>
+              <button id="btnRefreshVault" class="btn-link">↻ Refresh</button>
             </div>
             <div id="vaultList" class="vault-list">
-              <span class="empty-note">Carregando vídeos…</span>
+              <span class="empty-note">Loading videos…</span>
             </div>
           </div>
         </section>

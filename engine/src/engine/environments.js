@@ -6,47 +6,47 @@ export const BOARD_W = 4.55;
 export const BOARD_D = 3.35;
 export const BOARD_H = 0.24;
 
-// --- DECOUPLED CUTTING SURFACES (Tábua / Superfície de Corte) ---
+// --- DECOUPLED CUTTING SURFACES ---
 export const SURFACE_LIST = [
-  { id: 'honey-wood',      name: 'Madeira Clara (Carvalho)', subtitle: 'Tábua clássica viral com veios naturais', surfaceAudio: 'wood' },
-  { id: 'rustic-wood',     name: 'Madeira Rústica Escura',   subtitle: 'Nogueira escura artesanal', surfaceAudio: 'wood' },
-  { id: 'tempered-glass',  name: 'Vidro Temperado',          subtitle: 'Placa translúcida com borda verde jade', surfaceAudio: 'glass' },
-  { id: 'banana-leaf',     name: 'Folha de Bananeira 🌿',    subtitle: 'Folha tropical gigante sobre madeira', surfaceAudio: 'leaf' },
-  { id: 'obsidian-marble', name: 'Mármore Preto & Ouro',     subtitle: 'Pedra obsidian polida com veios dourados', surfaceAudio: 'stone' },
-  { id: 'white-marble',    name: 'Mármore Carrara Branco',   subtitle: 'Pedra branca luxuosa com veios cinza', surfaceAudio: 'stone' },
-  { id: 'brushed-steel',   name: 'Aço Inox Escovado',        subtitle: 'Superfície industrial de chef profissional', surfaceAudio: 'metal' },
-  { id: 'ice-block',       name: 'Bloco de Gelo ❄️',         subtitle: 'Gelo cristalino translúcido brilhante', surfaceAudio: 'ice' },
-  { id: 'pink-terrazzo',   name: 'Pedra Terrazzo Pastel',    subtitle: 'Base clara moderna com lascas coloridas', surfaceAudio: 'stone' },
-  { id: 'neon-grid',       name: 'Base Cyberpunk Neon',      subtitle: 'Preto fosco com borda luminosa ciano', surfaceAudio: 'glass' },
+  { id: 'honey-wood',      name: 'Honey Oak Wood',           subtitle: 'Classic viral oak cutting board with natural grain', surfaceAudio: 'wood' },
+  { id: 'rustic-wood',     name: 'Dark Walnut Wood',         subtitle: 'Artisan dark rustic walnut slab', surfaceAudio: 'wood' },
+  { id: 'tempered-glass',  name: 'Tempered Glass',           subtitle: 'Translucent jade-edged glass cutting board', surfaceAudio: 'glass' },
+  { id: 'banana-leaf',     name: 'Banana Leaf 🌿',           subtitle: 'Giant tropical leaf resting on dark wood', surfaceAudio: 'leaf' },
+  { id: 'obsidian-marble', name: 'Black & Gold Marble',      subtitle: 'Polished obsidian stone with liquid gold veins', surfaceAudio: 'stone' },
+  { id: 'white-marble',    name: 'White Carrara Marble',     subtitle: 'Luxury white marble with delicate grey veins', surfaceAudio: 'stone' },
+  { id: 'brushed-steel',   name: 'Brushed Stainless Steel',  subtitle: 'Industrial Michelin-kitchen chef surface', surfaceAudio: 'metal' },
+  { id: 'ice-block',       name: 'Arctic Ice Block ❄️',      subtitle: 'Translucent gleaming crystalline ice slab', surfaceAudio: 'ice' },
+  { id: 'pink-terrazzo',   name: 'Pastel Terrazzo Stone',    subtitle: 'Modern pale stone speckled with colorful chips', surfaceAudio: 'stone' },
+  { id: 'neon-grid',       name: 'Cyberpunk Neon Base',      subtitle: 'Matte black board with glowing cyan edge', surfaceAudio: 'glass' },
 ];
 
-// --- DECOUPLED STUDIO BACKGROUNDS & LIGHTING (Ambiente / Cenário) ---
+// --- DECOUPLED STUDIO BACKGROUNDS & LIGHTING ---
 export const ENVIRONMENT_LIST = [
-  { id: 'classic-viral',    name: 'Cozinha Viral (Azulejos)',   subtitle: 'Azulejos verde escuro + luz quente', defaultSurface: 'honey-wood' },
-  { id: 'glass-lab',        name: 'Laboratório Branco',         subtitle: 'Minimalista claro + luz limpa de estúdio', defaultSurface: 'tempered-glass' },
-  { id: 'tropical-leaf',    name: 'Cabana Tropical Quente',     subtitle: 'Madeira rústica + luz dourada solar', defaultSurface: 'banana-leaf' },
-  { id: 'luxury-obsidian',  name: 'Estúdio Obsidian Luxo',      subtitle: 'Fundo preto fosco + luz de recorte ouro', defaultSurface: 'obsidian-marble' },
-  { id: 'pro-kitchen',      name: 'Cozinha Industrial',         subtitle: 'Aço escovado escuro + luz fria precisa', defaultSurface: 'brushed-steel' },
-  { id: 'frozen-block',     name: 'Estúdio Ártico Congelado',   subtitle: 'Ambiente azul gelado cristalino', defaultSurface: 'ice-block' },
-  { id: 'cyberpunk-neon',   name: 'Estúdio Cyberpunk Neon',     subtitle: 'Fundo escuro com luzes ciano & magenta', defaultSurface: 'neon-grid' },
-  { id: 'sunset-terracotta',name: 'Pôr do Sol Terracota',       subtitle: 'Fundo âmbar aconchegante + luz dourada', defaultSurface: 'white-marble' },
+  { id: 'classic-viral',    name: 'Viral Tile Kitchen',       subtitle: 'Dark emerald subway tiles + warm studio light', defaultSurface: 'honey-wood' },
+  { id: 'glass-lab',        name: 'White Minimalist Lab',     subtitle: 'Crisp bright tiles + clean studio softbox', defaultSurface: 'tempered-glass' },
+  { id: 'tropical-leaf',    name: 'Warm Tropical Cabin',      subtitle: 'Rustic wood + golden sunlight glow', defaultSurface: 'banana-leaf' },
+  { id: 'luxury-obsidian',  name: 'Luxury Obsidian Studio',   subtitle: 'Matte obsidian backdrop + golden rim light', defaultSurface: 'obsidian-marble' },
+  { id: 'pro-kitchen',      name: 'Industrial Steel Kitchen', subtitle: 'Brushed dark steel + crisp precision light', defaultSurface: 'brushed-steel' },
+  { id: 'frozen-block',     name: 'Frozen Arctic Studio',     subtitle: 'Crystalline icy blue studio atmosphere', defaultSurface: 'ice-block' },
+  { id: 'cyberpunk-neon',   name: 'Cyberpunk Neon Studio',    subtitle: 'Dark studio with vivid cyan & magenta lights', defaultSurface: 'neon-grid' },
+  { id: 'sunset-terracotta',name: 'Terracotta Sunset Atelier',subtitle: 'Warm amber studio + golden sunset glow', defaultSurface: 'white-marble' },
 ];
 
 export const RANDOM_SURFACE_PROMPTS = [
-  'Mármore roxo com veios dourados',
-  'Tábua de bambu verde natural',
-  'Placa de vidro azul neon',
-  'Pedra vulcânica preta com rachaduras',
-  'Placa de ouro escovado luxo',
-  'Mármore rosa pastel',
+  'Deep purple marble with gold veins',
+  'Natural green Japanese bamboo board',
+  'Neon blue glowing glass slab',
+  'Black volcanic stone with ember cracks',
+  'Luxury brushed 24k gold plate',
+  'Pastel pink marble block',
 ];
 
 export const RANDOM_ENV_PROMPTS = [
-  'Estúdio neon roxo e ciano',
-  'Cozinha retrô creme aconchegante',
-  'Laboratório futurista azul',
-  'Estúdio vermelho dramático escuro',
-  'Ambiente floresta verde esmeralda',
+  'Cyberpunk neon purple and cyan studio',
+  'Cozy warm cream retro kitchen',
+  'Futuristic blue lighting lab',
+  'Dramatic dark crimson studio',
+  'Emerald green forest studio',
 ];
 
 function normalizeText(str) {

@@ -211,18 +211,19 @@ if (isHeadless) {
       if (item.id === 'custom') return;
       const opt = document.createElement('option');
       opt.value = item.id;
-      opt.textContent = `${item.name} — ${item.subtitle}`;
+      const label = item.englishName || item.name;
+      opt.textContent = item.subtitle && !item.englishName ? `${label} — ${item.subtitle}` : label;
       el.appendChild(opt);
     });
   }
 
-  populateSelect(selObject, OBJECT_LIST, { id: 'custom', text: '✨ Slot IA (engine/src/objects/object-builder.js)' });
+  populateSelect(selObject, OBJECT_LIST, { id: 'custom', text: '✨ AI Slot (engine/src/objects/object-builder.js)' });
   selObject.value = 'salmon';
-  populateSelect(selCutter, CUTTER_LIST, { id: 'ai-custom', text: '✨ Slot IA (engine/src/engine/custom-cutter.js)' });
+  populateSelect(selCutter, CUTTER_LIST, { id: 'ai-custom', text: '✨ AI Slot (engine/src/engine/custom-cutter.js)' });
   selCutter.value = 'chef-knife';
-  populateSelect(selSurface, SURFACE_LIST, { id: 'ai-custom', text: '✨ Slot IA (engine/src/engine/custom-surface.js)' });
+  populateSelect(selSurface, SURFACE_LIST, { id: 'ai-custom', text: '✨ AI Slot (engine/src/engine/custom-surface.js)' });
   selSurface.value = 'honey-wood';
-  populateSelect(selEnv, ENVIRONMENT_LIST, { id: 'ai-custom', text: '✨ Slot IA (engine/src/engine/custom-environment.js)' });
+  populateSelect(selEnv, ENVIRONMENT_LIST, { id: 'ai-custom', text: '✨ AI Slot (engine/src/engine/custom-environment.js)' });
   selEnv.value = 'classic-viral';
 
   function syncCardVisual(slotName, cardEl, badgeEl, randomBtn, inputEl) {
@@ -232,7 +233,7 @@ if (isHeadless) {
     randomBtn.classList.toggle('active', isRand);
     inputEl.disabled = isRand;
     if (isRand) {
-      inputEl.placeholder = '🎲 Aleatório ativado — a IA vai inventar uma criação inédita!';
+      inputEl.placeholder = '🎲 AI Random enabled — your AI will invent an original creation!';
     }
   }
 
@@ -428,9 +429,10 @@ if (isHeadless) {
     return arr.length > 0 ? arr : [10];
   }
   function tierTagForCuts(c) {
+    if (c <= 25) return 'Curved 3D';
     if (c <= 65) return 'Rapier';
     if (c <= 300) return 'Micro';
-    return 'Areia';
+    return 'Sand';
   }
   function syncRoundsToEngine(restart = false) {
     engine.setRounds(getSortedSelectedRounds(), chkFastPacing.checked ? 0.65 : 1.0, restart);
@@ -444,7 +446,7 @@ if (isHeadless) {
       const chip = document.createElement('button');
       const isSelected = state.selectedCuts.has(c);
       chip.className = 'cut-chip' + (isSelected ? ' selected' : '');
-      chip.innerHTML = `<span>${c.toLocaleString('pt-BR')}</span><span class="chip-tier">${tierTagForCuts(c)}</span>${!defaultSet.has(c) ? '<span class="chip-del">×</span>' : ''}`;
+      chip.innerHTML = `<span>${c.toLocaleString('en-US')}</span><span class="chip-tier">${tierTagForCuts(c)}</span>${!defaultSet.has(c) ? '<span class="chip-del">×</span>' : ''}`;
 
       chip.addEventListener('click', (e) => {
         if (e.target.classList.contains('chip-del')) {
@@ -470,14 +472,14 @@ if (isHeadless) {
         syncRoundsToEngine(false);
         renderCutChips();
         engine.startRound(Math.max(0, getSortedSelectedRounds().indexOf(c)), false);
-        btnPlayPause.textContent = '⏸ Pausar';
+        btnPlayPause.textContent = '⏸ Pause';
       });
 
       cutsChipGrid.appendChild(chip);
     }
 
     const rounds = getSortedSelectedRounds();
-    roundsSummary.textContent = `Sequência no vídeo (${rounds.length} ${rounds.length === 1 ? 'rodada' : 'rodadas'}): ${rounds.map((r) => r.toLocaleString('pt-BR')).join(' → ')} CUTS`;
+    roundsSummary.textContent = `Video sequence (${rounds.length} ${rounds.length === 1 ? 'round' : 'rounds'}): ${rounds.map((r) => r.toLocaleString('en-US')).join(' → ')} CUTS`;
   }
 
   function addCustomCut() {
@@ -514,17 +516,17 @@ if (isHeadless) {
     engine.audio.ensureContext();
     syncRoundsToEngine(false);
     engine.startRound(0, true);
-    btnPlayPause.textContent = '⏸ Pausar';
+    btnPlayPause.textContent = '⏸ Pause';
   });
   btnPlayPause.addEventListener('click', () => {
     engine.audio.ensureContext();
-    btnPlayPause.textContent = engine.togglePause() ? '▶ Retomar' : '⏸ Pausar';
+    btnPlayPause.textContent = engine.togglePause() ? '▶ Resume' : '⏸ Pause';
   });
   btnRestart.addEventListener('click', () => {
     engine.audio.ensureContext();
     syncRoundsToEngine(false);
     engine.startRound(engine.roundIndex, engine.autoSequence);
-    btnPlayPause.textContent = '⏸ Pausar';
+    btnPlayPause.textContent = '⏸ Pause';
   });
   speedGroup.querySelectorAll('.speed-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -550,7 +552,7 @@ if (isHeadless) {
     diagPhase.textContent = s.knifePhase;
     diagPhase.className = `phase-pill phase-${s.knifePhase}`;
     diagTier.textContent = `${s.roundLabel} • ${s.physics.tierName}`;
-    diagStats.textContent = `${s.physics.logicalCubes.toLocaleString('pt-BR')} cubos`;
+    diagStats.textContent = `${s.physics.logicalCubes.toLocaleString('en-US')} cubes`;
   };
 
   // --- Section 6A: Send Structured AI Brief to Claude / Antigravity ---
@@ -602,19 +604,19 @@ if (isHeadless) {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Falha ao salvar brief');
+      if (!res.ok) throw new Error(data.error || 'Failed to save creative brief');
 
       state.watchedBriefId = data.brief.id;
       briefStatusBox.classList.remove('hidden');
       const randCount = ['object', 'cutter', 'surface', 'environment'].filter((k) => payload[k].mode === 'ai-random').length;
-      briefTitle.textContent = `✅ Pedido salvo (${randCount > 0 ? randCount + ' aleatórios pela IA' : 'personalizado'})`;
-      briefDesc.textContent = 'Mande o comando abaixo no chat do Antigravity ou Claude Code — a IA vai programar os modelos 3D sob medida e renderizar o MP4 automaticamente:';
-      briefCmd.textContent = 'Executa o brief da infinite-slice-skill';
+      briefTitle.textContent = `✅ Brief saved (${randCount > 0 ? randCount + ' AI random slots' : 'custom'})`;
+      briefDesc.textContent = 'Send the command below to Claude Code or Antigravity — your AI will code bespoke 3D modules and automatically render your MP4:';
+      briefCmd.textContent = 'Run the infinite-slice-skill brief';
 
       try {
-        await navigator.clipboard.writeText('Executa o brief da infinite-slice-skill');
-        btnCopyTrigger.textContent = '✅ Copiado!';
-        setTimeout(() => { btnCopyTrigger.textContent = '📋 Copiar Comando'; }, 2000);
+        await navigator.clipboard.writeText('Run the infinite-slice-skill brief');
+        btnCopyTrigger.textContent = '✅ Copied!';
+        setTimeout(() => { btnCopyTrigger.textContent = '📋 Copy Command'; }, 2000);
       } catch {}
 
       // Watch for AI completion automatically
@@ -626,10 +628,10 @@ if (isHeadless) {
           const b = bData.brief;
           if (!b || b.id !== state.watchedBriefId) return;
           if (b.status === 'rendering') {
-            briefTitle.textContent = '🎬 IA criou os modelos 3D! Renderizando MP4…';
+            briefTitle.textContent = '🎬 AI built your 3D models! Rendering MP4…';
           } else if (b.status === 'completed' && b.result) {
             clearInterval(briefPollTimer);
-            briefTitle.textContent = `🎉 Vídeo criado pela IA pronto (${b.result.fileSizeMb} MB)!`;
+            briefTitle.textContent = `🎉 AI-authored MP4 ready (${b.result.fileSizeMb} MB)!`;
             await fetchHistory();
             await refreshVault();
             openVideoPlayer({
@@ -644,15 +646,15 @@ if (isHeadless) {
         } catch {}
       }, 2000);
     } catch (err) {
-      alert('Erro ao salvar pedido IA: ' + err.message);
+      alert('Failed to save AI brief: ' + err.message);
     }
   });
 
   btnCopyTrigger.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(briefCmd.textContent);
-      btnCopyTrigger.textContent = '✅ Copiado!';
-      setTimeout(() => { btnCopyTrigger.textContent = '📋 Copiar Comando'; }, 1800);
+      btnCopyTrigger.textContent = '✅ Copied!';
+      setTimeout(() => { btnCopyTrigger.textContent = '📋 Copy Command'; }, 1800);
     } catch {}
   });
 
@@ -661,7 +663,7 @@ if (isHeadless) {
 
   function openVideoPlayer(item) {
     playerBox.classList.remove('hidden');
-    const title = item.manifest?.name || item.filename;
+    const title = item.manifest?.englishName || item.manifest?.name || item.filename;
     playerTitle.textContent = `🎬 ${title} (${item.sizeMb} MB)`;
     mp4Player.src = item.url;
     mp4Player.load();
@@ -679,8 +681,8 @@ if (isHeadless) {
     if (!state.activeCaption) return;
     try {
       await navigator.clipboard.writeText(state.activeCaption);
-      btnCopyCaption.textContent = '✅ Legenda Copiada!';
-      setTimeout(() => { btnCopyCaption.textContent = '📋 Copiar Legenda EN'; }, 1800);
+      btnCopyCaption.textContent = '✅ Caption Copied!';
+      setTimeout(() => { btnCopyCaption.textContent = '📋 Copy Viral Caption'; }, 1800);
     } catch {
       alert(state.activeCaption);
     }
@@ -689,17 +691,17 @@ if (isHeadless) {
   async function refreshVault() {
     try {
       const res = await fetch('/api/videos');
-      if (!res.ok) throw new Error('API indisponível');
+      if (!res.ok) throw new Error('API unavailable');
       const data = await res.json();
       vaultList.innerHTML = '';
       if (!data.videos || data.videos.length === 0) {
-        vaultList.innerHTML = '<span class="empty-note">Nenhum vídeo MP4 renderizado ainda.</span>';
+        vaultList.innerHTML = '<span class="empty-note">No MP4 videos rendered yet.</span>';
         return;
       }
       for (const v of data.videos.slice(0, 12)) {
         const row = document.createElement('div');
         row.className = 'vault-item';
-        const title = v.manifest?.name || v.filename;
+        const title = v.manifest?.englishName || v.manifest?.name || v.filename;
         const roundsStr = v.manifest?.rounds ? v.manifest.rounds.join('→') : '';
         const resStr = v.manifest ? `${v.manifest.width}×${v.manifest.height} • ${v.manifest.fps}fps` : '';
         row.innerHTML = `
@@ -708,7 +710,7 @@ if (isHeadless) {
             <span>${v.sizeMb} MB ${resStr ? '• ' + resStr : ''} ${roundsStr ? '• ' + roundsStr : ''}</span>
           </div>
           <div class="vault-btns">
-            <button class="btn-secondary btn-sm btn-watch">▶ Ver</button>
+            <button class="btn-secondary btn-sm btn-watch">▶ Watch</button>
             <a class="btn-primary btn-sm" href="${v.downloadUrl}" download="${v.filename}">⬇ MP4</a>
           </div>
         `;
@@ -716,7 +718,7 @@ if (isHeadless) {
         vaultList.appendChild(row);
       }
     } catch {
-      vaultList.innerHTML = '<span class="empty-note">Execute com "npm run studio" para habilitar o render MP4 e cofre local.</span>';
+      vaultList.innerHTML = '<span class="empty-note">Run via "npm run studio" to enable local MP4 rendering & video vault.</span>';
     }
   }
   btnRefreshVault.addEventListener('click', refreshVault);
@@ -733,9 +735,9 @@ if (isHeadless) {
     const rounds = getSortedSelectedRounds();
 
     btnRenderMp4.disabled = true;
-    btnRenderMp4.textContent = '⏳ Renderizando MP4 (Playwright + FFmpeg)…';
+    btnRenderMp4.textContent = '⏳ Rendering MP4 (Playwright + FFmpeg)…';
     renderProgressBox.classList.remove('hidden');
-    progressMsg.textContent = 'Enviando trabalho para o motor offline…';
+    progressMsg.textContent = 'Sending job to offline renderer…';
     progressPct.textContent = '2%';
     progressFill.style.width = '2%';
 
@@ -757,7 +759,7 @@ if (isHeadless) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Falha ao iniciar render');
+      if (!res.ok) throw new Error(data.error || 'Failed to start render');
 
       const jobId = data.jobId;
       clearInterval(pollTimer);
@@ -765,14 +767,14 @@ if (isHeadless) {
         try {
           const stRes = await fetch(`/api/render/${encodeURIComponent(jobId)}`);
           const job = await stRes.json();
-          progressMsg.textContent = job.message || 'Renderizando…';
+          progressMsg.textContent = job.message || 'Rendering…';
           progressPct.textContent = `${job.percent || 0}%`;
           progressFill.style.width = `${job.percent || 0}%`;
 
           if (job.status === 'done') {
             clearInterval(pollTimer);
             btnRenderMp4.disabled = false;
-            btnRenderMp4.textContent = '🎬 Renderizar Vídeo MP4 Agora (Prévia Atual)';
+            btnRenderMp4.textContent = '🎬 Render MP4 Video Now (Current Preview)';
             await fetchHistory();
             await refreshVault();
             if (job.manifest) {
@@ -788,20 +790,20 @@ if (isHeadless) {
           } else if (job.status === 'error') {
             clearInterval(pollTimer);
             btnRenderMp4.disabled = false;
-            btnRenderMp4.textContent = '🎬 Renderizar Vídeo MP4 Agora (Prévia Atual)';
-            progressMsg.textContent = `Erro: ${job.error}`;
+            btnRenderMp4.textContent = '🎬 Render MP4 Video Now (Current Preview)';
+            progressMsg.textContent = `Error: ${job.error}`;
           }
         } catch (err) {
           clearInterval(pollTimer);
           btnRenderMp4.disabled = false;
-          btnRenderMp4.textContent = '🎬 Renderizar Vídeo MP4 Agora (Prévia Atual)';
-          progressMsg.textContent = `Erro: ${err.message}`;
+          btnRenderMp4.textContent = '🎬 Render MP4 Video Now (Current Preview)';
+          progressMsg.textContent = `Error: ${err.message}`;
         }
       }, 450);
     } catch (err) {
       btnRenderMp4.disabled = false;
-      btnRenderMp4.textContent = '🎬 Renderizar Vídeo MP4 Agora (Prévia Atual)';
-      progressMsg.textContent = `Erro: ${err.message}`;
+      btnRenderMp4.textContent = '🎬 Render MP4 Video Now (Current Preview)';
+      progressMsg.textContent = `Error: ${err.message}`;
     }
   });
 
@@ -814,6 +816,6 @@ if (isHeadless) {
     await refreshVault();
   }).catch((err) => {
     console.error('Boot error:', err);
-    loadingOverlay.innerHTML = `<span style="color:#fca5a5">Erro ao inicializar: ${err.message}</span>`;
+    loadingOverlay.innerHTML = `<span style="color:#fca5a5">Boot error: ${err.message}</span>`;
   });
 }

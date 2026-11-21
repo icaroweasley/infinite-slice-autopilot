@@ -60,12 +60,18 @@ fs.writeFileSync(
 const briefFile = path.join(STAGE_DIR, 'data', 'studio-brief.json');
 if (fs.existsSync(briefFile)) fs.unlinkSync(briefFile);
 
-// Reset buyer config.json handle to generic @yourhandle
+// Reset buyer config.json & UI defaults to generic @yourhandle (zero private handle leakage)
 const buyerCfgPath = path.join(STAGE_DIR, 'config.json');
 if (fs.existsSync(buyerCfgPath)) {
   const bCfg = JSON.parse(fs.readFileSync(buyerCfgPath, 'utf8'));
   if (bCfg.brand) bCfg.brand.handle = '@yourhandle';
   fs.writeFileSync(buyerCfgPath, JSON.stringify(bCfg, null, 2) + '\n', 'utf8');
+}
+for (const rel of ['engine/index.html', 'engine/src/engine/scene-core.js', 'scripts/publish-reels.mjs']) {
+  const p = path.join(STAGE_DIR, rel);
+  if (fs.existsSync(p)) {
+    fs.writeFileSync(p, fs.readFileSync(p, 'utf8').replaceAll('@atomslice3d', '@yourhandle'), 'utf8');
+  }
 }
 
 // Strip private autopilot scripts from buyer package.json
