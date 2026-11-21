@@ -1,5 +1,38 @@
 {
   "version": 1,
   "brand": "@atomslice3d",
-  "entries": []
+  "entries": [
+    {
+      "id": "slice-1795285693421",
+      "createdAt": "2026-11-21T18:28:13.421Z",
+      "status": "published",
+      "source": "cloud-autopilot:fallback",
+      "objectId": "prompt-custom",
+      "slug": "ripe-avocado-with-glossy-wooden-pit",
+      "name": "Ripe Avocado with glossy wooden pit",
+      "englishName": "Ripe Avocado",
+      "cutterId": "custom",
+      "surfaceId": "custom",
+      "envId": "custom",
+      "rounds": [
+        10,
+        100,
+        1000
+      ],
+      "maxCubes": 16760600,
+      "durationSec": 19.1,
+      "resolution": "540x960",
+      "fps": 30,
+      "videoFile": "output/infinite-slice-ripe-avocado-with-glossy-wooden--luxury-black-jewelry-studio-with-2026-11-21T18-22-14.mp4",
+      "caption": "10 → 1,000 cuts on a Ripe Avocado. Final count: 16,760,600 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-21T18:28:52.957Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17868670197684267",
+        "mediaId": "18380444377243228",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17868670197684267",
+        "caption": "10 → 1,000 cuts on a Ripe Avocado. Final count: 16,760,600 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
+    }
+  ]
 }
