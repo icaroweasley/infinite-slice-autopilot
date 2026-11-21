@@ -1,0 +1,23 @@
+{
+  "name": "infinite-slice-skill",
+  "version": "1.0.0",
+  "description": "Autonomous 3D Infinite Slicing Video Studio & Instagram Reels Skill for Antigravity and Claude Code",
+  "type": "module",
+  "scripts": {
+    "studio": "vite --config engine/vite.config.js",
+    "build": "vite build --config engine/vite.config.js",
+    "render": "node scripts/render-headless.mjs",
+    "pipeline": "node scripts/run-pipeline.mjs",
+    "history": "node scripts/history-cli.mjs",
+    "publish": "node scripts/publish-reels.mjs",
+    "autopilot": "node scripts/autopilot-cloud.mjs",
+    "package-buyer": "node scripts/package-buyer.mjs",
+    "install-skill": "node scripts/install-skill.mjs"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.21.0",
+    "playwright-core": "^1.59.0",
+    "three": "^0.187.0",
+    "vite": "^8.3.8"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "brand": {
+    "handle": "@atomslice3d",
+    "language": "en",
+    "niche": "Satisfying 3D Infinite Slicing ASMR"
+  },
+  "render": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 60,
+    "jpegQuality": 0.94,
+    "presetMode": "viral60",
+    "rounds": [10, 50, 100, 250, 500, 1000],
+    "showHud": true,
+    "outputDir": "output"
+  },
+  "environments": {
+    "default": "classic-viral",
+    "rotate": true,
+    "pool": [
+      "classic-viral",
+      "glass-lab",
+      "tropical-leaf",
+      "luxury-obsidian",
+      "pro-kitchen",
+      "frozen-block"
+    ]
+  },
+  "publishing": {
+    "enabled": false,
+    "mode": "dry-run",
+    "recommendedCadence": {
+      "warmupWeeks1to2": "2-3 Reels/day (09:00, 15:00, 21:00 UTC)",
+      "scaled": "4-6 Reels/day max (avoid 24/day spam triggers)"
+    },
+    "captionStyle": "english-retention",
+    "hashtags": [
+      "#satisfying",
+      "#3dart",
+      "#asmr",
+      "#slicing",
+      "#oddlysatisfying",
+      "#kineticsand",
+      "#3danimation",
+      "#reels"
+    ]
+  }
+}

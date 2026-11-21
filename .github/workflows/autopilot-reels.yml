@@ -1,0 +1,85 @@
+name: Infinite Slice 24/7 Reels Autopilot
+
+on:
+  # Default safe schedule: 3 Reels/day at peak global times (09:00, 15:00, 21:00 UTC)
+  # To switch to every 4 hours (6/day): change to '0 */4 * * *'
+  # To switch to every 1 hour (24/day - only after account warmup!): change to '0 * * * *'
+  schedule:
+    - cron: '0 9,15,21 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run only (render MP4 + preview caption, do NOT post to Instagram)'
+        type: boolean
+        default: true
+      quick:
+        description: 'Quick test render (540x960 @ 30fps, 3 rounds)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install system FFmpeg & Chromium dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install npm dependencies & Playwright Chromium
+        run: |
+          npm ci || npm install
+          npx playwright-core install chromium --with-deps
+
+      - name: Run Autonomous AI Creator + 60 FPS MP4 Render + Instagram Reels Publish
+        env:
+          # Free Gemini API key (Google AI Studio) OR Anthropic Claude API key
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-2.5-flash' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Publishing Method A (n8n / Make webhook) OR Method B (Meta Graph API + Cloudinary)
+          N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_UPLOAD_PRESET: ${{ secrets.CLOUDINARY_UPLOAD_PRESET }}
+        run: |
+          FLAGS="--res 720x1280 --fps 60"
+          if [ "${{ inputs.quick }}" = "true" ]; then
+            FLAGS="--quick"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node scripts/autopilot-cloud.mjs $FLAGS --dry-run
+          else
+            node scripts/autopilot-cloud.mjs $FLAGS --publish --cleanup
+          fi
+
+      - name: Upload MP4 Artifact (Dry-Run Inspection)
+        if: ${{ inputs.dry_run == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-reel-mp4
+          path: output/*.mp4
+          retention-days: 3
+
+      - name: Commit updated anti-repetition history.json
+        run: |
+          git config user.name "Infinite Slice Bot"
+          git config user.email "bot@infinite-slice.local"
+          git add data/history.json
+          git diff --cached --quiet || git commit -m "chore: log autonomous reel in history.json"
+          git push

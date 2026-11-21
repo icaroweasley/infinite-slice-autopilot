@@ -1,0 +1,11 @@
+node_modules/
+output/*.mp4
+output/*.wav
+output/*.json
+data/studio-brief.json
+.env
+dist/
+dist-buyer/
+autopilot.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,407 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { createServer } from 'vite';
+import { chromium } from 'playwright-core';
+import { synthesizeAsmrWav } from './synth-wav.mjs';
+import { loadConfig } from './history-cli.mjs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..');
+
+export function resolveChromiumExecutable() {
+  if (process.env.CHROMIUM_PATH && fs.existsSync(process.env.CHROMIUM_PATH)) {
+    return process.env.CHROMIUM_PATH;
+  }
+
+  const localAppData = process.env.LOCALAPPDATA || '';
+  const home = process.env.HOME || process.env.USERPROFILE || '';
+  const cacheRoots = [
+    path.join(localAppData, 'ms-playwright'),
+    path.join(home, '.cache', 'ms-playwright'),
+    path.join(home, 'Library', 'Caches', 'ms-playwright'),
+  ];
+
+  for (const cacheRoot of cacheRoots) {
+    if (!cacheRoot || !fs.existsSync(cacheRoot)) continue;
+    const dirs = fs.readdirSync(cacheRoot).filter((d) => d.startsWith('chromium-')).sort().reverse();
+    for (const d of dirs) {
+      const candidates = [
+        path.join(cacheRoot, d, 'chrome-win', 'chrome.exe'),
+        path.join(cacheRoot, d, 'chrome-win64', 'chrome.exe'),
+        path.join(cacheRoot, d, 'chrome-linux', 'chrome'),
+        path.join(cacheRoot, d, 'chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium'),
+      ];
+      for (const c of candidates) {
+        if (fs.existsSync(c)) return c;
+      }
+    }
+  }
+
+  const systemPaths = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ];
+  for (const p of systemPaths) {
+    if (fs.existsSync(p)) return p;
+  }
+
+  throw new Error(
+    'No Chrome/Chromium executable found. Set CHROMIUM_PATH in .env or run `npx playwright install chromium`.'
+  );
+}
+
+function runFfmpeg(args) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn('ffmpeg', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let stderr = '';
+    proc.stderr.on('data', (d) => { stderr += d.toString(); });
+    proc.on('error', (err) => reject(new Error(`Failed to run ffmpeg: ${err.message}`)));
+    proc.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`ffmpeg exited with code ${code}:\n${stderr.slice(-800)}`));
+    });
+  });
+}
+
+function writePipe(stream, buf) {
+  return new Promise((resolve, reject) => {
+    if (stream.write(buf)) {
+      resolve();
+    } else {
+      const onDrain = () => {
+        stream.off('error', onError);
+        resolve();
+      };
+      const onError = (err) => {
+        stream.off('drain', onDrain);
+        reject(err);
+      };
+      stream.once('drain', onDrain);
+      stream.once('error', onError);
+    }
+  });
+}
+
+function safeSlug(str) {
+  return (str || 'slice')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 32) || 'slice';
+}
+
+/**
+ * Deterministic Offline 9:16 Video Renderer:
+ * Supports presets AND free-text custom Object, Cutter, Surface, Environment, and custom Cut Rounds!
+ */
+export async function renderHeadlessVideo({
+  objectId = 'salmon',
+  objectPrompt = '',
+  cutterId = 'chef-knife',
+  cutterPrompt = '',
+  surfaceId = '',
+  surfacePrompt = '',
+  envId = 'classic-viral',
+  envPrompt = '',
+  handle,
+  width,
+  height,
+  fps,
+  rounds,
+  durationScale = 1.0,
+  jpegQuality,
+  showHud,
+  outputName,
+  serverUrl,
+  onProgress,
+} = {}) {
+  const cfg = loadConfig();
+  const W = width || cfg.render.width || 1080;
+  const H = height || cfg.render.height || 1920;
+  const FPS = fps || cfg.render.fps || 60;
+  const QUALITY = jpegQuality || cfg.render.jpegQuality || 0.94;
+  const HANDLE = handle ?? cfg.brand.handle ?? '@cubiccutlab';
+  const ROUNDS = (rounds && rounds.length > 0) ? rounds : (cfg.render.rounds || [10, 50, 100, 250, 500, 1000]);
+  const SHOW_HUD = showHud ?? cfg.render.showHud ?? true;
+
+  const outDir = path.resolve(ROOT, cfg.render.outputDir || 'output');
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const executablePath = resolveChromiumExecutable();
+  console.log(`[render] Browser: ${executablePath}`);
+  console.log(`[render] Target: object=${objectPrompt || objectId} | cutter=${cutterPrompt || cutterId} | surface=${surfacePrompt || surfaceId || 'default'} | env=${envPrompt || envId} | ${W}x${H} @ ${FPS}fps | rounds=[${ROUNDS.join(',')}]`);
+
+  let viteServer = null;
+  let url = '';
+  if (serverUrl) {
+    url = `${serverUrl.replace(/\/$/, '')}/?headless=1`;
+  } else {
+    viteServer = await createServer({
+      configFile: path.join(ROOT, 'engine', 'vite.config.js'),
+      server: { port: 0, host: '127.0.0.1' },
+      logLevel: 'silent',
+    });
+    await viteServer.listen();
+    const addr = viteServer.httpServer.address();
+    url = `http://127.0.0.1:${addr.port}/?headless=1`;
+  }
+
+  let browser = null;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const objTag = safeSlug(objectPrompt || objectId);
+  const envTag = safeSlug(envPrompt || envId);
+  const baseFile = outputName || `infinite-slice-${objTag}-${envTag}-${stamp}`;
+  const tempVideoPath = path.join(outDir, `${baseFile}.video.tmp.mp4`);
+  const tempWavPath = path.join(outDir, `${baseFile}.audio.tmp.wav`);
+  const finalMp4Path = path.join(outDir, `${baseFile}.mp4`);
+  const manifestPath = path.join(outDir, `${baseFile}.json`);
+
+  // Estimate expected total frames cleanly for UI progress bar
+  const estDuration = ROUNDS.reduce((acc, c) => acc + ((c >= 500 ? 11.4 : 10.4) * durationScale), 0);
+  const estTotalFrames = Math.max(30, Math.round(estDuration * FPS));
+
+  try {
+    onProgress?.({ stage: 'boot', percent: 3, message: 'Abrindo motor 3D WebGL2 & Rapier3D…' });
+    const isLinux = process.platform === 'linux';
+    const launchArgs = isLinux
+      ? [
+          '--use-gl=angle',
+          '--use-angle=swiftshader-webgl',
+          '--enable-unsafe-swiftshader',
+          '--enable-webgl',
+          '--ignore-gpu-blocklist',
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+        ]
+      : [
+          '--use-gl=angle',
+          '--enable-webgl',
+          '--ignore-gpu-blocklist',
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+        ];
+
+    browser = await chromium.launch({
+      executablePath,
+      headless: true,
+      args: launchArgs,
+    });
+
+    const page = await browser.newPage({ viewport: { width: W, height: H } });
+    const consoleErrors = [];
+    page.on('pageerror', (e) => consoleErrors.push(e.message));
+    page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
+
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => window.__HEADLESS_READY__ === true || Boolean(window.__HEADLESS_ERROR__), {
+      timeout: 30000,
+    });
+
+    const bootErr = await page.evaluate(() => window.__HEADLESS_ERROR__ || null);
+    if (bootErr) throw new Error(`Headless engine boot failed: ${bootErr}`);
+
+    const meta = await page.evaluate(
+      (opts) => window.__HEADLESS_API__.configure(opts),
+      {
+        objectId,
+        objectPrompt,
+        cutterId,
+        cutterPrompt,
+        surfaceId,
+        surfacePrompt,
+        envId,
+        envPrompt,
+        handle: HANDLE,
+        width: W,
+        height: H,
+        rounds: ROUNDS,
+        durationScale,
+        showHud: SHOW_HUD,
+      }
+    );
+
+    console.log(`[render] Object loaded: "${meta.englishName}" (slug: ${meta.slug})`);
+
+    const ffmpegVideo = spawn(
+      'ffmpeg',
+      [
+        '-y',
+        '-f', 'image2pipe',
+        '-vcodec', 'mjpeg',
+        '-framerate', String(FPS),
+        '-i', 'pipe:0',
+        '-c:v', 'libx264',
+        '-profile:v', 'high',
+        '-level', '4.2',
+        '-preset', 'medium',
+        '-crf', '18',
+        '-vf', 'scale=in_range=full:out_range=tv,format=yuv420p',
+        '-r', String(FPS),
+        tempVideoPath,
+      ],
+      { stdio: ['pipe', 'ignore', 'pipe'] }
+    );
+
+    let ffmpegErr = '';
+    ffmpegVideo.stderr.on('data', (d) => { ffmpegErr += d.toString(); });
+
+    const dt = 1.0 / FPS;
+    const maxFrames = Math.ceil(FPS * 160);
+    let frameCount = 0;
+    const t0 = Date.now();
+
+    while (frameCount < maxFrames) {
+      const frame = await page.evaluate(
+        ([stepDt, q]) => window.__HEADLESS_API__.stepAndCapture(stepDt, q),
+        [dt, QUALITY]
+      );
+
+      const jpgBuf = Buffer.from(frame.base64, 'base64');
+      await writePipe(ffmpegVideo.stdin, jpgBuf);
+      frameCount++;
+
+      if (frameCount % Math.max(10, Math.floor(FPS / 2)) === 0 || frame.done) {
+        const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+        const pct = Math.min(86, Math.max(5, Math.round((frameCount / estTotalFrames) * 84)));
+        const statusMsg = `Rodada ${frame.roundIndex + 1}/${ROUNDS.length} (${frame.cutsDone}/${frame.cutsTarget} CUTS) • ${frameCount} frames (${frame.simTime.toFixed(1)}s)`;
+        onProgress?.({ stage: 'frames', percent: pct, frames: frameCount, message: statusMsg });
+        process.stdout.write(`\r[render] ${statusMsg} in ${elapsed}s   `);
+      }
+
+      if (frame.done) break;
+    }
+    process.stdout.write('\n');
+
+    ffmpegVideo.stdin.end();
+    await new Promise((resolve, reject) => {
+      ffmpegVideo.on('close', (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`FFmpeg video pipe failed (${code}):\n${ffmpegErr.slice(-800)}`));
+      });
+    });
+
+    const summary = await page.evaluate(() => window.__HEADLESS_API__.getSummary());
+    if (consoleErrors.length > 0) {
+      console.warn(`[render] Warning: ${consoleErrors.length} page console error(s): ${consoleErrors[0]}`);
+    }
+
+    onProgress?.({ stage: 'audio', percent: 90, frames: frameCount, message: `Sintetizando áudio ASMR 48 kHz (${summary.audioEvents.length} eventos)…` });
+    console.log(`[render] Synthesizing 48kHz stereo ASMR audio (${summary.audioEvents.length} synced events)...`);
+    synthesizeAsmrWav({
+      durationSec: summary.durationSec,
+      audioEvents: summary.audioEvents,
+      outputPath: tempWavPath,
+    });
+
+    onProgress?.({ stage: 'mux', percent: 95, frames: frameCount, message: 'Finalizando MP4 H.264 + AAC…' });
+    console.log(`[render] Muxing final MP4 -> ${finalMp4Path}`);
+    await runFfmpeg([
+      '-y',
+      '-i', tempVideoPath,
+      '-i', tempWavPath,
+      '-c:v', 'copy',
+      '-c:a', 'aac',
+      '-b:a', '192k',
+      '-ar', '48000',
+      '-shortest',
+      '-movflags', '+faststart',
+      finalMp4Path,
+    ]);
+
+    if (fs.existsSync(tempVideoPath)) fs.unlinkSync(tempVideoPath);
+    if (fs.existsSync(tempWavPath)) fs.unlinkSync(tempWavPath);
+
+    const fileSizeMb = Number((fs.statSync(finalMp4Path).size / (1024 * 1024)).toFixed(2));
+    const manifest = {
+      renderedAt: new Date().toISOString(),
+      filename: path.basename(finalMp4Path),
+      videoFile: path.relative(ROOT, finalMp4Path).replace(/\\/g, '/'),
+      videoAbsolutePath: finalMp4Path,
+      fileSizeMb,
+      width: W,
+      height: H,
+      fps: FPS,
+      frames: frameCount,
+      durationSec: summary.durationSec,
+      handle: HANDLE,
+      cutterId: cutterPrompt ? 'custom' : cutterId,
+      cutterPrompt: cutterPrompt || '',
+      surfaceId: surfacePrompt ? 'custom' : (surfaceId || 'default'),
+      surfacePrompt: surfacePrompt || '',
+      envId: envPrompt ? 'custom' : summary.envId,
+      envPrompt: envPrompt || '',
+      rounds: ROUNDS,
+      objectId: summary.object.id,
+      objectPrompt: objectPrompt || '',
+      slug: summary.object.slug,
+      name: summary.object.name,
+      englishName: summary.object.englishName,
+      subtitle: summary.object.subtitle,
+      maxCubes: summary.maxCubes,
+      audioEventCount: summary.audioEvents.length,
+    };
+
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
+    console.log(`[render] DONE! ${finalMp4Path} (${fileSizeMb} MB, ${summary.durationSec}s @ ${FPS}fps, ${summary.maxCubes.toLocaleString('en-US')} max cubes)`);
+    onProgress?.({ stage: 'done', percent: 100, frames: frameCount, message: 'Vídeo MP4 pronto!', manifest });
+    return manifest;
+  } finally {
+    if (browser) await browser.close();
+    if (viteServer) await viteServer.close();
+  }
+}
+
+// CLI execution (supports both flags and --jobFile <json>)
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const args = process.argv.slice(2);
+  const getFlag = (name, def) => {
+    const idx = args.indexOf(`--${name}`);
+    return idx >= 0 && args[idx + 1] ? args[idx + 1] : def;
+  };
+  const hasFlag = (name) => args.includes(`--${name}`);
+
+  const jobFile = getFlag('jobFile', null);
+  let opts;
+  if (jobFile && fs.existsSync(jobFile)) {
+    opts = JSON.parse(fs.readFileSync(jobFile, 'utf8'));
+  } else {
+    const quick = hasFlag('quick');
+    const resStr = getFlag('res', quick ? '540x960' : undefined);
+    const [w, h] = resStr ? resStr.split('x').map(Number) : [undefined, undefined];
+    const roundsArg = getFlag('rounds', quick ? '10,100,1000' : undefined);
+    const rounds = roundsArg ? roundsArg.split(',').map(Number) : undefined;
+    opts = {
+      objectId: getFlag('object', 'salmon'),
+      objectPrompt: getFlag('objectPrompt', ''),
+      cutterId: getFlag('cutter', 'chef-knife'),
+      cutterPrompt: getFlag('cutterPrompt', ''),
+      surfaceId: getFlag('surface', ''),
+      surfacePrompt: getFlag('surfacePrompt', ''),
+      envId: getFlag('env', 'classic-viral'),
+      envPrompt: getFlag('envPrompt', ''),
+      handle: getFlag('handle', undefined),
+      width: w,
+      height: h,
+      fps: getFlag('fps', quick ? '30' : undefined) ? Number(getFlag('fps', quick ? '30' : undefined)) : undefined,
+      rounds,
+      durationScale: quick ? 0.55 : Number(getFlag('scale', '1.0')),
+      outputName: getFlag('out', undefined),
+      serverUrl: getFlag('serverUrl', undefined),
+    };
+  }
+
+  renderHeadlessVideo(opts).catch((err) => {
+    console.error('[render] FATAL:', err);
+    process.exit(1);
+  });
+}
