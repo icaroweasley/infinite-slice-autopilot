@@ -23,7 +23,7 @@ permissions:
 jobs:
   generate-and-post:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
 
     steps:
       - name: Check if scheduled run has publishing secrets configured
