@@ -82,7 +82,7 @@ function makeRoundedBoxGeo(w, h, d, power = 12) {
 }
 
 function makeSphereGeo(w, h, d) {
-  const geo = new THREE.SphereGeometry(0.5, 44, 32);
+  const geo = new THREE.SphereGeometry(0.5, 64, 48);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const ux = pos.getX(i) * 0.98;
@@ -95,7 +95,7 @@ function makeSphereGeo(w, h, d) {
 }
 
 function makeCylinderGeo(w, h, d) {
-  const geo = new THREE.CylinderGeometry(0.48, 0.48, h, 44, 24);
+  const geo = new THREE.CylinderGeometry(0.48, 0.48, h, 64, 28);
   geo.translate(0, h * 0.5, 0);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
@@ -613,8 +613,8 @@ export function generateObjectFromPrompt(rawPrompt) {
         if (ny > 0.80) {
           const ang = Math.atan2(nz, nx);
           const leafRadius = 0.22 + 0.56 * Math.pow(0.5 + 0.5 * Math.cos(ang * 5.0), 1.6);
-          const crownDrop = smoothstep(0.98, 0.82, ny);
-          if (rXZ < leafRadius * crownDrop && ny < 0.94) return true;
+          const crownDrop = smoothstep(0.99, 0.83, ny);
+          if (rXZ < leafRadius * crownDrop && ny < 0.965) return true;
         }
         // Plump conical-heart berry body (wide shoulders near top, tapered sweet tip at bottom or lying plumply)
         const y01 = clamp(ny / 0.86, 0, 1);
@@ -626,15 +626,16 @@ export function generateObjectFromPrompt(rawPrompt) {
         const ang = Math.atan2(nz, nx);
         const n = fbm3(nx * 18, ny * 18, nz * 18, 2);
 
-        // Bright emerald leafy calyx crown on top
-        if (ny > 0.79) {
+        // Bright emerald leafy calyx crown on top (veined 5-petal star!)
+        if (ny > 0.77) {
           const leafWave = 0.5 + 0.5 * Math.cos(ang * 5.0);
-          if (ny > 0.83 || (rXZ < 0.25 + 0.50 * leafWave && ny > 0.80)) {
+          const vein = Math.pow(0.5 + 0.5 * Math.cos(ang * 25.0), 4.0) * 0.12;
+          if (ny > 0.815 || (rXZ < 0.34 + 0.64 * leafWave && ny > 0.78)) {
             return {
-              r: lerp(0.10, 0.22, leafWave),
-              g: lerp(0.54, 0.74, leafWave + n * 0.12),
-              b: lerp(0.12, 0.20, leafWave),
-              roughness: 0.44,
+              r: clamp(lerp(0.08, 0.20, leafWave) + vein * 0.4, 0, 1),
+              g: clamp(lerp(0.50, 0.74, leafWave) + n * 0.08 + vein, 0, 1),
+              b: clamp(lerp(0.10, 0.18, leafWave) + vein * 0.2, 0, 1),
+              roughness: 0.40,
               metalness: 0.02,
               emissive: 0,
             };
@@ -645,15 +646,29 @@ export function generateObjectFromPrompt(rawPrompt) {
         const profile = Math.max(0.05, Math.sin(Math.pow(y01, 0.72) * Math.PI) * (0.68 + 0.36 * Math.sin(y01 * Math.PI * 0.85)));
         const normR = rXZ / profile;
 
-        // Glossy crimson skin with recessed tiny golden seeds!
+        // Glossy crimson skin with smooth anti-aliased golden ovoid seeds nestled inside subtle ruby dimples!
         if (normR > 0.88) {
-          const seedU = fract((ang / (Math.PI * 2)) * 18 + Math.floor(ny * 14) * 0.5);
-          const seedV = fract(ny * 14);
-          const seedD = Math.hypot(seedU - 0.5, seedV - 0.5);
-          if (seedD < 0.16 && ny > 0.10 && ny < 0.78) {
-            return { r: 0.96, g: 0.82, b: 0.28, roughness: 0.38, metalness: 0.04, emissive: 0 };
+          const nFine = fbm3(nx * 42, ny * 42, nz * 42, 2);
+          const seedU = fract((ang / (Math.PI * 2)) * 20 + Math.floor(ny * 15) * 0.5);
+          const seedV = fract(ny * 15);
+          const seedD = Math.hypot((seedU - 0.5) * 1.15, (seedV - 0.5) * 0.85);
+          if (ny > 0.08 && ny < 0.78) {
+            const seedMask = 1.0 - smoothstep(0.11, 0.16, seedD);
+            const dimpleShade = 1.0 - (1.0 - smoothstep(0.14, 0.30, seedD)) * 0.24;
+            const shoulder = smoothstep(0.66, 0.82, ny);
+            const baseR = lerp(0.86, 0.94, shoulder) * dimpleShade + nFine * 0.04;
+            const baseG = lerp(0.06, 0.22, shoulder) * dimpleShade + nFine * 0.02;
+            const baseB = lerp(0.10, 0.20, shoulder) * dimpleShade;
+            return {
+              r: lerp(baseR, 0.96, seedMask),
+              g: lerp(baseG, 0.80, seedMask),
+              b: lerp(baseB, 0.24, seedMask),
+              roughness: lerp(0.16, 0.40, seedMask),
+              metalness: 0.03,
+              emissive: 0.01,
+            };
           }
-          return { r: 0.88 + n * 0.06, g: 0.07 + n * 0.03, b: 0.11 + n * 0.03, roughness: 0.18, metalness: 0.04, emissive: 0.02 };
+          return { r: 0.88 + n * 0.05, g: 0.07 + n * 0.03, b: 0.11 + n * 0.03, roughness: 0.16, metalness: 0.03, emissive: 0.01 };
         }
 
         // Authentic strawberry cross-section: vibrant red outer flesh -> pinkish-white star core!
@@ -663,15 +678,15 @@ export function generateObjectFromPrompt(rawPrompt) {
           r: lerp(0.99, 0.90, coreT),
           g: lerp(0.88, 0.15, coreT),
           b: lerp(0.86, 0.19, coreT),
-          roughness: 0.26,
+          roughness: 0.24,
           metalness: 0.02,
           emissive: 0.02,
         };
       },
       createOuterGeometry() {
         const { w, h, d } = this.bounds;
-        // Plump berry body + merged 5-petal leafy crown
-        const body = new THREE.SphereGeometry(0.5, 48, 36);
+        // Smooth 64x48 plump berry body + merged 5-petal leafy crown (preserving non-overlapping UV groups!)
+        const body = new THREE.SphereGeometry(0.5, 64, 48);
         const bPos = body.attributes.position;
         for (let i = 0; i < bPos.count; i++) {
           const ux = bPos.getX(i);
@@ -685,8 +700,8 @@ export function generateObjectFromPrompt(rawPrompt) {
         }
         body.computeVertexNormals();
 
-        // Leafy green star calyx sitting on top
-        const crown = new THREE.CylinderGeometry(0.06, 0.44, h * 0.15, 40, 4);
+        // Leafy green star calyx sitting cleanly above berry shoulders (ny >= 0.81)
+        const crown = new THREE.CylinderGeometry(0.05, 0.44, h * 0.13, 56, 6);
         const cPos = crown.attributes.position;
         for (let i = 0; i < cPos.count; i++) {
           const cx = cPos.getX(i);
@@ -694,40 +709,48 @@ export function generateObjectFromPrompt(rawPrompt) {
           const cz = cPos.getZ(i);
           const ang = Math.atan2(cz, cx);
           const petal = 0.42 + 0.58 * Math.pow(0.5 + 0.5 * Math.cos(ang * 5.0), 1.5);
-          cPos.setXYZ(i, cx * petal * w * 0.92, cy + h * 0.865, cz * petal * d * 0.92);
+          cPos.setXYZ(i, cx * petal * w * 0.92, cy + h * 0.895, cz * petal * d * 0.92);
         }
         crown.computeVertexNormals();
 
-        // Merge body + crown into single clean BufferGeometry
+        // Merge body + crown preserving position, normal, uv, and 2 distinct UV groups for Ultra-HD baking!
         const bNon = body.toNonIndexed();
         const cNon = crown.toNonIndexed();
         const pA = bNon.attributes.position.array;
         const pB = cNon.attributes.position.array;
         const nA = bNon.attributes.normal.array;
         const nB = cNon.attributes.normal.array;
+        const uA = bNon.attributes.uv.array;
+        const uB = cNon.attributes.uv.array;
         const mergedPos = new Float32Array(pA.length + pB.length);
         mergedPos.set(pA, 0);
         mergedPos.set(pB, pA.length);
         const mergedNorm = new Float32Array(nA.length + nB.length);
         mergedNorm.set(nA, 0);
         mergedNorm.set(nB, nA.length);
+        const mergedUv = new Float32Array(uA.length + uB.length);
+        mergedUv.set(uA, 0);
+        mergedUv.set(uB, uA.length);
         const out = new THREE.BufferGeometry();
         out.setAttribute('position', new THREE.BufferAttribute(mergedPos, 3));
         out.setAttribute('normal', new THREE.BufferAttribute(mergedNorm, 3));
+        out.setAttribute('uv', new THREE.BufferAttribute(mergedUv, 2));
+        out.addGroup(0, pA.length / 3, 0);
+        out.addGroup(pA.length / 3, pB.length / 3, 1);
         body.dispose(); crown.dispose(); bNon.dispose(); cNon.dispose();
         return out;
       },
     };
   }
 
-  // 12. Striped Sweet Watermelon (12.8M+ view viral icon — striped emerald rind + white ring + ruby flesh + black seeds!)
+  // 12. Striped Sweet Watermelon (12.8M+ view viral icon — Ultra-HD organic Crimson Sweet tiger stripes + ruby flesh + teardrop seeds!)
   if (norm.includes('melanc') || norm.includes('watermelon')) {
     return {
       id: 'prompt-custom',
       slug,
       name: prompt,
       englishName: 'Sweet Striped Watermelon',
-      subtitle: 'Striped emerald rind + crisp white ring + vibrant ruby red seeded flesh',
+      subtitle: 'Ultra-HD striped emerald rind + crisp white ring + vibrant ruby red seeded flesh',
       bounds: { w: 2.26, h: 1.48, d: 1.66 },
       gridRes: { x: 100, y: 68, z: 76 },
       physics: { restitution: 0.14, friction: 0.58, cohesion: 0.70, density: 1.0, soundProfile: 'culinary' },
@@ -743,58 +766,93 @@ export function generateObjectFromPrompt(rawPrompt) {
         const dy = (ny - 0.5) / 0.485;
         const dz = nz / 0.485;
         const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        const n = fbm3(nx * 16, ny * 16, nz * 16, 2);
+        const n = fbm3(nx * 14, ny * 14, nz * 14, 3);
+        const nFine = fbm3(nx * 46, ny * 46, nz * 46, 2);
 
-        // Dark green / bright lime jagged stripes on outer rind
+        // Authentic Crimson Sweet Watermelon rind: smooth anti-aliased jagged tiger stripes + organic mottling!
         if (r > 0.895) {
+          // Small dark woody stem dimple at the right/left poles
+          const poleDist = Math.hypot(dy, dz);
+          if (Math.abs(dx) > 0.96 && poleDist < 0.18) {
+            return { r: 0.24, g: 0.18, b: 0.10, roughness: 0.76, metalness: 0.0, emissive: 0 };
+          }
           const theta = Math.atan2(dy, dz);
-          const stripe = Math.sin(theta * 9.0 + n * 2.4 + Math.sin(nx * 12) * 0.45);
-          const isDark = stripe > 0.05;
+          // Multi-frequency jagged lightning-like organic stripe edges (soft smoothstep = ZERO stair-stepping!)
+          const jag = (n - 0.5) * 2.1 + (nFine - 0.5) * 0.75 + Math.sin(nx * 18.0 + theta * 2.0) * 0.22;
+          const stripeVal = Math.sin(theta * 10.0 + jag);
+          const darkT = smoothstep(-0.18, 0.24, stripeVal);
+          // Subtle fine mottled dark speckles inside the lighter green bands
+          const mottle = smoothstep(0.35, 0.78, nFine) * 0.12;
+          // Natural subtle warm yellowish ground-spot on bottom belly
+          const belly = smoothstep(-0.78, -0.96, dy) * 0.28;
+
+          const rCol = lerp(0.34, 0.055, darkT) - mottle * 0.18 + belly * 0.42;
+          const gCol = lerp(0.62, 0.22, darkT) + (n - 0.5) * 0.06 - mottle * 0.24 + belly * 0.22;
+          const bCol = lerp(0.18, 0.075, darkT) - mottle * 0.08 + belly * 0.12;
           return {
-            r: isDark ? 0.05 : 0.24,
-            g: isDark ? 0.24 + n * 0.04 : 0.56 + n * 0.06,
-            b: isDark ? 0.08 : 0.14,
-            roughness: 0.24,
-            metalness: 0.03,
+            r: clamp(rCol, 0.02, 0.95),
+            g: clamp(gCol, 0.06, 0.95),
+            b: clamp(bCol, 0.02, 0.85),
+            roughness: 0.20 + (1 - darkT) * 0.05,
+            metalness: 0.02,
             emissive: 0,
           };
         }
-        // Crisp pale white-green inner rind ring
+        // Crisp green-to-creamy-white inner rind transition
         if (r > 0.815) {
           const t = smoothstep(0.815, 0.895, r);
+          const outerRim = smoothstep(0.875, 0.895, r);
           return {
-            r: lerp(0.95, 0.84, t),
-            g: lerp(0.97, 0.92, t),
-            b: lerp(0.86, 0.72, t),
-            roughness: 0.34,
+            r: lerp(0.95, 0.76, t) * (1 - outerRim * 0.35),
+            g: lerp(0.97, 0.90, t) * (1 - outerRim * 0.18),
+            b: lerp(0.88, 0.68, t) * (1 - outerRim * 0.35),
+            roughness: 0.30,
             metalness: 0.01,
             emissive: 0,
           };
         }
-        // Glossy black teardrop seeds arranged in natural inner ring (r in 0.42..0.70)
-        if (r > 0.36 && r < 0.74) {
-          const gx = Math.floor((nx + 0.5) * 14);
-          const gy = Math.floor(ny * 10);
-          const gz = Math.floor((nz + 0.5) * 12);
-          const h1 = hash3(gx, gy, gz);
-          if (h1 > 0.74) {
-            const fx = fract((nx + 0.5) * 14) - 0.5;
-            const fy = fract(ny * 10) - 0.5;
-            const fz = fract((nz + 0.5) * 12) - 0.5;
-            if (Math.hypot(fx, fy * 0.85, fz) < 0.26) {
-              return { r: 0.06, g: 0.05, b: 0.05, roughness: 0.22, metalness: 0.06, emissive: 0 };
+        // Natural glossy black teardrop seeds arranged in authentic botanical radial arcs inside the ruby flesh!
+        if (r > 0.24 && r < 0.74) {
+          const angXY = Math.atan2(dy, dx);
+          const rXY = Math.hypot(dx, dy);
+          // 2 staggered botanical seed rings in the XY cut plane + subtle Z layering
+          const ringA = Math.abs(rXY - 0.56);
+          const ringB = Math.abs(rXY - 0.36);
+          const onRingA = ringA < 0.08;
+          const onRingB = ringB < 0.075;
+          if (onRingA || onRingB) {
+            const spokeCount = onRingA ? 14.0 : 8.0;
+            const zLayer = Math.floor((nz + 0.5) * 6.0);
+            const angShift = (onRingB ? 0.35 : 0.0) + zLayer * 0.42;
+            const spokePos = ((angXY + Math.PI + angShift) / (Math.PI * 2)) * spokeCount;
+            const spokeCell = fract(spokePos) - 0.5;
+            const radErr = (onRingA ? (rXY - 0.56) : (rXY - 0.36)) / 0.048;
+            const angErr = spokeCell / 0.15;
+            const zCell = (fract((nz + 0.5) * 6.0) - 0.5) / 0.36;
+            const sd = Math.hypot(radErr, angErr, zCell);
+            if (sd < 1.0) {
+              const seedCore = 1.0 - smoothstep(0.68, 0.98, sd);
+              return {
+                r: lerp(0.32, 0.045, seedCore),
+                g: lerp(0.10, 0.038, seedCore),
+                b: lerp(0.10, 0.038, seedCore),
+                roughness: 0.14,
+                metalness: 0.08,
+                emissive: 0,
+              };
             }
           }
         }
-        // Ultra-juicy ruby-red watermelon flesh
-        const centerSweet = 1.0 - smoothstep(0.0, 0.82, r) * 0.14;
+        // Juicy marbled ruby-red flesh with delicate pale crystalline veining near the white rind
+        const rindTint = smoothstep(0.70, 0.815, r);
+        const marble = (nFine - 0.5) * 0.09;
         return {
-          r: clamp(0.96 * centerSweet + n * 0.04, 0, 1),
-          g: clamp(0.14 + (1 - centerSweet) * 0.14 + n * 0.03, 0, 1),
-          b: clamp(0.20 + n * 0.03, 0, 1),
-          roughness: 0.22,
-          metalness: 0.02,
-          emissive: 0.03,
+          r: clamp(lerp(0.94, 0.96, rindTint) + marble, 0, 1),
+          g: clamp(lerp(0.13, 0.34, rindTint) + marble * 0.6, 0, 1),
+          b: clamp(lerp(0.19, 0.36, rindTint) + marble * 0.5, 0, 1),
+          roughness: 0.20,
+          metalness: 0.01,
+          emissive: 0.02,
         };
       },
       createOuterGeometry() {

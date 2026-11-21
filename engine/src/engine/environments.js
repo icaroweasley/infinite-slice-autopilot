@@ -75,32 +75,34 @@ function makeCanvas(w, h) {
 }
 
 function makeWoodTexture(baseHex, grainHex, warm = true) {
-  const c = makeCanvas(512, 512);
+  const S = 1024;
+  const c = makeCanvas(S, S);
   const ctx = c.getContext('2d');
   ctx.fillStyle = baseHex;
-  ctx.fillRect(0, 0, 512, 512);
+  ctx.fillRect(0, 0, S, S);
 
-  const planks = 6;
-  const plankH = 512 / planks;
+  const planks = 7;
+  const plankH = S / planks;
   for (let p = 0; p < planks; p++) {
     ctx.fillStyle = p % 2 === 0 ? 'rgba(255,245,220,0.06)' : 'rgba(60,30,10,0.06)';
-    ctx.fillRect(0, p * plankH, 512, plankH);
+    ctx.fillRect(0, p * plankH, S, plankH);
     ctx.fillStyle = 'rgba(40,22,8,0.18)';
-    ctx.fillRect(0, p * plankH, 512, 1.5);
+    ctx.fillRect(0, p * plankH, S, 2.0);
   }
 
-  for (let i = 0; i < 420; i++) {
-    const y = (i / 420) * 512;
+  for (let i = 0; i < 820; i++) {
+    const y = (i / 820) * S;
     ctx.strokeStyle = grainHex;
-    ctx.globalAlpha = 0.05 + (Math.sin(i * 1.9) * 0.5 + 0.5) * 0.11;
-    ctx.lineWidth = 0.8 + (i % 3) * 0.6;
+    ctx.globalAlpha = 0.045 + (Math.sin(i * 1.9) * 0.5 + 0.5) * 0.10;
+    ctx.lineWidth = 0.8 + (i % 3) * 0.5;
     ctx.beginPath();
     ctx.moveTo(0, y);
-    for (let x = 0; x <= 512; x += 32) {
-      ctx.lineTo(x, y + Math.sin(x * 0.015 + i * 0.17) * (warm ? 3.2 : 1.8));
+    for (let x = 0; x <= S; x += 48) {
+      ctx.lineTo(x, y + Math.sin(x * 0.009 + i * 0.14) * (warm ? 4.4 : 2.4));
     }
     ctx.stroke();
   }
+  ctx.globalAlpha = 1.0;
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;

@@ -1,11 +1,15 @@
 import * as THREE from 'three';
+import { bakeUltraHDSurface, bakeCutCapSlice } from './hd-surface-baker.js';
+
+const CAP_RES = 512;
 
 /**
- * Volumetric 3D solid renderer:
- * - Bakes objDef.contains + objDef.sampleVolume into two WebGL2 Data3DTextures
- * - Renders smooth outer geometry with hardware clipping plane (also clips cast shadows!)
- * - Renders pixel-accurate solid cross-section cap at z = clipZ (supports hollow interiors like Geode!)
- * - Draws exact phase-locked progressive X, Y, Z knife slits strictly behind the moving blade edge
+ * Ultra-HD Volumetric 3D Solid Renderer:
+ * - Bakes a 1024x1024 anisotropic mipmapped outer-surface atlas (`surfColorTex` + `surfPropsTex`)
+ *   so every stripe, seed, logo, and surface detail is razor-sharp with ZERO voxel pixelation!
+ * - Bakes a 512x512 anti-aliased 2D cross-section cut cap on every Tier 1A Z-slice (~40x sharper than 96px 3D!)
+ * - Bakes an upgraded high-resolution 3D volume (`~160x120x128`) for fast high-cut slices & falling chunk interiors
+ * - Draws exact phase-locked progressive X, Y, Z knife grooves strictly behind the moving blade edge
  */
 export class VolumetricSolid {
   constructor(scene) {
@@ -16,14 +20,42 @@ export class VolumetricSolid {
     this.objDef = null;
     this.colorTex = null;
     this.propsTex = null;
+    this.surfColorTex = null;
+    this.surfPropsTex = null;
+    this.bakedOuterGeo = null;
     this.solidMesh = null;
     this.capMesh = null;
     this.zClipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 10.0);
+
+    // Reusable 512x512 Ultra-HD dynamic cut-plane cross-section textures
+    this.capColorBuf = new Uint8Array(CAP_RES * CAP_RES * 4);
+    this.capPropsBuf = new Uint8Array(CAP_RES * CAP_RES * 4);
+    this.capColorTex = new THREE.DataTexture(this.capColorBuf, CAP_RES, CAP_RES, THREE.RGBAFormat, THREE.UnsignedByteType);
+    this.capColorTex.minFilter = THREE.LinearFilter;
+    this.capColorTex.magFilter = THREE.LinearFilter;
+    this.capColorTex.anisotropy = 8;
+    this.capColorTex.wrapS = THREE.ClampToEdgeWrapping;
+    this.capColorTex.wrapT = THREE.ClampToEdgeWrapping;
+    this.capColorTex.flipY = false;
+
+    this.capPropsTex = new THREE.DataTexture(this.capPropsBuf, CAP_RES, CAP_RES, THREE.RGBAFormat, THREE.UnsignedByteType);
+    this.capPropsTex.minFilter = THREE.LinearFilter;
+    this.capPropsTex.magFilter = THREE.LinearFilter;
+    this.capPropsTex.anisotropy = 8;
+    this.capPropsTex.wrapS = THREE.ClampToEdgeWrapping;
+    this.capPropsTex.wrapT = THREE.ClampToEdgeWrapping;
+    this.capPropsTex.flipY = false;
+    this._lastCapBakedZ = 1e9;
 
     // Shared uniform block updated every frame by knife & round controller
     this.uniforms = {
       uColorVolume: { value: null },
       uPropsVolume: { value: null },
+      uSurfColorMap: { value: null },
+      uSurfPropsMap: { value: null },
+      uCapColorMap: { value: this.capColorTex },
+      uCapPropsMap: { value: this.capPropsTex },
+      uUseCap2D: { value: 0.0 },
       uBounds: { value: new THREE.Vector3(2, 1, 1.5) },
       uCapZ: { value: 0.0 },
       uNumX: { value: 5.0 },
@@ -39,13 +71,18 @@ export class VolumetricSolid {
   }
 
   /**
-   * Bakes the procedural 3D volumetric field into Data3DTextures (~10-20ms).
+   * Bakes the Ultra-HD 1024x1024 outer surface atlas + upgraded high-res 3D volumetric field.
    */
   loadObject(objDef) {
     this.disposeCurrent();
     this.objDef = objDef;
+    this._lastCapBakedZ = 1e9;
 
-    const { x: rx, y: ry, z: rz } = objDef.gridRes;
+    // 1. Upgraded 3D volume (~1.55x resolution per axis = ~3.7x more voxels for crisp falling-piece cut faces!)
+    const baseRes = objDef.gridRes || { x: 96, y: 64, z: 76 };
+    const rx = Math.min(168, Math.max(96, Math.round(baseRes.x * 1.55)));
+    const ry = Math.min(128, Math.max(64, Math.round(baseRes.y * 1.55)));
+    const rz = Math.min(136, Math.max(76, Math.round(baseRes.z * 1.55)));
     const total = rx * ry * rz;
     const colorData = new Uint8Array(total * 4);
     const propsData = new Uint8Array(total * 4);
@@ -58,7 +95,6 @@ export class VolumetricSolid {
         for (let ix = 0; ix < rx; ix++) {
           const nx = (ix + 0.5) / rx - 0.5;
           const inside = objDef.contains(nx, ny, nz);
-          // Always sample RGB even near outside boundary so linear filtering never bleeds black edges!
           const sample = objDef.sampleVolume(nx, ny, nz);
 
           colorData[ptr] = Math.round(Math.max(0, Math.min(1, sample.r)) * 255);
@@ -96,22 +132,30 @@ export class VolumetricSolid {
     this.propsTex.wrapR = THREE.ClampToEdgeWrapping;
     this.propsTex.needsUpdate = true;
 
+    // 2. Ultra-HD 1024x1024 Outer Surface Atlas (ZERO pixelation on skin/stripes/seeds/logos!)
+    const baked = bakeUltraHDSurface(objDef, 1024);
+    this.bakedOuterGeo = baked.geometry;
+    this.surfColorTex = baked.surfColorTex;
+    this.surfPropsTex = baked.surfPropsTex;
+
     const { w, h, d } = objDef.bounds;
     this.uniforms.uColorVolume.value = this.colorTex;
     this.uniforms.uPropsVolume.value = this.propsTex;
+    this.uniforms.uSurfColorMap.value = this.surfColorTex;
+    this.uniforms.uSurfPropsMap.value = this.surfPropsTex;
+    this.uniforms.uUseCap2D.value = 0.0;
     this.uniforms.uBounds.value.set(w, h, d);
 
-    // 1. Solid outer mesh (clipped cleanly in world space + shadows via zClipPlane)
-    const outerGeo = objDef.createOuterGeometry();
+    // 3. Solid outer mesh (uses razor-sharp 1024x1024 surface atlas + hardware clip plane!)
     const solidMat = this._createVolumetricMaterial(false);
     solidMat.clippingPlanes = [this.zClipPlane];
     solidMat.clipShadows = true;
-    this.solidMesh = new THREE.Mesh(outerGeo, solidMat);
+    this.solidMesh = new THREE.Mesh(this.bakedOuterGeo, solidMat);
     this.solidMesh.castShadow = true;
     this.solidMesh.receiveShadow = true;
     this.group.add(this.solidMesh);
 
-    // 2. Dynamic solid cross-section cap facing +Z (towards camera)
+    // 4. Dynamic solid cross-section cap facing +Z (uses 512x512 HD cut texture in Tier 1A!)
     const capGeo = new THREE.PlaneGeometry(w * 1.02, h * 1.02, 1, 1);
     capGeo.translate(0, h * 0.5, 0);
     const capMat = this._createVolumetricMaterial(true);
@@ -133,7 +177,7 @@ export class VolumetricSolid {
     });
 
     const sharedUniforms = this.uniforms;
-    mat.customProgramCacheKey = () => (isCap ? 'volumetric-cap-v1' : 'volumetric-solid-v1');
+    mat.customProgramCacheKey = () => (isCap ? 'volumetric-cap-hd-v2' : 'volumetric-solid-hd-v2');
 
     mat.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, sharedUniforms);
@@ -143,12 +187,15 @@ export class VolumetricSolid {
         .replace(
           '#include <common>',
           `#include <common>
-varying vec3 vObjPos;`
+${isCap ? '' : 'attribute vec2 aSurfUv;'}
+varying vec3 vObjPos;
+varying vec2 vSurfUv;`
         )
         .replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
-vObjPos = position;`
+vObjPos = position;
+vSurfUv = ${isCap ? 'vec2(0.0)' : 'aSurfUv'};`
         );
 
       shader.fragmentShader = shader.fragmentShader
@@ -158,6 +205,11 @@ vObjPos = position;`
 precision highp sampler3D;
 uniform highp sampler3D uColorVolume;
 uniform highp sampler3D uPropsVolume;
+uniform sampler2D uSurfColorMap;
+uniform sampler2D uSurfPropsMap;
+uniform sampler2D uCapColorMap;
+uniform sampler2D uCapPropsMap;
+uniform float uUseCap2D;
 uniform vec3 uBounds;
 uniform float uIsCap;
 uniform float uCapZ;
@@ -171,6 +223,7 @@ uniform float uActiveAxis;
 uniform float uActiveDepth;
 uniform float uSandGrain;
 varying vec3 vObjPos;
+varying vec2 vSurfUv;
 
 float evalCutLine(float coord01, float numCuts, float doneCuts, float isActive, float progressMask) {
   if (numCuts < 0.5) return 0.0;
@@ -190,7 +243,7 @@ float evalCutLine(float coord01, float numCuts, float doneCuts, float isActive, 
   float distCell = abs(idxFromHigh - nearest);
   // Anti-aliased crisp groove that scales naturally from chunky 10-cut slits to silky 1,000-cut grain
   float fw = fwidth(idxFromHigh);
-  float halfW = max(0.032, min(0.24, fw * 0.65));
+  float halfW = max(0.028, min(0.24, fw * 0.65));
   float line = 1.0 - smoothstep(halfW * 0.35, halfW, distCell);
   // Gently soften contrast when grid cells become sub-pixel to eliminate moire
   float aaFade = 1.0 - smoothstep(0.65, 1.85, fw);
@@ -207,16 +260,29 @@ vec3 uvw = vec3(
   volPos.z / uBounds.z + 0.5
 );
 vec3 uvwClamped = clamp(uvw, vec3(0.002), vec3(0.998));
-vec4 volCol = texture(uColorVolume, uvwClamped);
-vec4 volProps = texture(uPropsVolume, uvwClamped);
 
+vec4 volCol;
+vec4 volProps;
 if (uIsCap > 0.5) {
-  if (uvw.x < 0.0 || uvw.x > 1.0 || uvw.y < 0.0 || uvw.y > 1.0 || volCol.a < 0.46) {
+  if (uvw.x < 0.0 || uvw.x > 1.0 || uvw.y < 0.0 || uvw.y > 1.0) {
     discard;
   }
+  if (uUseCap2D > 0.5) {
+    volCol = texture2D(uCapColorMap, clamp(uvw.xy, vec2(0.001), vec2(0.999)));
+    volProps = texture2D(uCapPropsMap, clamp(uvw.xy, vec2(0.001), vec2(0.999)));
+    if (volCol.a < 0.48) discard;
+  } else {
+    volCol = texture(uColorVolume, uvwClamped);
+    volProps = texture(uPropsVolume, uvwClamped);
+    if (volCol.a < 0.46) discard;
+  }
+} else {
+  // Razor-sharp 1024x1024 anisotropic mipmapped outer surface texture!
+  volCol = texture2D(uSurfColorMap, vSurfUv);
+  volProps = texture2D(uSurfPropsMap, vSurfUv);
 }
 
-// Convert sRGB volume sample to linear space identically to THREE.Color sRGB->Linear
+// Convert sRGB sample to linear space identically to THREE.Color sRGB->Linear
 vec3 volLinear = pow(max(volCol.rgb, vec3(0.0001)), vec3(2.2));
 
 // Exact phase-locked progressive X, Y, Z knife grooves
@@ -238,7 +304,7 @@ if (uSandGrain > 0.01) {
   grainSpark = (gHash - 0.5) * 0.16 * uSandGrain * scoredRegion;
 }
 
-// Fresh internal cross-section looks crisp and slightly moist/bright; cut slits cast tight dark shadow
+// Crisp shaded surface + tight dark knife slits
 vec3 shadedCol = volLinear * (1.0 - cutIntensity * 0.66) + vec3(grainSpark * 0.35);
 diffuseColor.rgb *= max(shadedCol, vec3(0.004));`
         )
@@ -274,6 +340,7 @@ totalEmissiveRadiance += volLinear * volProps.b * 1.55 * (1.0 - cutIntensity * 0
     this.uniforms.uActiveAxis.value = 0;
     this.uniforms.uActiveDepth.value = 1.0;
     this.uniforms.uSandGrain.value = sandGrain;
+    this._lastCapBakedZ = 1e9;
 
     this.setClipZ(d * 0.5 + 0.05, false);
     if (this.solidMesh) this.solidMesh.visible = true;
@@ -289,18 +356,31 @@ totalEmissiveRadiance += volLinear * volProps.b * 1.55 * (1.0 - cutIntensity * 0
 
   /**
    * Advances the Z-clipping plane backward (from +d/2 toward -d/2),
-   * exposing the solid pixel-accurate internal cross-section cap facing +Z.
+   * baking a razor-sharp 512x512 HD cut cross-section on Tier 1A slices!
    */
   setClipZ(clipZ, showCap = true) {
     if (!this.objDef) return;
     const { d } = this.objDef.bounds;
     this.zClipPlane.constant = clipZ;
-    this.uniforms.uCapZ.value = clipZ - 0.0015;
+    const capZ = clipZ - 0.0015;
+    this.uniforms.uCapZ.value = capZ;
 
     if (this.capMesh) {
       const withinBody = clipZ < d * 0.5 - 0.003 && clipZ > -d * 0.5 + 0.003;
       this.capMesh.position.z = clipZ - 0.001;
       this.capMesh.visible = showCap && withinBody;
+
+      if (showCap && withinBody && this.uniforms.uNumZ.value < 8) {
+        if (Math.abs(capZ - this._lastCapBakedZ) > 0.002) {
+          bakeCutCapSlice(this.objDef, capZ, this.capColorBuf, this.capPropsBuf, CAP_RES);
+          this.capColorTex.needsUpdate = true;
+          this.capPropsTex.needsUpdate = true;
+          this._lastCapBakedZ = capZ;
+        }
+        this.uniforms.uUseCap2D.value = 1.0;
+      } else {
+        this.uniforms.uUseCap2D.value = 0.0;
+      }
     }
     if (this.solidMesh) {
       this.solidMesh.visible = clipZ > -d * 0.5 + 0.003;
@@ -312,6 +392,9 @@ totalEmissiveRadiance += volLinear * volProps.b * 1.55 * (1.0 - cutIntensity * 0
     return {
       colorTex: this.colorTex,
       propsTex: this.propsTex,
+      surfColorTex: this.surfColorTex,
+      surfPropsTex: this.surfPropsTex,
+      bakedOuterGeo: this.bakedOuterGeo,
       bounds: this.objDef.bounds,
     };
   }
@@ -327,6 +410,7 @@ totalEmissiveRadiance += volLinear * volProps.b * 1.55 * (1.0 - cutIntensity * 0
       this.solidMesh.geometry.dispose();
       this.solidMesh.material.dispose();
       this.solidMesh = null;
+      this.bakedOuterGeo = null;
     }
     if (this.capMesh) {
       this.group.remove(this.capMesh);
@@ -341,6 +425,14 @@ totalEmissiveRadiance += volLinear * volProps.b * 1.55 * (1.0 - cutIntensity * 0
     if (this.propsTex) {
       this.propsTex.dispose();
       this.propsTex = null;
+    }
+    if (this.surfColorTex) {
+      this.surfColorTex.dispose();
+      this.surfColorTex = null;
+    }
+    if (this.surfPropsTex) {
+      this.surfPropsTex.dispose();
+      this.surfPropsTex = null;
     }
   }
 }

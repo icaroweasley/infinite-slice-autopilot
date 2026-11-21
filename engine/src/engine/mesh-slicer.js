@@ -6,15 +6,17 @@ import * as THREE from 'three';
  * 100% faithful to the true 3D object shape during low cut counts (Tier 1A: 3–25 CUTS) instead of blocky cubes!
  */
 
-export function prepareSlicerSource(objDef) {
-  const raw = objDef.createOuterGeometry();
-  const geo = raw.index ? raw.toNonIndexed() : raw.clone();
+export function prepareSlicerSource(objDef, bakedOuterGeo = null) {
+  const ownsGeo = !bakedOuterGeo;
+  const raw = bakedOuterGeo || objDef.createOuterGeometry();
+  const geo = ownsGeo ? (raw.index ? raw.toNonIndexed() : raw.clone()) : raw;
   if (!geo.attributes.normal) {
     geo.computeVertexNormals();
   }
 
   const pos = geo.attributes.position;
   const norm = geo.attributes.normal;
+  const surfUv = geo.attributes.aSurfUv || geo.attributes.uv || null;
   const triCount = Math.floor(pos.count / 3);
   const triangles = new Array(triCount);
 
@@ -28,9 +30,21 @@ export function prepareSlicerSource(objDef) {
     const x2 = pos.getX(i2), y2 = pos.getY(i2), z2 = pos.getZ(i2);
 
     triangles[t] = {
-      v0: { x: x0, y: y0, z: z0, nx: norm.getX(i0), ny: norm.getY(i0), nz: norm.getZ(i0) },
-      v1: { x: x1, y: y1, z: z1, nx: norm.getX(i1), ny: norm.getY(i1), nz: norm.getZ(i1) },
-      v2: { x: x2, y: y2, z: z2, nx: norm.getX(i2), ny: norm.getY(i2), nz: norm.getZ(i2) },
+      v0: {
+        x: x0, y: y0, z: z0,
+        nx: norm.getX(i0), ny: norm.getY(i0), nz: norm.getZ(i0),
+        u: surfUv ? surfUv.getX(i0) : 0, v: surfUv ? surfUv.getY(i0) : 0,
+      },
+      v1: {
+        x: x1, y: y1, z: z1,
+        nx: norm.getX(i1), ny: norm.getY(i1), nz: norm.getZ(i1),
+        u: surfUv ? surfUv.getX(i1) : 0, v: surfUv ? surfUv.getY(i1) : 0,
+      },
+      v2: {
+        x: x2, y: y2, z: z2,
+        nx: norm.getX(i2), ny: norm.getY(i2), nz: norm.getZ(i2),
+        u: surfUv ? surfUv.getX(i2) : 0, v: surfUv ? surfUv.getY(i2) : 0,
+      },
       minX: Math.min(x0, x1, x2),
       maxX: Math.max(x0, x1, x2),
       minY: Math.min(y0, y1, y2),
@@ -40,8 +54,10 @@ export function prepareSlicerSource(objDef) {
     };
   }
 
-  raw.dispose();
-  geo.dispose();
+  if (ownsGeo) {
+    raw.dispose();
+    geo.dispose();
+  }
   return { triangles };
 }
 
@@ -74,6 +90,8 @@ function clipPolygonAxis(poly, axis, bound, keepGreater) {
         nx: nx / nl,
         ny: ny / nl,
         nz: nz / nl,
+        u: a.u + (b.u - a.u) * t,
+        v: a.v + (b.v - a.v) * t,
       });
     }
   }
@@ -92,12 +110,14 @@ export function buildClippedPieceGeometry(source, objDef, box, cutFlags) {
   const positions = [];
   const normals = [];
   const origPositions = [];
+  const surfUvs = [];
   const isCapList = [];
 
   const pushTri = (a, b, c, isCap) => {
     positions.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
     normals.push(a.nx, a.ny, a.nz, b.nx, b.ny, b.nz, c.nx, c.ny, c.nz);
     origPositions.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+    surfUvs.push(a.u || 0, a.v || 0, b.u || 0, b.v || 0, c.u || 0, c.v || 0);
     isCapList.push(isCap, isCap, isCap);
   };
 
@@ -231,10 +251,11 @@ export function buildClippedPieceGeometry(source, objDef, box, cutFlags) {
   const halfY = Math.max(0.018, spanY * 0.5);
   const halfZ = Math.max(0.018, spanZ * 0.5);
 
-  // Recenter local mesh vertices around piece centroid while preserving exact uncut aOrigPos for 3D texture
+  // Recenter local mesh vertices around piece centroid while preserving exact uncut aOrigPos & aSurfUv
   const posArr = new Float32Array(positions.length);
   const origArr = new Float32Array(origPositions.length);
   const normArr = new Float32Array(normals);
+  const surfUvArr = new Float32Array(surfUvs);
   const capArr = new Float32Array(isCapList);
 
   // Micro shrink (~1.2%) around centroid gives clean visible hair-thin slice separation without boxy gaps
@@ -253,6 +274,7 @@ export function buildClippedPieceGeometry(source, objDef, box, cutFlags) {
   geometry.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
   geometry.setAttribute('normal', new THREE.BufferAttribute(normArr, 3));
   geometry.setAttribute('aOrigPos', new THREE.BufferAttribute(origArr, 3));
+  geometry.setAttribute('aSurfUv', new THREE.BufferAttribute(surfUvArr, 2));
   geometry.setAttribute('aIsCap', new THREE.BufferAttribute(capArr, 1));
   geometry.computeBoundingSphere();
 

@@ -53,6 +53,8 @@ export class PhysicsTierEngine {
     this.tier1AUniforms = {
       uChunkColorVol: { value: null },
       uChunkPropsVol: { value: null },
+      uChunkSurfColorMap: { value: null },
+      uChunkSurfPropsMap: { value: null },
       uChunkBounds: { value: new THREE.Vector3(2, 1, 1.5) },
     };
     this.tier1AMaterial = this._createTier1AVolumetricMaterial();
@@ -157,7 +159,7 @@ export class PhysicsTierEngine {
       side: THREE.DoubleSide,
     });
     const shared = this.tier1AUniforms;
-    mat.customProgramCacheKey = () => 'tier1a-true-silhouette-chunk-v3';
+    mat.customProgramCacheKey = () => 'tier1a-true-silhouette-hd-v4';
 
     mat.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, shared);
@@ -167,14 +169,17 @@ export class PhysicsTierEngine {
           '#include <common>',
           `#include <common>
 attribute vec3 aOrigPos;
+attribute vec2 aSurfUv;
 attribute float aIsCap;
 varying vec3 vOrigPos;
+varying vec2 vSurfUv;
 varying float vIsCap;`
         )
         .replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
 vOrigPos = aOrigPos;
+vSurfUv = aSurfUv;
 vIsCap = aIsCap;`
         );
 
@@ -185,25 +190,36 @@ vIsCap = aIsCap;`
 precision highp sampler3D;
 uniform highp sampler3D uChunkColorVol;
 uniform highp sampler3D uChunkPropsVol;
+uniform sampler2D uChunkSurfColorMap;
+uniform sampler2D uChunkSurfPropsMap;
 uniform vec3 uChunkBounds;
 varying vec3 vOrigPos;
+varying vec2 vSurfUv;
 varying float vIsCap;`
         )
         .replace(
           '#include <map_fragment>',
           `#include <map_fragment>
-vec3 uvw = clamp(vec3(
-  vOrigPos.x / uChunkBounds.x + 0.5,
-  vOrigPos.y / uChunkBounds.y,
-  vOrigPos.z / uChunkBounds.z + 0.5
-), vec3(0.002), vec3(0.998));
-vec4 volCol = texture(uChunkColorVol, uvw);
-// Pixel-accurate silhouette trim on flat knife-cut cross-section caps (preserves round/organic & hollow shapes!)
-if (vIsCap > 0.5 && volCol.a < 0.44) discard;
-vec4 volProps = texture(uChunkPropsVol, uvw);
+vec4 volCol;
+vec4 volProps;
+float cutEdgeShade = 1.0;
+if (vIsCap > 0.5) {
+  vec3 uvw = clamp(vec3(
+    vOrigPos.x / uChunkBounds.x + 0.5,
+    vOrigPos.y / uChunkBounds.y,
+    vOrigPos.z / uChunkBounds.z + 0.5
+  ), vec3(0.002), vec3(0.998));
+  volCol = texture(uChunkColorVol, uvw);
+  // Pixel-accurate silhouette trim on flat knife-cut cross-section caps (preserves round/organic & hollow shapes!)
+  if (volCol.a < 0.44) discard;
+  volProps = texture(uChunkPropsVol, uvw);
+  cutEdgeShade = mix(0.86, 1.0, smoothstep(0.44, 0.62, volCol.a));
+} else {
+  // Razor-sharp 1024x1024 anisotropic mipmapped outer surface texture on curved falling pieces!
+  volCol = texture2D(uChunkSurfColorMap, vSurfUv);
+  volProps = texture2D(uChunkSurfPropsMap, vSurfUv);
+}
 vec3 volLinear = pow(max(volCol.rgb, vec3(0.0001)), vec3(2.2));
-// Subtle crisp rim shading right where cut plane meets outer shell
-float cutEdgeShade = vIsCap > 0.5 ? mix(0.86, 1.0, smoothstep(0.44, 0.62, volCol.a)) : 1.0;
 diffuseColor.rgb *= max(volLinear * cutEdgeShade, vec3(0.004));`
         )
         .replace(
@@ -425,6 +441,8 @@ normal = normalize(normal + microN * 0.62);`
     if (volumeData) {
       this.tier1AUniforms.uChunkColorVol.value = volumeData.colorTex;
       this.tier1AUniforms.uChunkPropsVol.value = volumeData.propsTex;
+      this.tier1AUniforms.uChunkSurfColorMap.value = volumeData.surfColorTex;
+      this.tier1AUniforms.uChunkSurfPropsMap.value = volumeData.surfPropsTex;
       this.tier1AUniforms.uChunkBounds.value.set(volumeData.bounds.w, volumeData.bounds.h, volumeData.bounds.d);
     }
 
@@ -433,7 +451,7 @@ normal = normalize(normal + microN * 0.62);`
     if (totalCuts <= 25 && totalGridCells <= 360) {
       this.activeTier = 1;
       this.subMode = '1A';
-      this.tier1ASource = prepareSlicerSource(objDef);
+      this.tier1ASource = prepareSlicerSource(objDef, volumeData?.bakedOuterGeo || null);
     } else if (totalCuts <= 65 && totalGridCells <= TIER1B_MAX_INSTANCES) {
       this.activeTier = 1;
       this.subMode = '1B';
