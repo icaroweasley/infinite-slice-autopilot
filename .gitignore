@@ -6,6 +6,7 @@ data/studio-brief.json
 .env
 dist/
 dist-buyer/
+sales-site.zip
 autopilot.log
 .DS_Store
 Thumbs.db

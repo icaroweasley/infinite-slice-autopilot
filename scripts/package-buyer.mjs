@@ -20,6 +20,7 @@ const EXCLUDE_NAMES = new Set([
   'dist-buyer',
   'output',
   'sales-site',
+  'sales-site.zip',
   'brand-kit',
   '.git',
   '.github',
