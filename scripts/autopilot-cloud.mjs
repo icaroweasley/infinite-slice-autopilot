@@ -51,14 +51,21 @@ function buildAiSystemPrompt(usedSlugs, previousError = '') {
   const specObj = fs.readFileSync(path.join(ROOT, 'references', 'object-recipe-spec.md'), 'utf8');
   const specSlots = fs.readFileSync(path.join(ROOT, 'references', 'ai-slots-spec.md'), 'utf8');
 
-  return `You are an elite Three.js procedural 3D artist running an autonomous viral "Infinite Slicing" 9:16 Reels studio.
+  return `You are an elite Three.js procedural 3D artist running an autonomous viral "Infinite Slicing" 9:16 Reels/Shorts studio (@atomslice3d).
 
 TASK:
-Invent ONE completely original, never-repeated, ultra-high-retention 4-part scene:
-1. A unique 3D volumetric Object with a jaw-dropping internal surprise when sliced open.
-2. A bespoke 3D Cutter/Knife/Tool (edge strictly along local y=0, z in [-1.5, +1.5], handle extending to -Z).
-3. A bespoke procedural Cutting Surface (512x512 CanvasTexture + PBR material on boardMat/rimMat).
-4. A bespoke Studio Environment (scene.background + wallMat + counterMat + 3-point lighting).
+Invent ONE completely original, never-repeated, MEGA-VIRAL 4-part scene engineered for 1M–44M view retention (inspired by top viral 3D slicing channels):
+1. A universally recognizable, hyper-appetizing or iconic everyday 3D volumetric Object with a jaw-dropping, ultra-detailed internal anatomy when sliced open!
+   - PRIORITIZE proven viral categories (NEVER repeat anything in ALREADY USED SLUGS below):
+     * Vibrant fresh fruits & produce (e.g., Red Chili Pepper with white pith & seeds, Ruby Pomegranate packed with jewel arils, Green Bartlett Pear with core, Purple Cabbage with layered concentric veins, Yellow Banana, Fresh Cucumber with watery seed core, Red Onion with purple rings, Juicy Orange with citrus segments, Cantaloupe Melon, Lime, Red Apple, Kiwi with green flesh & black seed ring, Coconut with white meat, Dragon Fruit, Sweet Potato).
+     * Crave-worthy foods & desserts (e.g., Fresh Salmon Fillet with white fat marbling, Berry Lattice Pie, Neapolitan Ice Cream Sandwich, Glazed Pink Donut with sprinkles, Croissant with flaky layers, Frosted Layer Cake, Sushi Roll, Matcha Mille-Crepe, Ramen Egg, Cheesecake slice).
+     * Viral curiosity & iconic objects (e.g., Anatomically Stylized Pink Brain, Glass Apple with molten core, Vintage Pokéball, Nintendo Switch, Luxury Watch, Emerald Crystal Block, Neon Soap Bar, "Is It Cake?" Clay Brick).
+   - IMPORTANT FOR OUR 1024x1024 ULTRA-HD SURFACE BAKER:
+     * Use high-segment smooth geometry (e.g., SphereGeometry(0.5, 64, 48), CylinderGeometry(..., 64, 28)) with valid UVs!
+     * Use smoothstep() transitions for stripes, seeds, rings, and veins so the 1024x1024 outer texture and 512x512 cut caps look razor-sharp and photorealistic — ZERO pixelated hard jumps!
+2. A crisp, iconic 3D Cutter/Blade (edge strictly along local y=0, z in [-1.5, +1.5], handle extending to -Z) — prefer razor-sharp chef knives, Damascus katanas, golden cleavers, or heated blades that contrast cleanly against the object.
+3. A clean, appetizing procedural Cutting Surface (1024x1024 or 512x512 CanvasTexture + PBR material on boardMat/rimMat) — prefer warm honey-oak wood butcher block, marble, bamboo, or sleek contrasting stone so the food/object POPS!
+4. A clean, bright, high-contrast Studio Environment (scene.background + wallMat + counterMat + 3-point lighting) — NEVER dark/muddy! Keep key light bright (2.8–3.4) and studio appetizing.
 
 ALREADY USED SLUGS (DO NOT REPEAT ANY OF THESE OR OBVIOUS DUPLICATES):
 ${usedSlugs.length ? usedSlugs.join(', ') : '(none yet)'}
@@ -79,7 +86,7 @@ CRITICAL RULES FOR ZERO ERRORS:
     "environmentCode": "full ES module code for engine/src/engine/custom-environment.js exporting customEnvironment (imports * as THREE from 'three')"
   }
 - Inside objectCode: export const customObject = { id: 'custom', slug, name, englishName, subtitle, bounds, gridRes, physics, contains(nx,ny,nz), sampleVolume(nx,ny,nz), createOuterGeometry() }.
-- Ensure createOuterGeometry() translates geometry so its bottom rests at y = 0 and never returns NaN.
+- Ensure createOuterGeometry() translates geometry so its bottom rests at y = 0, preserves valid UV attributes, and never returns NaN.
 - Ensure sampleVolume() ALWAYS returns { r, g, b, roughness, metalness, emissive } with numbers in [0, 1].
 - Ensure cutterCode's build() returns { toolGroup, bladeGeo, bladeMatsToFade, blurHex }.
 ${previousError ? `\nPREVIOUS BUILD FAILED WITH THIS ERROR — FIX IT:\n${previousError}` : ''}`;
@@ -95,10 +102,16 @@ const CLOUD_EN_OBJECTS = [
   'Swiss chocolate bar blocks stuffed with molten caramel',
   'Seared Wagyu A5 Marble Steak with fine white marbling',
   'Artisan Swiss Cheese Block with real hollow 3D holes',
+  'Fresh Atlantic Salmon Fillet with white marbling lines',
+  'Uramaki Salmon Sushi Roll with sesame rice and nori',
   'Clay Brick hiding a rainbow layer cake inside',
   'Vibrant Pink Dragon Fruit with white seed-speckled core',
+  'Ripe Juicy Red Apple with crisp white core and seeds',
+  'Fresh Green Kiwi Fruit with emerald flesh and black seed ring',
+  'Bright Tangerine Orange with juicy citrus segments inside',
+  'Ruby Pomegranate packed with glossy red crystal seeds',
+  'Red Hot Chili Pepper with spicy white pith and seeds',
   'Cracked Obsidian Volcano with glowing magma core',
-  'Uramaki Salmon Sushi Roll with sesame rice and nori',
   'Mirror Pokeball with cyan plasma core',
   'Nintendo Switch OLED with copper circuit board inside',
   'Ripe Avocado with glossy wooden pit',
@@ -107,36 +120,33 @@ const CLOUD_EN_OBJECTS = [
 ];
 
 const CLOUD_EN_CUTTERS = [
-  '1000C glowing red-hot chef knife',
+  'Mirror-polished Japanese chef knife with dark walnut handle',
   'Damascus steel samurai katana with gold guard',
-  'Neon purple plasma lightsaber',
+  '1000C glowing red-hot chef knife',
   'Solid 24k gold Chinese cleaver',
+  'Neon purple plasma lightsaber',
   'Luxury metallic black credit card with gold chip',
   'Translucent blue diamond crystal blade',
-  'Obsidian magma wakizashi with glowing lava edge',
-  'Emerald green neon lightsaber',
 ];
 
 const CLOUD_EN_SURFACES = [
+  'Warm natural honey oak butcher block cutting board',
+  'Striped Japanese bamboo cutting board',
+  'White Carrara marble slab with soft grey veins',
   'Deep purple marble slab with liquid gold veins',
   'Walnut wood and turquoise epoxy resin river board',
   'Black volcanic stone with glowing ember veins',
   'Frosted glass slab with cyan LED edge glow',
-  'Polished pink quartz stone block',
-  'Brushed copper architectural plate',
-  'Striped Japanese bamboo cutting board',
-  'Cracked glacial arctic ice slab',
 ];
 
 const CLOUD_EN_ENVS = [
-  'Cyberpunk Japanese kitchen at night with cyan and magenta neon lights',
+  'Classic dark emerald subway tile kitchen with bright warm studio spotlight',
   'Dark Michelin restaurant kitchen with brushed steel and warm spotlight',
   'Minimalist Scandinavian studio with soft morning light',
   'Futuristic ultra-white surgical lab studio',
   'Luxury black jewelry studio with golden rim light',
-  'Deep purple galaxy studio with violet rim lighting',
   'Cozy terracotta sunset atelier with warm amber light',
-  'Icy blue crystal cave with cool cinematic reflections',
+  'Cyberpunk Japanese kitchen at night with cyan and magenta neon lights',
 ];
 
 async function callGemini(prompt) {
