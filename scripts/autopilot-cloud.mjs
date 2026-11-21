@@ -63,9 +63,9 @@ Invent ONE completely original, never-repeated, MEGA-VIRAL 4-part scene engineer
    - IMPORTANT FOR OUR 1024x1024 ULTRA-HD SURFACE BAKER:
      * Use high-segment smooth geometry (e.g., SphereGeometry(0.5, 64, 48), CylinderGeometry(..., 64, 28)) with valid UVs!
      * Use smoothstep() transitions for stripes, seeds, rings, and veins so the 1024x1024 outer texture and 512x512 cut caps look razor-sharp and photorealistic — ZERO pixelated hard jumps!
-2. A crisp, iconic 3D Cutter/Blade (edge strictly along local y=0, z in [-1.5, +1.5], handle extending to -Z) — prefer razor-sharp chef knives, Damascus katanas, golden cleavers, or heated blades that contrast cleanly against the object.
-3. A clean, appetizing procedural Cutting Surface (1024x1024 or 512x512 CanvasTexture + PBR material on boardMat/rimMat) — prefer warm honey-oak wood butcher block, marble, bamboo, or sleek contrasting stone so the food/object POPS!
-4. A clean, bright, high-contrast Studio Environment (scene.background + wallMat + counterMat + 3-point lighting) — NEVER dark/muddy! Keep key light bright (2.8–3.4) and studio appetizing.
+2. A WILDLY CREATIVE, UNIQUE 3D Cutter/Blade (edge strictly along local y=0, z in [-1.5, +1.5], handle extending to -Z) — ALWAYS vary dramatically every video! Mix Damascus samurai katanas, 1000°C glowing red-hot knives, neon plasma lightsabers, 24k gold cleavers, luxury black credit cards, translucent diamond crystal blades, obsidian magma blades, surgical scalpels, laser cutters, etc. NEVER repeat the same plain chef knife!
+3. A WILDLY CREATIVE, UNIQUE procedural Cutting Surface (1024x1024 or 512x512 CanvasTexture + PBR material on boardMat/rimMat) — ALWAYS vary dramatically every video! Mix giant tropical banana leaves, black & gold obsidian marble, arctic ice blocks, pastel terrazzo, cyberpunk glowing neon grids, turquoise epoxy resin river wood, white Carrara marble, brushed Michelin steel, volcanic lava stone, frosted glass, bamboo, etc.
+4. A WILDLY CREATIVE, UNIQUE bright Studio Environment (scene.background + wallMat + counterMat + 3-point lighting) — ALWAYS vary dramatically every video (Cyberpunk Neon, Frozen Arctic, Luxury Obsidian Gold, White Minimalist Lab, Terracotta Sunset, Tropical Cabin, Emerald Kitchen, Galaxy Purple, Michelin Steel Kitchen) while keeping lighting bright, crisp, and high-contrast!
 
 ALREADY USED SLUGS (DO NOT REPEAT ANY OF THESE OR OBVIOUS DUPLICATES):
 ${usedSlugs.length ? usedSlugs.join(', ') : '(none yet)'}
