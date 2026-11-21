@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { BOARD_W, BOARD_D, BOARD_H } from './environments.js';
 import { estimateFillRatio } from '../objects/registry.js';
+import { prepareSlicerSource, buildClippedPieceGeometry } from './mesh-slicer.js';
 
 const HF_NX = 128;
 const HF_NZ = 96;
@@ -46,8 +47,9 @@ export class PhysicsTierEngine {
     this.totalLogicalCubes = 0;
     this.totalVisualPieces = 0;
 
-    // Tier 1A: individual Rapier3D chunks rendered with exact per-pixel 3D volumetric GPU shader!
+    // Tier 1A: individual Rapier3D true-silhouette clipped chunks rendered with per-pixel 3D volumetric GPU shader!
     this.tier1AChunks = [];
+    this.tier1ASource = null;
     this.tier1AUniforms = {
       uChunkColorVol: { value: null },
       uChunkPropsVol: { value: null },
@@ -152,9 +154,10 @@ export class PhysicsTierEngine {
       color: 0xffffff,
       roughness: 0.4,
       metalness: 0.08,
+      side: THREE.DoubleSide,
     });
     const shared = this.tier1AUniforms;
-    mat.customProgramCacheKey = () => 'tier1a-volumetric-chunk-v2';
+    mat.customProgramCacheKey = () => 'tier1a-true-silhouette-chunk-v3';
 
     mat.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, shared);
@@ -164,15 +167,15 @@ export class PhysicsTierEngine {
           '#include <common>',
           `#include <common>
 attribute vec3 aOrigPos;
-attribute vec3 aLocalUV;
+attribute float aIsCap;
 varying vec3 vOrigPos;
-varying vec3 vLocalUV;`
+varying float vIsCap;`
         )
         .replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
 vOrigPos = aOrigPos;
-vLocalUV = aLocalUV;`
+vIsCap = aIsCap;`
         );
 
       shader.fragmentShader = shader.fragmentShader
@@ -184,7 +187,7 @@ uniform highp sampler3D uChunkColorVol;
 uniform highp sampler3D uChunkPropsVol;
 uniform vec3 uChunkBounds;
 varying vec3 vOrigPos;
-varying vec3 vLocalUV;`
+varying float vIsCap;`
         )
         .replace(
           '#include <map_fragment>',
@@ -195,17 +198,13 @@ vec3 uvw = clamp(vec3(
   vOrigPos.z / uChunkBounds.z + 0.5
 ), vec3(0.002), vec3(0.998));
 vec4 volCol = texture(uChunkColorVol, uvw);
+// Pixel-accurate silhouette trim on flat knife-cut cross-section caps (preserves round/organic & hollow shapes!)
+if (vIsCap > 0.5 && volCol.a < 0.44) discard;
 vec4 volProps = texture(uChunkPropsVol, uvw);
 vec3 volLinear = pow(max(volCol.rgb, vec3(0.0001)), vec3(2.2));
-
-// Subtle crisp bevel edge definition along the 12 cut borders of each rigid block
-vec3 absUV = abs(vLocalUV);
-float edgeMax = max(max(absUV.x, absUV.y), absUV.z);
-float edgeMin = min(min(absUV.x, absUV.y), absUV.z);
-float edge2nd = (absUV.x + absUV.y + absUV.z) - edgeMax - edgeMin;
-float cutRim = smoothstep(0.89, 0.995, edge2nd);
-
-diffuseColor.rgb *= max(volLinear * (1.0 - cutRim * 0.14), vec3(0.004));`
+// Subtle crisp rim shading right where cut plane meets outer shell
+float cutEdgeShade = vIsCap > 0.5 ? mix(0.86, 1.0, smoothstep(0.44, 0.62, volCol.a)) : 1.0;
+diffuseColor.rgb *= max(volLinear * cutEdgeShade, vec3(0.004));`
         )
         .replace(
           '#include <roughnessmap_fragment>',
@@ -431,9 +430,10 @@ normal = normalize(normal + microN * 0.62);`
 
     const totalGridCells = (nx + 1) * (ny + 1) * (nz + 1);
 
-    if (totalCuts <= 15 && totalGridCells <= 220) {
+    if (totalCuts <= 25 && totalGridCells <= 360) {
       this.activeTier = 1;
       this.subMode = '1A';
+      this.tier1ASource = prepareSlicerSource(objDef);
     } else if (totalCuts <= 65 && totalGridCells <= TIER1B_MAX_INSTANCES) {
       this.activeTier = 1;
       this.subMode = '1B';
@@ -511,76 +511,69 @@ normal = normalize(normal + microN * 0.62);`
   _releaseTier1A(zFront, zBack, isFinalBackSlab) {
     const { w, h, d } = this.objDef.bounds;
     const { friction, restitution } = this.objDef.physics;
-    const cz = (zFront + zBack) * 0.5;
     const sliceD = Math.max(0.02, zFront - zBack);
-    const nzC = cz / d;
+    const z0 = Math.max(-d * 0.5, zBack);
+    const z1 = Math.min(d * 0.5, zFront);
+    const hasNegZCut = z0 > -d * 0.5 + 0.008;
+    const hasPosZCut = z1 < d * 0.5 - 0.008;
+
+    if (!this.tier1ASource) {
+      this.tier1ASource = prepareSlicerSource(this.objDef);
+    }
 
     let released = 0;
     for (let ix = 0; ix <= this.nx; ix++) {
-      const cx = -w * 0.5 + (ix + 0.5) * this.dx;
-      const nxC = cx / w;
+      const x0 = -w * 0.5 + ix * this.dx;
+      const x1 = x0 + this.dx;
       for (let iy = 0; iy <= this.ny; iy++) {
-        const cy = (iy + 0.5) * this.dy;
-        const nyC = cy / h;
+        const y0 = iy * this.dy;
+        const y1 = y0 + this.dy;
 
-        let occupied = this.objDef.contains(nxC, nyC, nzC);
-        if (!occupied) {
-          occupied =
-            this.objDef.contains(nxC, Math.max(0.01, nyC - (this.dy * 0.3) / h), nzC) ||
-            this.objDef.contains(nxC + (this.dx * 0.25) / w, nyC, nzC) ||
-            this.objDef.contains(nxC - (this.dx * 0.25) / w, nyC, nzC);
-        }
-        if (!occupied) continue;
+        const piece = buildClippedPieceGeometry(
+          this.tier1ASource,
+          this.objDef,
+          { x0, x1, y0, y1, z0, z1 },
+          {
+            negX: ix > 0,
+            posX: ix < this.nx,
+            negY: iy > 0,
+            posY: iy < this.ny,
+            negZ: hasNegZCut,
+            posZ: hasPosZCut,
+          }
+        );
+        if (!piece) continue;
 
-        // Clean 24-vertex BoxGeometry with exact aOrigPos for RAZOR-SHARP per-pixel GPU Data3DTexture sampling!
-        const bw = this.dx * 0.965;
-        const bh = this.dy * 0.965;
-        const bd = sliceD * 0.965;
-        const geo = new THREE.BoxGeometry(bw, bh, bd, 1, 1, 1);
-        const pos = geo.attributes.position;
-        const origArr = new Float32Array(pos.count * 3);
-        const localUvArr = new Float32Array(pos.count * 3);
-
-        for (let vi = 0; vi < pos.count; vi++) {
-          const vx = pos.getX(vi);
-          const vy = pos.getY(vi);
-          const vz = pos.getZ(vi);
-          origArr[vi * 3] = cx + vx;
-          origArr[vi * 3 + 1] = Math.max(0.002, cy + vy);
-          origArr[vi * 3 + 2] = cz + vz;
-
-          localUvArr[vi * 3] = vx / (bw * 0.5);
-          localUvArr[vi * 3 + 1] = vy / (bh * 0.5);
-          localUvArr[vi * 3 + 2] = vz / (bd * 0.5);
-        }
-        geo.setAttribute('aOrigPos', new THREE.BufferAttribute(origArr, 3));
-        geo.setAttribute('aLocalUV', new THREE.BufferAttribute(localUvArr, 3));
-
-        const mesh = new THREE.Mesh(geo, this.tier1AMaterial);
+        const { geometry, center, halfExtents } = piece;
+        const mesh = new THREE.Mesh(geometry, this.tier1AMaterial);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        mesh.position.set(cx, cy, cz);
+        mesh.position.set(center.x, center.y, center.z);
         this.group.add(mesh);
 
         let body = null;
         if (this.world) {
           const desc = RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(cx, cy + 0.008, cz)
+            .setTranslation(center.x, Math.max(halfExtents.y + 0.006, center.y + 0.006), center.z)
             .setLinearDamping(0.22)
             .setAngularDamping(0.28);
           body = this.world.createRigidBody(desc);
           this.world.createCollider(
-            RAPIER.ColliderDesc.cuboid(bw * 0.49, bh * 0.49, bd * 0.49)
+            RAPIER.ColliderDesc.cuboid(
+              Math.max(0.014, halfExtents.x * 0.94),
+              Math.max(0.014, halfExtents.y * 0.94),
+              Math.max(0.014, halfExtents.z * 0.94)
+            )
               .setFriction(friction)
               .setRestitution(restitution),
             body
           );
 
-          const heightRatio = cy / h;
+          const heightRatio = Math.max(0, Math.min(1, center.y / h));
           const pushZ = isFinalBackSlab
             ? -(0.38 + heightRatio * 0.48 + Math.random() * 0.18)
             : 0.55 + heightRatio * 0.85 + Math.random() * 0.25;
-          const pushX = (cx / (w * 0.5)) * 0.48 + (Math.random() - 0.5) * 0.32;
+          const pushX = (center.x / (w * 0.5)) * 0.48 + (Math.random() - 0.5) * 0.32;
           const pushY = 0.20 + heightRatio * 0.32 + Math.random() * 0.16;
           body.setLinvel({ x: pushX, y: pushY, z: pushZ }, true);
           body.setAngvel(

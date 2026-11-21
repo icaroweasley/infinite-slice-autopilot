@@ -19,6 +19,8 @@ const EXCLUDE_NAMES = new Set([
   'dist',
   'dist-buyer',
   'output',
+  'sales-site',
+  'brand-kit',
   '.git',
   '.github',
   '.env',
@@ -57,6 +59,14 @@ fs.writeFileSync(
 );
 const briefFile = path.join(STAGE_DIR, 'data', 'studio-brief.json');
 if (fs.existsSync(briefFile)) fs.unlinkSync(briefFile);
+
+// Reset buyer config.json handle to generic @yourhandle
+const buyerCfgPath = path.join(STAGE_DIR, 'config.json');
+if (fs.existsSync(buyerCfgPath)) {
+  const bCfg = JSON.parse(fs.readFileSync(buyerCfgPath, 'utf8'));
+  if (bCfg.brand) bCfg.brand.handle = '@yourhandle';
+  fs.writeFileSync(buyerCfgPath, JSON.stringify(bCfg, null, 2) + '\n', 'utf8');
+}
 
 // Strip private autopilot scripts from buyer package.json
 const buyerPkgPath = path.join(STAGE_DIR, 'package.json');

@@ -362,7 +362,14 @@ export async function renderHeadlessVideo({
 }
 
 // CLI execution (supports both flags and --jobFile <json>)
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+// Guard with globalThis flag so Vite loading engine/vite.config.js (which imports render-headless.mjs)
+// NEVER recursively re-triggers CLI execution when invoked directly via `node scripts/render-headless.mjs`!
+if (
+  !globalThis.__INFINITE_SLICE_CLI_RUNNING__ &&
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  globalThis.__INFINITE_SLICE_CLI_RUNNING__ = true;
   const args = process.argv.slice(2);
   const getFlag = (name, def) => {
     const idx = args.indexOf(`--${name}`);

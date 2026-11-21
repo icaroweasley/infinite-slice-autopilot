@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Infinite Slice 3D — AI Creator Studio &amp; Skill (@atomslice3d)</title>
+    <meta
+      name="description"
+      content="Create viral 10 → 1,000 cuts 3D slicing videos in 1 click with synced 48kHz ASMR. Powered by Claude Code &amp; Antigravity AI. Zero Blender needed."
+    />
+    <meta property="og:title" content="Infinite Slice 3D — Create Viral 10 → 1,000 Cuts 3D Videos in 1 Click" />
+    <meta
+      property="og:description"
+      content="Type any impossible object, blade, cutting board &amp; studio — or click AI Random. Export silky 60 FPS vertical 9:16 MP4s with synced 48kHz ASMR."
+    />
+    <meta property="og:image" content="assets/og-banner.jpg" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="assets/avatar.jpg" type="image/jpeg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Sticky Header -->
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="#" class="brand">
+          <img src="assets/avatar.jpg" alt="@atomslice3d" class="brand-avatar" />
+          <div>
+            <span class="brand-name">Infinite Slice 3D</span>
+            <span class="brand-sub">by @atomslice3d</span>
+          </div>
+        </a>
+
+        <nav class="nav-links">
+          <a href="#demo" data-i18n="navDemo">Live Demo</a>
+          <a href="#features" data-i18n="navFeatures">Features</a>
+          <a href="#pricing" data-i18n="navPricing">Pricing</a>
+          <a href="#faq" data-i18n="navFaq">FAQ</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="lang-toggle" aria-label="Language switcher">
+            <button type="button" class="lang-btn active" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="pt">PT</button>
+          </div>
+          <a href="#pricing" class="btn btn-gold btn-sm" data-i18n="navCta">Get Access</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            <span data-i18n="eyebrow">AS SEEN ON @ATOMSLICE3D • CLAUDE CODE &amp; ANTIGRAVITY SKILL</span>
+          </div>
+          <h1>
+            <span data-i18n="heroTitle1">Create Viral</span>
+            <span class="text-gradient" data-i18n="heroTitleGrad">10 → 1,000 Cuts</span>
+            <span data-i18n="heroTitle2">3D Slicing Videos in 1 Click.</span>
+          </h1>
+          <p class="hero-lead" data-i18n="heroLead">
+            Type any impossible object, blade, cutting board &amp; studio — or click AI Random. Export silky 60 FPS vertical 9:16 MP4 videos with synced 48kHz ASMR. Zero Blender, zero monthly credits.
+          </p>
+
+          <div class="hero-ctas">
+            <a href="#pricing" id="heroBuyBtn" class="btn btn-gold btn-lg" data-checkout>
+              Get Instant Access — $29
+            </a>
+            <a href="#demo" class="btn btn-outline btn-lg" data-i18n="heroBtnSecondary">
+              Try Interactive Builder ↓
+            </a>
+          </div>
+
+          <div class="trust-pills">
+            <span data-i18n="trust1">⚡ Instant .zip Download</span>
+            <span data-i18n="trust2">🎬 60 FPS MP4 + 48kHz ASMR</span>
+            <span data-i18n="trust3">💰 Commercial Rights Included</span>
+          </div>
+        </div>
+
+        <!-- Floating 9:16 iPhone Showcase -->
+        <div class="phone-stage">
+          <div class="phone-glow"></div>
+
+          <div class="float-badge badge-left">
+            <strong data-i18n="badgeLeftTop">37,152,406</strong>
+            <span data-i18n="badgeLeftSub">Micro-Cubes &amp; Dust Physics</span>
+          </div>
+
+          <div class="phone-frame">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              <video
+                id="heroDemoVideo"
+                src="assets/demo-reel.mp4"
+                poster="assets/shot-avocado.jpg"
+                autoplay
+                muted
+                loop
+                playsinline
+              ></video>
+              <button type="button" id="btnSoundToggle" class="sound-btn">🔇 ASMR Off</button>
+            </div>
+          </div>
+
+          <div class="float-badge badge-right">
+            <strong data-i18n="badgeRightTop">1-Click MP4</strong>
+            <span data-i18n="badgeRightSub">Reels • TikTok • Shorts Ready</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Real Engine Output Showcase -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="shotsTag">REAL 3D ENGINE OUTPUT — ZERO BLENDER</span>
+          <h2 data-i18n="shotsTitle">True 3D Curved Slicing at 10 Cuts. Granular Avalanche at 1,000.</h2>
+          <p data-i18n="shotsSub">
+            Built from scratch in WebGL2 + Rapier3D WASM so low cuts preserve exact curved shapes and high cuts explode into realistic speckled powder.
+          </p>
+        </div>
+
+        <div class="shots-grid">
+          <article class="shot-card">
+            <div class="shot-img-wrap">
+              <img src="assets/shot-burger.jpg" alt="True 3D Curved Slicing on Burger" loading="lazy" />
+            </div>
+            <div class="shot-body">
+              <span class="shot-pill" data-i18n="shot1Pill">TRUE 3D SILHOUETTE SLICING</span>
+              <h3 data-i18n="shot1Title">Curved Shapes Stay Real</h3>
+              <p data-i18n="shot1Desc">
+                Round burgers, avocados, geodes &amp; watches slice cleanly with true curved edges and per-pixel interiors — never blocky cubes.
+              </p>
+            </div>
+          </article>
+
+          <article class="shot-card">
+            <div class="shot-img-wrap">
+              <img src="assets/shot-avocado.jpg" alt="Bright Studio Lighting & Katana" loading="lazy" />
+            </div>
+            <div class="shot-body">
+              <span class="shot-pill" data-i18n="shot2Pill">STUDIO SOFTBOX LIGHTING</span>
+              <h3 data-i18n="shot2Title">Bespoke Blades &amp; Boards</h3>
+              <p data-i18n="shot2Desc">
+                Damascus katanas, 1000°C hot knives, lightsabers, epoxy river slabs &amp; gleaming PBR studio lighting.
+              </p>
+            </div>
+          </article>
+
+          <article class="shot-card">
+            <div class="shot-img-wrap">
+              <img src="assets/shot-1000cuts.jpg" alt="Supersonic 1,000 Cuts Powder Avalanche" loading="lazy" />
+            </div>
+            <div class="shot-body">
+              <span class="shot-pill" data-i18n="shot3Pill">30M+ MICRO-GRAINS</span>
+              <h3 data-i18n="shot3Title">Supersonic 1,000-Cut Finale</h3>
+              <p data-i18n="shot3Desc">
+                12-blade shutter-blur knife curtain + 130,000 lit grains + Reels/TikTok/Shorts Safe-Zone HUD.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Builder Preview -->
+    <section id="demo" class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="pgTag">INTERACTIVE CREATOR STUDIO PREVIEW</span>
+          <h2 data-i18n="pgTitle">Feel How Easy Your Workflow Becomes</h2>
+          <p data-i18n="pgSub">
+            Inside the included Creator Studio UI, pick your 4 ingredients (or hit AI Random) and click Render MP4.
+          </p>
+        </div>
+
+        <div class="playground">
+          <div class="pg-grid">
+            <div>
+              <div class="pg-group">
+                <span class="pg-label" data-i18n="pgObj">1. Object to Slice (or AI invents any object)</span>
+                <div id="pgObjects" class="chip-row"></div>
+              </div>
+              <div class="pg-group">
+                <span class="pg-label" data-i18n="pgCutter">2. Blade / Cutting Tool</span>
+                <div id="pgCutters" class="chip-row"></div>
+              </div>
+              <div class="pg-group">
+                <span class="pg-label" data-i18n="pgSurface">3. Cutting Surface</span>
+                <div id="pgSurfaces" class="chip-row"></div>
+              </div>
+              <div class="pg-group">
+                <span class="pg-label" data-i18n="pgEnv">4. Studio Environment</span>
+                <div id="pgEnvs" class="chip-row"></div>
+              </div>
+              <div class="pg-group">
+                <span class="pg-label" data-i18n="pgRounds">5. Custom Cut Rounds</span>
+                <div id="pgRounds" class="chip-row"></div>
+              </div>
+              <button type="button" id="btnPgRandom" class="btn btn-outline btn-sm" data-i18n="pgRandomBtn">
+                🎲 AI Surprise Me
+              </button>
+            </div>
+
+            <div class="pg-output">
+              <div class="pg-output-head">
+                <span data-i18n="pgOutHeader">● READY TO RENDER 9:16 MP4</span>
+                <span>60 FPS • 48kHz</span>
+              </div>
+              <ul class="pg-summary">
+                <li><span data-i18n="pgSumObj">Object</span><strong id="outObj">—</strong></li>
+                <li><span data-i18n="pgSumCutter">Cutter</span><strong id="outCutter">—</strong></li>
+                <li><span data-i18n="pgSumSurface">Board</span><strong id="outSurface">—</strong></li>
+                <li><span data-i18n="pgSumEnv">Studio</span><strong id="outEnv">—</strong></li>
+                <li><span data-i18n="pgSumRounds">Rounds</span><strong id="outRounds">—</strong></li>
+              </ul>
+              <div class="pg-metric">
+                <small data-i18n="pgEstLabel">Estimated Final Count</small>
+                <strong id="outCubes">37,152,406 CUBES</strong>
+              </div>
+              <a href="#pricing" class="btn btn-gold btn-xl" data-checkout data-i18n="pgBuyBtn">
+                Unlock Full 3D Studio &amp; Render Unlimited →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section">
+      <div class="container">
+        <div class="banner-frame">
+          <img src="assets/og-banner.jpg" alt="Infinite Slice 3D Visual Showcase" loading="lazy" />
+        </div>
+
+        <div class="section-head">
+          <span class="section-tag" data-i18n="stepsTag">HOW IT WORKS</span>
+          <h2 data-i18n="stepsTitle">From Zero to Your First Viral Reel in 3 Minutes</h2>
+          <p data-i18n="stepsSub">No 3D modeling, no keyframes, no video editor, no cloud rendering bills.</p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h3 data-i18n="step1Title">Install the Skill in 1 Command</h3>
+            <p data-i18n="step1Desc">
+              Unzip your download and run npm install &amp;&amp; npm run install-skill. Auto-connects to Claude Code and Google Antigravity.
+            </p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h3 data-i18n="step2Title">Type Any Idea or Hit AI Random</h3>
+            <p data-i18n="step2Desc">
+              Use 10 built-in volumetric objects or let your AI write bespoke 3D objects, custom knives, boards &amp; studios on demand.
+            </p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <h3 data-i18n="step3Title">Click Render MP4 &amp; Post</h3>
+            <p data-i18n="step3Desc">
+              Headless Playwright + FFmpeg exports a crisp H.264 MP4 with synced 48kHz stereo ASMR and your @handle ready for Reels, TikTok &amp; Shorts.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="featTag">WHAT IS INSIDE THE DOWNLOAD</span>
+          <h2 data-i18n="featTitle">A Complete Viral 3D Production Studio On Your Computer</h2>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <span class="feat-icon">🔪</span>
+            <h3 data-i18n="feat1T">True Silhouette + 3-Tier Physics</h3>
+            <p data-i18n="feat1D">Exact 3D curved slices at 10–25 cuts, dynamic Rapier3D physics at 50 cuts, and 130,000-grain micro-sand avalanches at 1,000 cuts.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">🔊</span>
+            <h3 data-i18n="feat2T">48 kHz Procedural ASMR Synth</h3>
+            <p data-i18n="feat2D">Every blade whoosh, crisp slice, wood/glass/stone/ice impact, and supersonic cascade is synthesized sample-accurately to the millisecond.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">📱</span>
+            <h3 data-i18n="feat3T">Reels / TikTok / Shorts Safe-Zone HUD</h3>
+            <p data-i18n="feat3D">Dynamic CUTS &amp; CUBES counters automatically positioned clear of platform captions and buttons, with your own custom @handle.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">🤖</span>
+            <h3 data-i18n="feat4T">4 Bespoke AI Codegen Slots</h3>
+            <p data-i18n="feat4D">Your AI (Claude Code or Antigravity) can invent brand-new 3D objects, blades, cutting boards &amp; studio rooms with anti-repetition memory.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">💻</span>
+            <h3 data-i18n="feat5T">100% Local — Zero Subscriptions</h3>
+            <p data-i18n="feat5D">Pay once, render unlimited HD 9:16 videos locally on Windows or Mac. No monthly SaaS credits, no watermarks from us.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">💎</span>
+            <h3 data-i18n="feat6T">Full Commercial License</h3>
+            <p data-i18n="feat6D">Keep 100% of ad revenue, Creator Fund payouts, sponsorships, and client fees from every video you generate.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="priceTag">SIMPLE ONE-TIME PRICING</span>
+          <h2 data-i18n="priceTitle">Own the Entire 3D Slicing Studio Forever</h2>
+          <p data-i18n="priceSub">One viral video pays for this tool 50x over. Zero recurring fees.</p>
+        </div>
+
+        <div class="pricing-wrap">
+          <span id="priceBadge" class="price-badge">LAUNCH OFFER — 63% OFF</span>
+          <h3 data-i18n="priceName">Infinite Slice 3D — Creator Edition</h3>
+          <div class="price-row">
+            <span id="priceNow" class="price-now">$29</span>
+            <span id="priceOld" class="price-old">$79</span>
+          </div>
+          <div class="price-sub" data-i18n="priceOneTime">One-time payment • Lifetime access • Instant .zip download</div>
+
+          <ul class="check-list">
+            <li data-i18n="chk1">Visual Creator Studio 3D UI (Browser-based, 1-click MP4 export)</li>
+            <li data-i18n="chk2">Official Claude Code &amp; Google Antigravity Skill (SKILL.md + 4 AI Slots)</li>
+            <li data-i18n="chk3">10 Built-in Volumetric Objects + Free-Text Prompt 3D Generator</li>
+            <li data-i18n="chk4">9 Cutters, 10 Cutting Surfaces &amp; 8 Studio Environments + Custom AI Slots</li>
+            <li data-i18n="chk5">Deterministic 60 FPS H.264 MP4 + 48 kHz Stereo ASMR Audio Engine</li>
+            <li data-i18n="chk6">Full Commercial Monetization Rights (Instagram, TikTok, YouTube)</li>
+          </ul>
+
+          <button type="button" class="btn btn-gold btn-xl" data-checkout data-i18n="buyMainCta">
+            Get Instant Access Now →
+          </button>
+
+          <div class="guarantee-box" data-i18n="guarantee">
+            🔒 Secure checkout • Instant automatic .zip delivery • Works on Windows &amp; macOS
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="faqTag">QUESTIONS &amp; ANSWERS</span>
+          <h2 data-i18n="faqTitle">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary data-i18n="faq1Q">Do I need Blender, Cinema 4D, or any 3D skills?</summary>
+            <p data-i18n="faq1A">Zero 3D skills needed. Everything runs inside an interactive visual Creator Studio UI and connects directly to Claude Code or Google Antigravity.</p>
+          </details>
+          <details class="faq-item">
+            <summary data-i18n="faq2Q">What computer specs do I need?</summary>
+            <p data-i18n="faq2A">Any standard Windows or Mac computer with Node.js 18+ and FFmpeg installed. No expensive RTX GPU is required — rendering is deterministic frame-by-frame so exports never drop frames.</p>
+          </details>
+          <details class="faq-item">
+            <summary data-i18n="faq3Q">Can I monetize the videos on TikTok, Instagram Reels &amp; YouTube Shorts?</summary>
+            <p data-i18n="faq3A">Yes! You receive 100% commercial rights to every video you render, including your own custom @handle watermark on screen.</p>
+          </details>
+          <details class="faq-item">
+            <summary data-i18n="faq4Q">Is there any monthly subscription or render credit limit?</summary>
+            <p data-i18n="faq4A">Never. It is a single one-time purchase. You run it locally on your own machine and render as many videos as you want forever.</p>
+          </details>
+          <details class="faq-item">
+            <summary data-i18n="faq5Q">How do I receive the files after purchasing?</summary>
+            <p data-i18n="faq5A">Immediately after payment confirmation, you get an instant download link for infinite-slice-skill-buyer-edition.zip plus the quick-start README.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container footer-inner">
+        <div>
+          <strong>Infinite Slice 3D</strong> • Created by <a href="https://instagram.com/atomslice3d" target="_blank" rel="noopener" style="color: var(--gold);">@atomslice3d</a>
+        </div>
+        <div>© 2026 Atom Slice 3D. All rights reserved.</div>
+      </div>
+    </footer>
+
+    <!-- Checkout Setup Modal (only displays if owner hasn't pasted checkout URL yet) -->
+    <div id="checkoutModal" class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <h3 data-i18n="modalTitle">Checkout Link Setup Pending</h3>
+        <p data-i18n="modalDesc">
+          Owner note: Paste your Gumroad, Lemon Squeezy, Stripe, or Kiwify checkout link inside sales-site/checkout-config.js!
+        </p>
+        <div class="modal-code">
+          checkoutUrlUSD: 'https://atomslice3d.gumroad.com/l/infinite-slice'<br />
+          checkoutUrlBRL: 'https://pay.kiwify.com.br/SEU-LINK'
+        </div>
+        <button type="button" id="closeModal" class="btn btn-gold btn-xl" data-i18n="modalClose">Close</button>
+      </div>
+    </div>
+
+    <script src="checkout-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -598,32 +598,60 @@ export class EnvironmentManager {
 
     if (id === 'custom' && customPrompt.trim()) {
       const norm = normalizeText(customPrompt);
-      const baseHex = parseHexColor(norm, '#1a2430');
+      const baseHex = parseHexColor(norm, '#243242');
       const baseCol = new THREE.Color(baseHex);
-      const isLight = norm.includes('branc') || norm.includes('claro') || norm.includes('creme') || norm.includes('bege') || norm.includes('minimal');
+      const isLight = norm.includes('branc') || norm.includes('white') || norm.includes('claro') || norm.includes('creme') || norm.includes('bege') || norm.includes('minimal') || norm.includes('scandinav') || norm.includes('morning');
       const isNeon = norm.includes('neon') || norm.includes('cyber');
+      const isWarm = norm.includes('quente') || norm.includes('sol') || norm.includes('gold') || norm.includes('dourad') || norm.includes('warm') || norm.includes('amber') || norm.includes('sunset') || norm.includes('terracot');
 
-      this.scene.background = baseCol.clone().multiplyScalar(isLight ? 0.95 : 0.42);
-      this.counterMat.color.copy(baseCol).multiplyScalar(isLight ? 0.92 : 0.36);
-      this.counterMat.roughness = 0.50;
-      this.counterMat.metalness = 0.12;
+      // Keep moody backgrounds refined without ever going pitch-black
+      const bgCol = baseCol.clone().multiplyScalar(isLight ? 0.96 : 0.56);
+      const bgHsl = { h: 0, s: 0, l: 0 };
+      bgCol.getHSL(bgHsl);
+      if (!isLight && bgHsl.l < 0.11) bgCol.setHSL(bgHsl.h, Math.min(bgHsl.s, 0.35), 0.11);
+      this.scene.background = bgCol;
 
-      this.wallMat.color.copy(baseCol).multiplyScalar(isLight ? 0.98 : 0.58);
-      if (norm.includes('azulej') || norm.includes('cozinh') || norm.includes('lab')) {
+      const counterCol = baseCol.clone().multiplyScalar(isLight ? 0.94 : 0.52);
+      const cHsl = { h: 0, s: 0, l: 0 };
+      counterCol.getHSL(cHsl);
+      if (!isLight && cHsl.l < 0.13) counterCol.setHSL(cHsl.h, Math.min(cHsl.s, 0.30), 0.13);
+      this.counterMat.color.copy(counterCol);
+      this.counterMat.roughness = 0.46;
+      this.counterMat.metalness = 0.14;
+
+      const wallCol = baseCol.clone().multiplyScalar(isLight ? 0.98 : 0.74);
+      const wHsl = { h: 0, s: 0, l: 0 };
+      wallCol.getHSL(wHsl);
+      if (!isLight && wHsl.l < 0.17) wallCol.setHSL(wHsl.h, Math.min(wHsl.s, 0.30), 0.17);
+      this.wallMat.color.copy(wallCol);
+      if (norm.includes('azulej') || norm.includes('cozinh') || norm.includes('kitchen') || norm.includes('lab') || norm.includes('tile')) {
         this.wallMat.map = isLight ? this.textures.lightTiles : this.textures.darkTiles;
       }
-      this.wallMat.roughness = 0.36;
+      this.wallMat.roughness = 0.34;
       this.wallMat.metalness = 0.08;
 
-      hemi.color.set(isLight ? '#ffffff' : '#dbeafe');
-      hemi.groundColor.copy(baseCol).multiplyScalar(0.35);
-      hemi.intensity = isLight ? 1.1 : 0.85;
-      key.color.set(norm.includes('quente') || norm.includes('sol') ? '#ffd699' : '#ffffff');
-      key.intensity = 2.65;
-      fill.color.copy(baseCol).offsetHSL(0.08, 0.15, 0.25);
-      fill.intensity = isNeon ? 1.45 : 0.90;
-      rim.color.copy(baseCol).offsetHSL(0.45, 0.25, 0.30);
-      rim.intensity = isNeon ? 1.65 : 1.05;
+      // Commercial hero lighting: ALWAYS bright, crisp, and vibrant on mobile screens
+      this.scene.environmentIntensity = isLight ? 0.78 : 0.66;
+      hemi.color.set('#ffffff');
+      hemi.groundColor.set(isLight ? '#d8d4cc' : '#524b42');
+      hemi.intensity = isLight ? 1.38 : 1.18;
+
+      key.color.set(isWarm ? '#fff1d6' : '#ffffff');
+      key.intensity = isLight ? 3.15 : 3.45;
+
+      const fillCol = baseCol.clone().offsetHSL(0.06, 0.12, 0.45);
+      const fHsl = { h: 0, s: 0, l: 0 };
+      fillCol.getHSL(fHsl);
+      fillCol.setHSL(fHsl.h, Math.min(fHsl.s, isNeon ? 0.65 : 0.25), Math.max(0.76, fHsl.l));
+      fill.color.copy(fillCol);
+      fill.intensity = isNeon ? 1.65 : 1.35;
+
+      const rimCol = isWarm ? new THREE.Color('#ffd48a') : baseCol.clone().offsetHSL(0.45, 0.22, 0.45);
+      const rHsl = { h: 0, s: 0, l: 0 };
+      rimCol.getHSL(rHsl);
+      rimCol.setHSL(rHsl.h, Math.min(rHsl.s, isNeon ? 0.78 : 0.45), Math.max(0.72, rHsl.l));
+      rim.color.copy(rimCol);
+      rim.intensity = isNeon ? 1.9 : 1.55;
 
       this.wallMat.needsUpdate = true;
       this.counterMat.needsUpdate = true;
@@ -631,105 +659,113 @@ export class EnvironmentManager {
     }
 
     if (id === 'classic-viral') {
-      this.scene.background = new THREE.Color('#0f1a18');
-      this.counterMat.color.set('#14181a');
-      this.counterMat.roughness = 0.55;
-      this.counterMat.metalness = 0.14;
+      this.scene.background = new THREE.Color('#182b26');
+      this.scene.environmentIntensity = 0.66;
+      this.counterMat.color.set('#222a2d');
+      this.counterMat.roughness = 0.50;
+      this.counterMat.metalness = 0.12;
       this.wallMat.color.set('#ffffff');
       this.wallMat.map = this.textures.darkTiles;
       this.wallMat.roughness = 0.24;
-      this.wallMat.metalness = 0.12;
-      hemi.color.set('#dcebe7'); hemi.groundColor.set('#261d15'); hemi.intensity = 0.85;
-      key.color.set('#fff3e0'); key.intensity = 2.65;
-      fill.color.set('#9fd0dd'); fill.intensity = 0.85;
-      rim.color.set('#ffd9a8'); rim.intensity = 1.0;
+      this.wallMat.metalness = 0.10;
+      hemi.color.set('#f2faf8'); hemi.groundColor.set('#4c4134'); hemi.intensity = 1.22;
+      key.color.set('#fff6e8'); key.intensity = 3.25;
+      fill.color.set('#cdeaf4'); fill.intensity = 1.28;
+      rim.color.set('#ffe2b8'); rim.intensity = 1.35;
     } else if (id === 'glass-lab') {
-      this.scene.background = new THREE.Color('#dfe6ed');
-      this.counterMat.color.set('#eef2f6');
+      this.scene.background = new THREE.Color('#e4ebf2');
+      this.scene.environmentIntensity = 0.78;
+      this.counterMat.color.set('#f2f5f9');
       this.counterMat.roughness = 0.34;
       this.counterMat.metalness = 0.04;
-      this.wallMat.color.set('#f5f8fb');
+      this.wallMat.color.set('#f8fafc');
       this.wallMat.map = this.textures.lightTiles;
       this.wallMat.roughness = 0.26;
       this.wallMat.metalness = 0.04;
-      hemi.color.set('#ffffff'); hemi.groundColor.set('#cad6e0'); hemi.intensity = 1.15;
-      key.color.set('#ffffff'); key.intensity = 2.3;
-      fill.color.set('#c4e0ff'); fill.intensity = 0.95;
-      rim.color.set('#9bf2e5'); rim.intensity = 0.9;
+      hemi.color.set('#ffffff'); hemi.groundColor.set('#d5e0ea'); hemi.intensity = 1.35;
+      key.color.set('#ffffff'); key.intensity = 2.85;
+      fill.color.set('#d4e9ff'); fill.intensity = 1.25;
+      rim.color.set('#b4f7ec'); rim.intensity = 1.15;
     } else if (id === 'tropical-leaf') {
-      this.scene.background = new THREE.Color('#23180f');
-      this.counterMat.color.set('#342114');
+      this.scene.background = new THREE.Color('#342416');
+      this.scene.environmentIntensity = 0.68;
+      this.counterMat.color.set('#4a311e');
       this.counterMat.map = this.textures.rusticWood;
-      this.counterMat.roughness = 0.78;
+      this.counterMat.roughness = 0.72;
       this.counterMat.metalness = 0.02;
-      this.wallMat.color.set('#2c2217');
-      this.wallMat.roughness = 0.85;
+      this.wallMat.color.set('#413122');
+      this.wallMat.roughness = 0.80;
       this.wallMat.metalness = 0.02;
-      hemi.color.set('#ffe4b8'); hemi.groundColor.set('#2c1c0f'); hemi.intensity = 0.95;
-      key.color.set('#ffcf87'); key.intensity = 3.0;
-      fill.color.set('#96d98c'); fill.intensity = 0.75;
-      rim.color.set('#ffaa4a'); rim.intensity = 1.15;
+      hemi.color.set('#fff0d1'); hemi.groundColor.set('#553b22'); hemi.intensity = 1.25;
+      key.color.set('#ffd99e'); key.intensity = 3.45;
+      fill.color.set('#bce8b3'); fill.intensity = 1.15;
+      rim.color.set('#ffbe6e'); rim.intensity = 1.45;
     } else if (id === 'luxury-obsidian') {
-      this.scene.background = new THREE.Color('#09090c');
-      this.counterMat.color.set('#0e0f14');
-      this.counterMat.roughness = 0.42;
+      this.scene.background = new THREE.Color('#14161e');
+      this.scene.environmentIntensity = 0.68;
+      this.counterMat.color.set('#1c1f29');
+      this.counterMat.roughness = 0.38;
       this.counterMat.metalness = 0.22;
-      this.wallMat.color.set('#14151b');
-      this.wallMat.roughness = 0.78;
+      this.wallMat.color.set('#222531');
+      this.wallMat.roughness = 0.68;
       this.wallMat.metalness = 0.12;
-      hemi.color.set('#d2d6e6'); hemi.groundColor.set('#1a140c'); hemi.intensity = 0.65;
-      key.color.set('#fff0d2'); key.intensity = 2.8;
-      fill.color.set('#7a88b5'); fill.intensity = 0.65;
-      rim.color.set('#ffcb6b'); rim.intensity = 1.5;
+      hemi.color.set('#eef2ff'); hemi.groundColor.set('#4a3d2a'); hemi.intensity = 1.12;
+      key.color.set('#fff5e0'); key.intensity = 3.55;
+      fill.color.set('#b8c7eb'); fill.intensity = 1.22;
+      rim.color.set('#ffd47d'); rim.intensity = 1.85;
     } else if (id === 'pro-kitchen') {
-      this.scene.background = new THREE.Color('#14181e');
-      this.counterMat.color.set('#232a32');
-      this.counterMat.roughness = 0.40;
-      this.counterMat.metalness = 0.62;
-      this.wallMat.color.set('#262e38');
+      this.scene.background = new THREE.Color('#1f2630');
+      this.scene.environmentIntensity = 0.72;
+      this.counterMat.color.set('#323b47');
+      this.counterMat.roughness = 0.36;
+      this.counterMat.metalness = 0.56;
+      this.wallMat.color.set('#36414f');
       this.wallMat.map = this.textures.steel;
-      this.wallMat.roughness = 0.45;
-      this.wallMat.metalness = 0.55;
-      hemi.color.set('#e8f2ff'); hemi.groundColor.set('#1b222a'); hemi.intensity = 0.9;
-      key.color.set('#f7fbff'); key.intensity = 2.65;
-      fill.color.set('#9ec6f0'); fill.intensity = 0.9;
-      rim.color.set('#ffdfba'); rim.intensity = 1.0;
-    } else if (id === 'frozen-block') {
-      this.scene.background = new THREE.Color('#0c1e2e');
-      this.counterMat.color.set('#10263a');
-      this.counterMat.roughness = 0.25;
-      this.counterMat.metalness = 0.18;
-      this.wallMat.color.set('#122e46');
       this.wallMat.roughness = 0.42;
-      this.wallMat.metalness = 0.1;
-      hemi.color.set('#bce8ff'); hemi.groundColor.set('#0e2538'); hemi.intensity = 1.0;
-      key.color.set('#e3f7ff'); key.intensity = 2.6;
-      fill.color.set('#66c2ff'); fill.intensity = 1.05;
-      rim.color.set('#b8f4ff'); rim.intensity = 1.3;
+      this.wallMat.metalness = 0.48;
+      hemi.color.set('#f0f7ff'); hemi.groundColor.set('#3d4957'); hemi.intensity = 1.24;
+      key.color.set('#ffffff'); key.intensity = 3.25;
+      fill.color.set('#bedcf7'); fill.intensity = 1.28;
+      rim.color.set('#ffe4c4'); rim.intensity = 1.35;
+    } else if (id === 'frozen-block') {
+      this.scene.background = new THREE.Color('#16324a');
+      this.scene.environmentIntensity = 0.74;
+      this.counterMat.color.set('#1e405e');
+      this.counterMat.roughness = 0.25;
+      this.counterMat.metalness = 0.16;
+      this.wallMat.color.set('#21486b');
+      this.wallMat.roughness = 0.38;
+      this.wallMat.metalness = 0.10;
+      hemi.color.set('#d9f3ff'); hemi.groundColor.set('#285275'); hemi.intensity = 1.30;
+      key.color.set('#eefaff'); key.intensity = 3.20;
+      fill.color.set('#99d6ff'); fill.intensity = 1.35;
+      rim.color.set('#ccf7ff'); rim.intensity = 1.55;
     } else if (id === 'cyberpunk-neon') {
-      this.scene.background = new THREE.Color('#090714');
-      this.counterMat.color.set('#110d20');
+      this.scene.background = new THREE.Color('#130f26');
+      this.scene.environmentIntensity = 0.65;
+      this.counterMat.color.set('#1e1738');
       this.counterMat.roughness = 0.28;
-      this.counterMat.metalness = 0.42;
-      this.wallMat.color.set('#16102b');
-      this.wallMat.roughness = 0.48;
-      this.wallMat.metalness = 0.25;
-      hemi.color.set('#a5f3fc'); hemi.groundColor.set('#3b0764'); hemi.intensity = 0.8;
-      key.color.set('#f5f3ff'); key.intensity = 2.4;
-      fill.color.set('#38bdf8'); fill.intensity = 1.45;
-      rim.color.set('#f43f8e'); rim.intensity = 1.75;
+      this.counterMat.metalness = 0.38;
+      this.wallMat.color.set('#261d45');
+      this.wallMat.roughness = 0.44;
+      this.wallMat.metalness = 0.22;
+      hemi.color.set('#d5f9ff'); hemi.groundColor.set('#58218a'); hemi.intensity = 1.15;
+      key.color.set('#faf8ff'); key.intensity = 3.15;
+      fill.color.set('#7dd3fc'); fill.intensity = 1.65;
+      rim.color.set('#fb7185'); rim.intensity = 1.95;
     } else if (id === 'sunset-terracotta') {
-      this.scene.background = new THREE.Color('#3b1f18');
-      this.counterMat.color.set('#5e3226');
-      this.counterMat.roughness = 0.56;
+      this.scene.background = new THREE.Color('#4f2b21');
+      this.scene.environmentIntensity = 0.72;
+      this.counterMat.color.set('#754032');
+      this.counterMat.roughness = 0.54;
       this.counterMat.metalness = 0.04;
-      this.wallMat.color.set('#7a3e2e');
-      this.wallMat.roughness = 0.72;
+      this.wallMat.color.set('#914e3b');
+      this.wallMat.roughness = 0.68;
       this.wallMat.metalness = 0.02;
-      hemi.color.set('#ffedd5'); hemi.groundColor.set('#431407'); hemi.intensity = 1.0;
-      key.color.set('#ffd28e'); key.intensity = 2.9;
-      fill.color.set('#fda4af'); fill.intensity = 0.85;
-      rim.color.set('#fb923c'); rim.intensity = 1.35;
+      hemi.color.set('#fff3e0'); hemi.groundColor.set('#6b331c'); hemi.intensity = 1.28;
+      key.color.set('#ffdda6'); key.intensity = 3.35;
+      fill.color.set('#fecdd3'); fill.intensity = 1.18;
+      rim.color.set('#fdba74'); rim.intensity = 1.55;
     }
 
     this.wallMat.needsUpdate = true;

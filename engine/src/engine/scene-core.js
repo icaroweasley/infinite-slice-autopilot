@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EnvironmentManager } from './environments.js';
 import { VolumetricSolid } from './volumetric-solid.js';
 import { KnifeController } from './knife-controller.js';
@@ -68,22 +69,29 @@ export class InfiniteSliceEngine {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.toneMappingExposure = 1.15;
     this.renderer.localClippingEnabled = true;
 
     this.scene = new THREE.Scene();
+
+    // Studio softbox IBL (PMREM RoomEnvironment) so metallic blades, marble, glass, and glossy interiors gleam crisply
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
+    this.scene.environment = this.envRT.texture;
+    this.scene.environmentIntensity = 0.56;
+    pmrem.dispose();
 
     // Locked 3/4 isometric perspective camera tuned specifically for 9:16 vertical composition
     this.camera = new THREE.PerspectiveCamera(34, 9 / 16, 0.1, 60);
     this.camera.position.set(5.85, 7.55, 8.10);
     this.camera.lookAt(0.0, 0.34, 0.14);
 
-    // 3-Point Studio Lighting Rig
-    const hemi = new THREE.HemisphereLight(0xdcebe7, 0x261d15, 0.85);
+    // 3-Point + Overhead Softbox Studio Lighting Rig
+    const hemi = new THREE.HemisphereLight(0xf2f7f5, 0x483f36, 1.15);
     this.scene.add(hemi);
 
-    const key = new THREE.DirectionalLight(0xfff3e0, 2.65);
-    key.position.set(5.4, 10.2, 5.2);
+    const key = new THREE.DirectionalLight(0xfff6e8, 3.25);
+    key.position.set(5.2, 10.6, 5.8);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
     key.shadow.camera.near = 2.0;
@@ -96,12 +104,12 @@ export class InfiniteSliceEngine {
     key.shadow.normalBias = 0.018;
     this.scene.add(key);
 
-    const fill = new THREE.DirectionalLight(0x9fd0dd, 0.85);
-    fill.position.set(-6.0, 5.5, 4.0);
+    const fill = new THREE.DirectionalLight(0xd4ecff, 1.25);
+    fill.position.set(-5.6, 6.8, 5.4);
     this.scene.add(fill);
 
-    const rim = new THREE.DirectionalLight(0xffd9a8, 1.0);
-    rim.position.set(-2.5, 6.2, -6.5);
+    const rim = new THREE.DirectionalLight(0xffe1b8, 1.35);
+    rim.position.set(-2.5, 6.4, -6.2);
     this.scene.add(rim);
 
     this.lights = { hemi, key, fill, rim };

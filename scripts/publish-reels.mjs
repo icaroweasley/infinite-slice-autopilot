@@ -37,7 +37,7 @@ export function buildEnglishCaption(manifest, config) {
   const hash = [...objName].reduce((a, c) => a + c.charCodeAt(0), 0);
   const hook = hooks[hash % hooks.length];
 
-  return `${hook}\n\nWhat impossible object should ${handle} slice next? Comment below 👇\n\n${hashtags}`;
+  return `${hook}\n\nWhat impossible object should ${handle} slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment "SLICE" or tap the link in bio 🔗\n\n${hashtags}`;
 }
 
 async function uploadToCloudinary(videoPath) {
