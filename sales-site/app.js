@@ -256,7 +256,7 @@ const PG_DATA = {
 };
 
 const state = {
-  lang: (navigator.language || '').toLowerCase().startsWith('pt') ? 'pt' : 'en',
+  lang: 'en',
   object: PG_DATA.objects[0],
   cutter: PG_DATA.cutters[0],
   surface: PG_DATA.surfaces[0],
