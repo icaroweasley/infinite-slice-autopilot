@@ -26,14 +26,14 @@ const COPY = {
     shotsSub:
       'Built from scratch in WebGL2 + Rapier3D WASM so low cuts preserve exact curved shapes and high cuts explode into realistic speckled powder.',
     shot1Pill: 'TRUE 3D SILHOUETTE SLICING',
-    shot1Title: 'Curved Shapes Stay Real',
-    shot1Desc: 'Round burgers, avocados, geodes & watches slice cleanly with true curved edges and per-pixel interiors — never blocky cubes.',
-    shot2Pill: 'STUDIO SOFTBOX LIGHTING',
-    shot2Title: 'Bespoke Blades & Boards',
-    shot2Desc: 'Damascus katanas, 1000°C hot knives, lightsabers, epoxy river slabs & gleaming PBR studio lighting.',
-    shot3Pill: '30M+ MICRO-GRAINS',
-    shot3Title: 'Supersonic 1,000-Cut Finale',
-    shot3Desc: '12-blade shutter-blur knife curtain + 130,000 lit grains + Reels/TikTok/Shorts Safe-Zone HUD.',
+    shot1Title: 'Curved Burger × Chef Knife',
+    shot1Desc: 'Round sesame buns, lettuce, tomato & patty keep exact curved 3D silhouettes at 10 cuts before exploding into 1,000-cut dust.',
+    shot2Pill: 'HOLLOW INTERIOR × 1000°C BLADE',
+    shot2Title: 'Amethyst Geode × Glowing Knife',
+    shot2Desc: 'True hollow crystal cavities sliced by a 1000°C molten red-hot blade on black & gold obsidian marble with softbox reflections.',
+    shot3Pill: 'LIGHTSABER × 37M+ MICRO-GRAINS',
+    shot3Title: 'Rubik\'s Cube × Plasma Lightsaber',
+    shot3Desc: 'Minimalist white glass lab, cyan plasma blade, 12-blade supersonic blur & speckled rainbow micro-cubes above the Reels Safe Zone.',
 
     pgTag: 'INTERACTIVE CREATOR STUDIO PREVIEW',
     pgTitle: 'Feel How Easy Your Workflow Becomes',
@@ -397,14 +397,46 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.id === 'checkoutModal') e.currentTarget.classList.remove('open');
   });
 
-  // Hero Demo Reel sound toggle
-  const video = document.getElementById('heroDemoVideo');
-  const soundBtn = document.getElementById('btnSoundToggle');
-  if (video && soundBtn) {
-    soundBtn.addEventListener('click', () => {
-      video.muted = !video.muted;
-      if (!video.muted) video.play().catch(() => {});
-      soundBtn.textContent = video.muted ? '🔇 ASMR Off' : '🔊 ASMR On';
+  // Coordinated ASMR sound toggle across Hero video + all Showcase demo videos (only 1 unmuted at a time)
+  const heroVideo = document.getElementById('heroDemoVideo');
+  const heroSoundBtn = document.getElementById('btnSoundToggle');
+  const cardButtons = [...document.querySelectorAll('[data-card-sound]')];
+
+  function muteAllVideos(exceptVideo = null) {
+    if (heroVideo && heroVideo !== exceptVideo) {
+      heroVideo.muted = true;
+      if (heroSoundBtn) heroSoundBtn.textContent = '🔇 ASMR Off';
+    }
+    cardButtons.forEach((btn) => {
+      const vid = btn.parentElement?.querySelector('video');
+      if (vid && vid !== exceptVideo) {
+        vid.muted = true;
+        btn.textContent = '🔇 ASMR';
+        btn.classList.remove('unmuted');
+      }
     });
   }
+
+  if (heroVideo && heroSoundBtn) {
+    heroSoundBtn.addEventListener('click', () => {
+      const willUnmute = heroVideo.muted;
+      if (willUnmute) muteAllVideos(heroVideo);
+      heroVideo.muted = !willUnmute;
+      if (willUnmute) heroVideo.play().catch(() => {});
+      heroSoundBtn.textContent = heroVideo.muted ? '🔇 ASMR Off' : '🔊 ASMR On';
+    });
+  }
+
+  cardButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const vid = btn.parentElement?.querySelector('video');
+      if (!vid) return;
+      const willUnmute = vid.muted;
+      if (willUnmute) muteAllVideos(vid);
+      vid.muted = !willUnmute;
+      if (willUnmute) vid.play().catch(() => {});
+      btn.textContent = vid.muted ? '🔇 ASMR' : '🔊 ASMR On';
+      btn.classList.toggle('unmuted', !vid.muted);
+    });
+  });
 });
