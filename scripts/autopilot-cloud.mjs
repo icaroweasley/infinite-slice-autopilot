@@ -196,7 +196,7 @@ async function main() {
   const durationScale = quick ? 0.55 : Number(getFlag('scale', '1.0'));
 
   let renderOpts = {
-    handle: getFlag('handle', cfg.brand?.handle || '@cubiccutlab'),
+    handle: getFlag('handle', cfg.brand?.handle || '@atomslice3d'),
     width,
     height,
     fps,

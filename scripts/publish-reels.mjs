@@ -25,7 +25,7 @@ export function buildEnglishCaption(manifest, config) {
   const objName = manifest.englishName || manifest.name || 'this object';
   const maxCuts = Math.max(...(manifest.rounds || [1000])).toLocaleString('en-US');
   const maxCubes = (manifest.maxCubes || 0).toLocaleString('en-US');
-  const handle = manifest.handle || config.brand?.handle || '@cubiccutlab';
+  const handle = manifest.handle || config.brand?.handle || '@atomslice3d';
   const hashtags = (config.publishing?.hashtags || ['#satisfying', '#3dart', '#asmr', '#reels']).join(' ');
 
   const hooks = [
@@ -77,45 +77,102 @@ async function publishViaN8n(videoPath, manifest, caption) {
 }
 
 async function publishViaMetaGraph(videoPath, manifest, caption) {
-  const igUserId = process.env.IG_USER_ID;
-  const token = process.env.IG_ACCESS_TOKEN;
-  if (!igUserId || !token) {
-    throw new Error('IG_USER_ID and IG_ACCESS_TOKEN must be set in .env for Meta Graph API publishing.');
+  const token = (process.env.IG_ACCESS_TOKEN || '').trim();
+  if (!token) {
+    throw new Error('IG_ACCESS_TOKEN must be set in .env / GitHub Secrets for Instagram publishing.');
+  }
+
+  // Auto-detect Instagram Login token (starts with "IG") vs Facebook Graph token (starts with "EAA")
+  const isIgLogin = token.startsWith('IG');
+  const apiBase = (process.env.IG_API_BASE || (isIgLogin ? 'https://graph.instagram.com/v21.0' : 'https://graph.facebook.com/v21.0')).replace(/\/$/, '');
+
+  let igUserId = (process.env.IG_USER_ID || '').trim();
+  if (!igUserId) {
+    if (isIgLogin) {
+      const meRes = await fetch(`${apiBase}/me?fields=user_id,id,username&access_token=${encodeURIComponent(token)}`);
+      const meJson = await meRes.json();
+      if (!meRes.ok) {
+        throw new Error(`Failed to resolve IG_USER_ID via /me: ${JSON.stringify(meJson)}`);
+      }
+      igUserId = meJson.user_id || meJson.id || 'me';
+      console.log(`[publish] Auto-resolved Instagram account: @${meJson.username || 'unknown'} (id: ${igUserId})`);
+    } else {
+      throw new Error('IG_USER_ID must be set in .env / GitHub Secrets when using a Facebook Graph (EAA...) token.');
+    }
   }
 
   let videoUrl = process.env.PUBLIC_VIDEO_BASE_URL
     ? `${process.env.PUBLIC_VIDEO_BASE_URL.replace(/\/$/, '')}/${path.basename(videoPath)}`
     : await uploadToCloudinary(videoPath);
 
-  if (!videoUrl) {
-    throw new Error('Meta Graph API requires a public HTTPS video URL. Configure CLOUDINARY_CLOUD_NAME + CLOUDINARY_UPLOAD_PRESET or PUBLIC_VIDEO_BASE_URL in .env.');
+  let creationId = null;
+
+  if (videoUrl) {
+    // 1A. Create Reels media container from public HTTPS video URL (Cloudinary or custom CDN)
+    console.log(`[publish] Creating Reels container on ${apiBase} via public video_url...`);
+    const createParams = new URLSearchParams({
+      media_type: 'REELS',
+      video_url: videoUrl,
+      caption,
+      share_to_feed: 'true',
+      access_token: token,
+    });
+    const createRes = await fetch(`${apiBase}/${igUserId}/media?${createParams}`, { method: 'POST' });
+    const createJson = await createRes.json();
+    if (!createRes.ok || !createJson.id) {
+      throw new Error(`Meta Graph container error: ${JSON.stringify(createJson)}`);
+    }
+    creationId = createJson.id;
+  } else {
+    // 1B. Direct Resumable Binary Upload to Meta (no external CDN needed!)
+    console.log(`[publish] No Cloudinary/CDN configured — using direct Meta resumable binary upload on ${apiBase}...`);
+    const createParams = new URLSearchParams({
+      media_type: 'REELS',
+      upload_type: 'resumable',
+      caption,
+      share_to_feed: 'true',
+      access_token: token,
+    });
+    const createRes = await fetch(`${apiBase}/${igUserId}/media?${createParams}`, { method: 'POST' });
+    const createJson = await createRes.json();
+    if (!createRes.ok || !createJson.id || !createJson.uri) {
+      throw new Error(
+        `Meta resumable container init failed: ${JSON.stringify(createJson)}. ` +
+        `If your token does not support direct resumable upload, configure CLOUDINARY_CLOUD_NAME + CLOUDINARY_UPLOAD_PRESET.`
+      );
+    }
+    creationId = createJson.id;
+    const uploadUri = createJson.uri;
+    const fileBuf = fs.readFileSync(videoPath);
+    console.log(`[publish] Streaming ${(fileBuf.length / (1024 * 1024)).toFixed(2)} MB binary directly to ${uploadUri}...`);
+    const upRes = await fetch(uploadUri, {
+      method: 'POST',
+      headers: {
+        Authorization: `OAuth ${token}`,
+        offset: '0',
+        file_size: String(fileBuf.length),
+        'Content-Type': 'application/octet-stream',
+      },
+      body: fileBuf,
+    });
+    const upText = await upRes.text();
+    if (!upRes.ok) {
+      throw new Error(`Meta binary rupload failed (${upRes.status}): ${upText.slice(0, 400)}`);
+    }
+    console.log(`[publish] Binary upload accepted: ${upText.slice(0, 160)}`);
+    videoUrl = uploadUri;
   }
 
-  // 1. Create Reels media container
-  const createParams = new URLSearchParams({
-    media_type: 'REELS',
-    video_url: videoUrl,
-    caption,
-    share_to_feed: 'true',
-    access_token: token,
-  });
-  const createRes = await fetch(`https://graph.facebook.com/v21.0/${igUserId}/media?${createParams}`, { method: 'POST' });
-  const createJson = await createRes.json();
-  if (!createRes.ok || !createJson.id) {
-    throw new Error(`Meta Graph container error: ${JSON.stringify(createJson)}`);
-  }
-  const creationId = createJson.id;
-
-  // 2. Poll container processing status until FINISHED (max ~2 minutes)
+  // 2. Poll container processing status until FINISHED (max ~4 minutes)
   let status = 'IN_PROGRESS';
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 48; i++) {
     await new Promise((r) => setTimeout(r, 5000));
     const pollRes = await fetch(
-      `https://graph.facebook.com/v21.0/${creationId}?fields=status_code&access_token=${encodeURIComponent(token)}`
+      `${apiBase}/${creationId}?fields=status_code,status&access_token=${encodeURIComponent(token)}`
     );
     const pollJson = await pollRes.json();
     status = pollJson.status_code || 'UNKNOWN';
-    console.log(`[publish] IG container ${creationId} status: ${status}`);
+    console.log(`[publish] IG container ${creationId} status: ${status}${pollJson.status ? ` (${pollJson.status})` : ''}`);
     if (status === 'FINISHED') break;
     if (status === 'ERROR' || status === 'EXPIRED') {
       throw new Error(`IG container failed with status: ${status} (${JSON.stringify(pollJson)})`);
@@ -130,12 +187,12 @@ async function publishViaMetaGraph(videoPath, manifest, caption) {
     creation_id: creationId,
     access_token: token,
   });
-  const pubRes = await fetch(`https://graph.facebook.com/v21.0/${igUserId}/media_publish?${pubParams}`, { method: 'POST' });
+  const pubRes = await fetch(`${apiBase}/${igUserId}/media_publish?${pubParams}`, { method: 'POST' });
   const pubJson = await pubRes.json();
   if (!pubRes.ok || !pubJson.id) {
     throw new Error(`Meta Graph media_publish error: ${JSON.stringify(pubJson)}`);
   }
-  return { provider: 'meta-graph', creationId, mediaId: pubJson.id, videoUrl };
+  return { provider: isIgLogin ? 'instagram-api' : 'meta-graph', creationId, mediaId: pubJson.id, videoUrl };
 }
 
 export async function publishReel({ videoPath, manifestPath, dryRun = false, captionOverride } = {}) {
