@@ -152,12 +152,12 @@ export class PhysicsTierEngine {
   _createTier1AVolumetricMaterial() {
     const mat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.4,
-      metalness: 0.08,
+      roughness: 0.36,
+      metalness: 0.04,
       side: THREE.DoubleSide,
     });
     const shared = this.tier1AUniforms;
-    mat.customProgramCacheKey = () => 'tier1a-true-silhouette-chunk-v3';
+    mat.customProgramCacheKey = () => 'tier1a-photoreal-silhouette-chunk-v5';
 
     mat.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, shared);
@@ -169,13 +169,15 @@ export class PhysicsTierEngine {
 attribute vec3 aOrigPos;
 attribute float aIsCap;
 varying vec3 vOrigPos;
-varying float vIsCap;`
+varying float vIsCap;
+varying mat3 vChunkToView;`
         )
         .replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
 vOrigPos = aOrigPos;
-vIsCap = aIsCap;`
+vIsCap = aIsCap;
+vChunkToView = mat3(modelViewMatrix);`
         );
 
       shader.fragmentShader = shader.fragmentShader
@@ -187,7 +189,42 @@ uniform highp sampler3D uChunkColorVol;
 uniform highp sampler3D uChunkPropsVol;
 uniform vec3 uChunkBounds;
 varying vec3 vOrigPos;
-varying float vIsCap;`
+varying float vIsCap;
+varying mat3 vChunkToView;
+
+float cHash3(vec3 p) {
+  p = fract(p * 0.3183099 + 0.1);
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float cNoise3(vec3 x) {
+  vec3 i = floor(x);
+  vec3 f = fract(x);
+  f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+  return mix(
+    mix(mix(cHash3(i + vec3(0.0, 0.0, 0.0)), cHash3(i + vec3(1.0, 0.0, 0.0)), f.x),
+        mix(cHash3(i + vec3(0.0, 1.0, 0.0)), cHash3(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+    mix(mix(cHash3(i + vec3(0.0, 0.0, 1.0)), cHash3(i + vec3(1.0, 0.0, 1.0)), f.x),
+        mix(cHash3(i + vec3(0.0, 1.0, 1.0)), cHash3(i + vec3(1.0, 1.0, 1.0)), f.x), f.y),
+    f.z
+  );
+}
+
+float chunkMicroBump(vec3 p, float isCapFlag) {
+  if (isCapFlag > 0.5) {
+    return cNoise3(p * 30.0) * 0.65 + cNoise3(p * 60.0) * 0.35;
+  }
+  return cNoise3(p * 22.0) * 0.64 + cNoise3(p * 44.0) * 0.36;
+}
+
+vec3 chunkBumpGrad(vec3 p, float isCapFlag) {
+  float e = isCapFlag > 0.5 ? 0.004 : 0.0055;
+  float dx = chunkMicroBump(p + vec3(e, 0.0, 0.0), isCapFlag) - chunkMicroBump(p - vec3(e, 0.0, 0.0), isCapFlag);
+  float dy = chunkMicroBump(p + vec3(0.0, e, 0.0), isCapFlag) - chunkMicroBump(p - vec3(0.0, e, 0.0), isCapFlag);
+  float dz = chunkMicroBump(p + vec3(0.0, 0.0, e), isCapFlag) - chunkMicroBump(p - vec3(0.0, 0.0, e), isCapFlag);
+  return vec3(dx, dy, dz) / (2.0 * e);
+}`
         )
         .replace(
           '#include <map_fragment>',
@@ -202,19 +239,37 @@ vec4 volCol = texture(uChunkColorVol, uvw);
 if (vIsCap > 0.5 && volCol.a < 0.44) discard;
 vec4 volProps = texture(uChunkPropsVol, uvw);
 vec3 volLinear = pow(max(volCol.rgb, vec3(0.0001)), vec3(2.2));
+float cBump = chunkMicroBump(vOrigPos, vIsCap);
+float cAO = vIsCap > 0.5 ? mix(0.97, 1.02, cBump) : mix(0.93, 1.04, cBump);
 // Subtle crisp rim shading right where cut plane meets outer shell
-float cutEdgeShade = vIsCap > 0.5 ? mix(0.86, 1.0, smoothstep(0.44, 0.62, volCol.a)) : 1.0;
-diffuseColor.rgb *= max(volLinear * cutEdgeShade, vec3(0.004));`
+float cutEdgeShade = vIsCap > 0.5 ? mix(0.86, 1.0, smoothstep(0.44, 0.64, volCol.a)) : 1.0;
+diffuseColor.rgb *= max(volLinear * cAO * cutEdgeShade, vec3(0.004));`
         )
         .replace(
           '#include <roughnessmap_fragment>',
           `#include <roughnessmap_fragment>
-roughnessFactor = clamp(volProps.r, 0.06, 0.96);`
+float cNonMetal = 1.0 - smoothstep(0.45, 0.85, volProps.g);
+float cBaseR = vIsCap > 0.5
+  ? clamp(volProps.r + 0.08, 0.28, 0.64)
+  : mix(volProps.r, min(volProps.r, 0.28), cNonMetal * smoothstep(0.28, 0.60, volProps.r));
+roughnessFactor = clamp(cBaseR + (cBump - 0.5) * (vIsCap > 0.5 ? 0.05 : 0.10), 0.06, 0.96);`
         )
         .replace(
           '#include <metalnessmap_fragment>',
           `#include <metalnessmap_fragment>
 metalnessFactor = clamp(volProps.g, 0.0, 0.96);`
+        )
+        .replace(
+          '#include <normal_fragment_maps>',
+          `#include <normal_fragment_maps>
+{
+  float nonMetal = 1.0 - smoothstep(0.45, 0.85, metalnessFactor);
+  float organicAmt = smoothstep(0.24, 0.50, volProps.r);
+  float bumpStr = vIsCap > 0.5 ? 0.006 : mix(0.005, 0.032, organicAmt * nonMetal);
+  vec3 viewGrad = vChunkToView * chunkBumpGrad(vOrigPos, vIsCap);
+  vec3 tangGrad = viewGrad - normal * dot(viewGrad, normal);
+  normal = normalize(normal - tangGrad * bumpStr);
+}`
         )
         .replace(
           '#include <emissivemap_fragment>',
@@ -308,14 +363,21 @@ float edgeDensity = smoothstep(0.002, 0.028, vMoundPos.y);
 if (edgeDensity < h2) discard;
 
 // Jittered NearestFilter lookup into un-blended pure pigment textures A & B:
-// ZERO muddy color averaging and ZERO parallel grid stripes — authentic organic speckled micro-cube sand!
+// Wide stochastic grain scatter completely eliminates radial pie-stripe bands while preserving organic pigment clusters!
 vec2 baseUv = vec2(vMoundPos.x / uHfSize.x + 0.5, vMoundPos.z / uHfSize.y + 0.5);
 float h4 = gHash(gCell + vec3(91.7, 29.3, 53.1));
-vec2 jitter = (vec2(h1, h4) - 0.5) * (2.8 / uHfRes);
+float h5 = gHash(gCell + vec3(7.3, 83.9, 41.2));
+float scatterRadius = h5 > 0.72 ? 15.5 : 8.5;
+vec2 jitter = (vec2(h1, h4) - 0.5) * (scatterRadius / uHfRes);
 vec2 uvSample = clamp(baseUv + jitter, vec2(0.004), vec2(0.996));
 
 vec4 colA = texture2D(uHfTexA, uvSample);
 vec4 colB = texture2D(uHfTexB, uvSample);
+// Fallback to center cell if jitter landed outside deposited pile
+if (colA.a < 0.5) {
+  colA = texture2D(uHfTexA, clamp(baseUv, vec2(0.004), vec2(0.996)));
+  colB = texture2D(uHfTexB, clamp(baseUv, vec2(0.004), vec2(0.996)));
+}
 vec3 srgbGrain = (h2 > 0.50 && colB.a > 0.5) ? colB.rgb : colA.rgb;
 vec3 linGrain = pow(max(srgbGrain, vec3(0.0001)), vec3(2.2));
 
@@ -941,10 +1003,11 @@ normal = normalize(normal + microN * 0.62);`
    */
   _relaxHeightfield(passes = 4) {
     const cohesion = this.objDef ? this.objDef.physics.cohesion : 0.60;
-    // Lower realistic repose slope -> broad natural crumbled heap instead of tall smooth volcano peak!
+    // Lower realistic repose slope -> broad natural circular sand dune (8-neighbor isotropic metric = ZERO diamond ridges!)
     const slope = 0.28 + cohesion * 0.16;
     const maxDiffX = HF_CELL_X * slope;
     const maxDiffZ = HF_CELL_Z * slope;
+    const maxDiffD = Math.hypot(HF_CELL_X, HF_CELL_Z) * slope;
 
     let moved = false;
     for (let p = 0; p < passes; p++) {
@@ -953,26 +1016,31 @@ normal = normalize(normal + microN * 0.62);`
         const rowOff = gz * HF_NX;
         for (let gx = rev ? HF_NX - 2 : 1; rev ? gx >= 1 : gx < HF_NX - 1; gx += rev ? -1 : 1) {
           const i = rowOff + gx;
-          const hi = this.hfH[i];
-          if (hi < 0.006) continue;
+          let hi = this.hfH[i];
+          if (hi < 0.005) continue;
 
           const neighbors = [
             [i + 1, maxDiffX],
             [i - 1, maxDiffX],
             [i + HF_NX, maxDiffZ],
             [i - HF_NX, maxDiffZ],
+            [i + 1 + HF_NX, maxDiffD],
+            [i - 1 + HF_NX, maxDiffD],
+            [i + 1 - HF_NX, maxDiffD],
+            [i - 1 - HF_NX, maxDiffD],
           ];
-          for (let n = 0; n < 4; n++) {
+          for (let n = 0; n < 8; n++) {
             const ni = neighbors[n][0];
             const limit = neighbors[n][1];
             const diff = hi - this.hfH[ni];
             if (diff > limit) {
-              const flow = (diff - limit) * 0.30;
-              this.hfH[i] -= flow;
+              const flow = (diff - limit) * 0.18;
+              hi -= flow;
+              this.hfH[i] = hi;
               const prevN = this.hfH[ni];
               this.hfH[ni] = prevN + flow;
 
-              // Copy PURE un-blended pigment from source grain to destination slot (zero muddy mixing!)
+              // Copy PURE un-blended pigment from source grain to destination slot (preserving dual-channel organic speckle!)
               const sp = i * 4;
               const dp = ni * 4;
               if (prevN < 0.002) {
@@ -980,11 +1048,11 @@ normal = normalize(normal + microN * 0.62);`
                 this.hfBytesA[dp + 1] = this.hfBytesA[sp + 1];
                 this.hfBytesA[dp + 2] = this.hfBytesA[sp + 2];
                 this.hfBytesA[dp + 3] = 255;
-                this.hfBytesB[dp] = this.hfBytesB[sp];
-                this.hfBytesB[dp + 1] = this.hfBytesB[sp + 1];
-                this.hfBytesB[dp + 2] = this.hfBytesB[sp + 2];
+                this.hfBytesB[dp] = this.hfBytesB[sp + 3] > 0 ? this.hfBytesB[sp] : this.hfBytesA[sp];
+                this.hfBytesB[dp + 1] = this.hfBytesB[sp + 3] > 0 ? this.hfBytesB[sp + 1] : this.hfBytesA[sp + 1];
+                this.hfBytesB[dp + 2] = this.hfBytesB[sp + 3] > 0 ? this.hfBytesB[sp + 2] : this.hfBytesA[sp + 2];
                 this.hfBytesB[dp + 3] = 255;
-              } else if (flow > 0.0012 && Math.random() < 0.45) {
+              } else if (flow > 0.0006 && Math.random() < 0.62) {
                 const src = Math.random() < 0.5 ? this.hfBytesB : this.hfBytesA;
                 const dst = Math.random() < 0.5 ? this.hfBytesA : this.hfBytesB;
                 if (src[sp + 3] > 0) {

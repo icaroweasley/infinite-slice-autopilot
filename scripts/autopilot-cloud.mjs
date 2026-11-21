@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { renderHeadlessVideo } from './render-headless.mjs';
 import { loadConfig, loadHistory, recordEntry } from './history-cli.mjs';
 import { buildEnglishCaption, publishReel } from './publish-reels.mjs';
+import { hasYouTubeCredentials, publishYouTubeShort } from './publish-youtube.mjs';
 import {
   AI_OBJECT_SUGGESTIONS,
   AI_CUTTER_SUGGESTIONS,
@@ -238,15 +239,16 @@ async function main() {
     `[env-check] GEMINI_API_KEY=${process.env.GEMINI_API_KEY ? 'present' : 'MISSING'} | ` +
     `IG_ACCESS_TOKEN=${process.env.IG_ACCESS_TOKEN ? 'present' : 'MISSING'} | ` +
     `IG_USER_ID=${process.env.IG_USER_ID ? 'present' : 'MISSING'} | ` +
+    `YT_SHORTS=${hasYouTubeCredentials() ? 'present' : 'not-set'} | ` +
     `CLOUDINARY=${process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_UPLOAD_PRESET ? 'present' : 'not-set'} | ` +
     `N8N_WEBHOOK_URL=${process.env.N8N_WEBHOOK_URL ? 'present' : 'not-set'}`
   );
 
-  // Fail-fast before spending minutes rendering if --publish is requested without credentials
-  if (shouldPublish && !dryRun && !process.env.N8N_WEBHOOK_URL && !process.env.IG_ACCESS_TOKEN) {
+  // Fail-fast before spending minutes rendering if --publish is requested without any publishing credentials
+  if (shouldPublish && !dryRun && !process.env.N8N_WEBHOOK_URL && !process.env.IG_ACCESS_TOKEN && !hasYouTubeCredentials()) {
     throw new Error(
-      'Cannot run with --publish: neither IG_ACCESS_TOKEN nor N8N_WEBHOOK_URL is set! ' +
-      'Add IG_ACCESS_TOKEN (and IG_USER_ID if using an EAA... token) under GitHub -> Settings -> Secrets and variables -> Actions -> Repository secrets.'
+      'Cannot run with --publish: neither IG_ACCESS_TOKEN, YouTube credentials, nor N8N_WEBHOOK_URL is set! ' +
+      'Add IG_ACCESS_TOKEN (or UPLOAD_POST_API_KEY / YT_REFRESH_TOKEN) under GitHub -> Settings -> Secrets and variables -> Actions -> Repository secrets.'
     );
   }
 
@@ -370,11 +372,26 @@ async function main() {
   });
 
   if (shouldPublish || dryRun) {
-    const pub = await publishReel({
-      videoPath: manifest.videoFile,
-      dryRun,
-      captionOverride: caption,
-    });
+    let pub = { provider: 'skipped' };
+    if (dryRun || process.env.IG_ACCESS_TOKEN || process.env.N8N_WEBHOOK_URL) {
+      pub = await publishReel({
+        videoPath: manifest.videoFile,
+        dryRun,
+        captionOverride: caption,
+      });
+    }
+    // Cross-post automatically to YouTube Shorts if YouTube credentials are configured
+    if (dryRun || hasYouTubeCredentials()) {
+      try {
+        await publishYouTubeShort({
+          videoPath: manifest.videoFile,
+          manifest,
+          dryRun,
+        });
+      } catch (ytErr) {
+        console.error('[autopilot] YouTube Shorts cross-post warning:', ytErr.message);
+      }
+    }
     if (cleanup && shouldPublish && !dryRun && pub.provider !== 'dry-run') {
       if (fs.existsSync(manifest.videoAbsolutePath)) {
         fs.unlinkSync(manifest.videoAbsolutePath);

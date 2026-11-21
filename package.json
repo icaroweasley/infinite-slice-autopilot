@@ -10,6 +10,9 @@
     "pipeline": "node scripts/run-pipeline.mjs",
     "history": "node scripts/history-cli.mjs",
     "publish": "node scripts/publish-reels.mjs",
+    "publish-youtube": "node scripts/publish-youtube.mjs",
+    "youtube-auth": "node scripts/setup-youtube-auth.mjs",
+    "youtube-repost-grid": "node scripts/repost-youtube-grid.mjs",
     "autopilot": "node scripts/autopilot-cloud.mjs",
     "package-buyer": "node scripts/package-buyer.mjs",
     "install-skill": "node scripts/install-skill.mjs"

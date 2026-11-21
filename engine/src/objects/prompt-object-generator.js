@@ -116,63 +116,88 @@ export function generateObjectFromPrompt(rawPrompt) {
 
   // --- Rich Viral Archetype Templates ---
 
-  // 1. Avocado (Abacate com caroço)
+  // 1. Photorealistic Hass Avocado (authentic tapered pear silhouette + pebbly Hass skin + chartreuse-to-cream flesh + pit)
   if (norm.includes('abacat') || norm.includes('avocado')) {
+    const pearFactor = (nx) => 1.0 - 0.44 * smoothstep(-0.12, 0.48, nx);
     return {
       id: 'prompt-custom',
       slug,
       name: prompt,
       englishName: 'Ripe Avocado',
-      subtitle: 'Casca verde escura + polpa cremosa + caroço marrom central',
-      bounds: { w: 2.15, h: 1.24, d: 1.56 },
-      gridRes: { x: 96, y: 60, z: 72 },
-      physics: { restitution: 0.14, friction: 0.64, cohesion: 0.72, density: 1.0, soundProfile: 'culinary' },
+      subtitle: 'Pebbly dark Hass skin + chartreuse rim + creamy pale flesh + glossy brown pit',
+      bounds: { w: 2.38, h: 1.26, d: 1.46 },
+      gridRes: { x: 108, y: 64, z: 76 },
+      physics: { restitution: 0.12, friction: 0.64, cohesion: 0.72, density: 1.0, soundProfile: 'culinary' },
       contains(nx, ny, nz) {
-        if (ny < 0 || ny > 1) return false;
-        const dx = nx / 0.48;
-        const dy = (ny - 0.48) / 0.49;
-        const dz = nz / 0.48;
-        const pear = 1.0 - 0.16 * smoothstep(0.1, 0.48, nx);
-        return (dx * dx) + (dy * dy + dz * dz) / (pear * pear) <= 1.0;
+        if (ny < 0.005 || ny > 0.995) return false;
+        const pf = pearFactor(nx);
+        const yCenter = 0.50 - (1.0 - pf) * 0.24;
+        const dx = nx / 0.485;
+        const dy = (ny - yCenter) / (0.485 * pf);
+        const dz = nz / (0.485 * pf);
+        return dx * dx + dy * dy + dz * dz <= 1.0;
       },
       sampleVolume(nx, ny, nz) {
-        const n = fbm3(nx * 18, ny * 18, nz * 18, 2);
-        const dx = nx / 0.48;
-        const dy = (ny - 0.48) / 0.49;
-        const dz = nz / 0.48;
-        const pear = 1.0 - 0.16 * smoothstep(0.1, 0.48, nx);
-        const r = Math.sqrt(dx * dx + (dy * dy + dz * dz) / (pear * pear));
-        // Brown wooden central pit
-        const pitR = Math.hypot((nx + 0.08) / 0.18, (ny - 0.48) / 0.24, nz / 0.20);
+        const n = fbm3(nx * 24, ny * 24, nz * 24, 3);
+        const pf = pearFactor(nx);
+        const yCenter = 0.50 - (1.0 - pf) * 0.24;
+        const dx = nx / 0.485;
+        const dy = (ny - yCenter) / (0.485 * pf);
+        const dz = nz / (0.485 * pf);
+        const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        // Rich mahogany-brown glossy wooden pit nestled inside the plump belly (peeks cleanly on first Z-slice!)
+        const pitR = Math.hypot((nx + 0.12) / 0.17, (ny - 0.46) / 0.25, nz / 0.27);
         if (pitR < 1.0) {
-          const woodRing = 0.5 + 0.5 * Math.sin(pitR * 22 + n * 3);
-          return { r: lerp(0.32, 0.48, woodRing), g: lerp(0.16, 0.26, woodRing), b: lerp(0.08, 0.14, woodRing), roughness: 0.48, metalness: 0.02, emissive: 0 };
+          const woodRing = 0.5 + 0.5 * Math.sin(pitR * 18 + n * 2.5);
+          const skinRim = smoothstep(0.82, 1.0, pitR);
+          return {
+            r: lerp(0.60, 0.38, skinRim) + woodRing * 0.05,
+            g: lerp(0.32, 0.17, skinRim) + woodRing * 0.03,
+            b: lerp(0.14, 0.07, skinRim),
+            roughness: 0.32,
+            metalness: 0.02,
+            emissive: 0,
+          };
         }
-        // Dark bumpy skin
-        if (r > 0.89) {
-          return { r: 0.07 + n * 0.04, g: 0.17 + n * 0.06, b: 0.06 + n * 0.03, roughness: 0.72, metalness: 0.02, emissive: 0 };
+
+        // Authentic juicy emerald-forest Hass avocado pebbly skin (roughness ~0.46 drives smooth GPU pebble bump!)
+        if (r > 0.905) {
+          return {
+            r: 0.055 + n * 0.032,
+            g: 0.255 + n * 0.065,
+            b: 0.052 + n * 0.024,
+            roughness: 0.46,
+            metalness: 0.02,
+            emissive: 0,
+          };
         }
-        // Rich green edge grading smoothly into creamy buttery yellow interior
-        const fleshT = smoothstep(0.42, 0.88, r);
+        // Thin vivid chartreuse-green layer just under the skin grading smoothly into creamy pale butter flesh
+        const fleshT = smoothstep(0.55, 0.90, r);
+        const deepRim = smoothstep(0.80, 0.905, r);
         return {
-          r: lerp(0.92, 0.34, fleshT),
-          g: lerp(0.90, 0.68, fleshT),
-          b: lerp(0.46, 0.16, fleshT),
-          roughness: 0.34,
+          r: lerp(0.92, 0.52, fleshT) * (1 - deepRim * 0.35),
+          g: lerp(0.95, 0.80, fleshT) * (1 - deepRim * 0.18),
+          b: lerp(0.72, 0.24, fleshT),
+          roughness: 0.30,
           metalness: 0.0,
-          emissive: 0.0,
+          emissive: 0,
         };
       },
       createOuterGeometry() {
         const { w, h, d } = this.bounds;
-        const geo = new THREE.SphereGeometry(0.5, 48, 34);
+        const geo = new THREE.SphereGeometry(0.5, 64, 44);
         const pos = geo.attributes.position;
         for (let i = 0; i < pos.count; i++) {
-          const ux = pos.getX(i) * 0.96;
+          const ux = pos.getX(i);
           const uy = pos.getY(i);
-          const uz = pos.getZ(i) * 0.96;
-          const pear = 1.0 - 0.16 * smoothstep(0.1, 0.48, ux);
-          pos.setXYZ(i, ux * w, clamp((uy * pear + 0.48) * h, 0, h), uz * pear * d);
+          const uz = pos.getZ(i);
+          const nx = ux * 0.97;
+          const pf = pearFactor(nx);
+          const yCenter = 0.50 - (1.0 - pf) * 0.24;
+          const ny = clamp(yCenter + uy * 0.97 * pf, 0.002, 0.998);
+          const nz = uz * 0.97 * pf;
+          pos.setXYZ(i, nx * w, ny * h, nz * d);
         }
         geo.computeVertexNormals();
         return geo;

@@ -127,13 +127,13 @@ export class VolumetricSolid {
   _createVolumetricMaterial(isCap) {
     const mat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.4,
-      metalness: 0.05,
+      roughness: 0.36,
+      metalness: 0.04,
       side: isCap ? THREE.FrontSide : THREE.DoubleSide,
     });
 
     const sharedUniforms = this.uniforms;
-    mat.customProgramCacheKey = () => (isCap ? 'volumetric-cap-v1' : 'volumetric-solid-v1');
+    mat.customProgramCacheKey = () => (isCap ? 'volumetric-cap-photoreal-v3' : 'volumetric-solid-photoreal-v3');
 
     mat.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, sharedUniforms);
@@ -143,12 +143,14 @@ export class VolumetricSolid {
         .replace(
           '#include <common>',
           `#include <common>
-varying vec3 vObjPos;`
+varying vec3 vObjPos;
+varying mat3 vObjToView;`
         )
         .replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
-vObjPos = position;`
+vObjPos = position;
+vObjToView = mat3(modelViewMatrix);`
         );
 
       shader.fragmentShader = shader.fragmentShader
@@ -171,9 +173,47 @@ uniform float uActiveAxis;
 uniform float uActiveDepth;
 uniform float uSandGrain;
 varying vec3 vObjPos;
+varying mat3 vObjToView;
 
-float evalCutLine(float coord01, float numCuts, float doneCuts, float isActive, float progressMask) {
-  if (numCuts < 0.5) return 0.0;
+float vHash3(vec3 p) {
+  p = fract(p * 0.3183099 + 0.1);
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+// Quintic C2 smooth 3D value noise (silky organic pebbles, zero blocky artifacts)
+float vNoise3(vec3 x) {
+  vec3 i = floor(x);
+  vec3 f = fract(x);
+  f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+  return mix(
+    mix(mix(vHash3(i + vec3(0.0, 0.0, 0.0)), vHash3(i + vec3(1.0, 0.0, 0.0)), f.x),
+        mix(vHash3(i + vec3(0.0, 1.0, 0.0)), vHash3(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+    mix(mix(vHash3(i + vec3(0.0, 0.0, 1.0)), vHash3(i + vec3(1.0, 0.0, 1.0)), f.x),
+        mix(vHash3(i + vec3(0.0, 1.0, 1.0)), vHash3(i + vec3(1.0, 1.0, 1.0)), f.x), f.y),
+    f.z
+  );
+}
+
+float surfaceMicroBump(vec3 p, float isCapFlag) {
+  if (isCapFlag > 0.5) {
+    return vNoise3(p * 30.0) * 0.65 + vNoise3(p * 60.0) * 0.35;
+  }
+  return vNoise3(p * 22.0) * 0.64 + vNoise3(p * 44.0) * 0.36;
+}
+
+// Analytical 3D finite-difference surface gradient (zero screen-space dFdx sparkle!)
+vec3 surfaceBumpGrad(vec3 p, float isCapFlag) {
+  float e = isCapFlag > 0.5 ? 0.004 : 0.0055;
+  float dx = surfaceMicroBump(p + vec3(e, 0.0, 0.0), isCapFlag) - surfaceMicroBump(p - vec3(e, 0.0, 0.0), isCapFlag);
+  float dy = surfaceMicroBump(p + vec3(0.0, e, 0.0), isCapFlag) - surfaceMicroBump(p - vec3(0.0, e, 0.0), isCapFlag);
+  float dz = surfaceMicroBump(p + vec3(0.0, 0.0, e), isCapFlag) - surfaceMicroBump(p - vec3(0.0, 0.0, e), isCapFlag);
+  return vec3(dx, dy, dz) / (2.0 * e);
+}
+
+// Returns vec2(grooveDarkness, signedBevelSlope) for crisp 3D V-groove cut slits
+vec2 evalCutLine(float coord01, float numCuts, float doneCuts, float isActive, float progressMask) {
+  if (numCuts < 0.5) return vec2(0.0);
   float stepLen = 1.0 / (numCuts + 1.0);
   // Cuts march from coord = 1.0 down toward 0.0
   float idxFromHigh = (1.0 - coord01) / stepLen;
@@ -185,16 +225,20 @@ float evalCutLine(float coord01, float numCuts, float doneCuts, float isActive, 
   } else if (isActive > 0.5 && abs(nearest - (doneCuts + 1.0)) < 0.49) {
     visible = progressMask;
   }
-  if (visible <= 0.001) return 0.0;
+  if (visible <= 0.001) return vec2(0.0);
 
-  float distCell = abs(idxFromHigh - nearest);
+  float signedDist = idxFromHigh - nearest;
+  float distCell = abs(signedDist);
   // Anti-aliased crisp groove that scales naturally from chunky 10-cut slits to silky 1,000-cut grain
   float fw = fwidth(idxFromHigh);
-  float halfW = max(0.032, min(0.24, fw * 0.65));
-  float line = 1.0 - smoothstep(halfW * 0.35, halfW, distCell);
+  float halfW = max(0.032, min(0.22, fw * 0.68));
+  float line = 1.0 - smoothstep(halfW * 0.28, halfW, distCell);
+  // Subtle V-groove shoulder lip just outside the hairline cut to catch crisp studio rim specular
+  float bevelBand = smoothstep(halfW * 0.2, halfW * 1.05, distCell) * (1.0 - smoothstep(halfW * 1.05, halfW * 2.4, distCell));
   // Gently soften contrast when grid cells become sub-pixel to eliminate moire
   float aaFade = 1.0 - smoothstep(0.65, 1.85, fw);
-  return line * visible * mix(0.28, 1.0, aaFade);
+  float strength = visible * mix(0.28, 1.0, aaFade);
+  return vec2(line * strength, sign(signedDist) * bevelBand * visible * aaFade);
 }`
         )
         .replace(
@@ -219,16 +263,24 @@ if (uIsCap > 0.5) {
 // Convert sRGB volume sample to linear space identically to THREE.Color sRGB->Linear
 vec3 volLinear = pow(max(volCol.rgb, vec3(0.0001)), vec3(2.2));
 
-// Exact phase-locked progressive X, Y, Z knife grooves
+// Exact phase-locked progressive X, Y, Z knife grooves + analytical V-groove bevel slopes
 float maskX = step(uActiveDepth, uvwClamped.y);
 float maskY = step(uActiveDepth, uvwClamped.x);
 float maskZ = step(uActiveDepth, uvwClamped.y);
 
-float cutX = evalCutLine(uvwClamped.x, uNumX, uDoneX, (uActiveAxis > 0.5 && uActiveAxis < 1.5) ? 1.0 : 0.0, maskX);
-float cutY = evalCutLine(uvwClamped.y, uNumY, uDoneY, (uActiveAxis > 1.5 && uActiveAxis < 2.5) ? 1.0 : 0.0, maskY);
-float cutZ = uIsCap > 0.5 ? 0.0 : evalCutLine(uvwClamped.z, uNumZ, uDoneZ, (uActiveAxis > 2.5) ? 1.0 : 0.0, maskZ);
+vec2 cutX = evalCutLine(uvwClamped.x, uNumX, uDoneX, (uActiveAxis > 0.5 && uActiveAxis < 1.5) ? 1.0 : 0.0, maskX);
+vec2 cutY = evalCutLine(uvwClamped.y, uNumY, uDoneY, (uActiveAxis > 1.5 && uActiveAxis < 2.5) ? 1.0 : 0.0, maskY);
+vec2 cutZ = uIsCap > 0.5 ? vec2(0.0) : evalCutLine(uvwClamped.z, uNumZ, uDoneZ, (uActiveAxis > 2.5) ? 1.0 : 0.0, maskZ);
 
-float cutIntensity = clamp(max(max(cutX, cutY), cutZ), 0.0, 1.0);
+float cutIntensity = clamp(max(max(cutX.x, cutY.x), cutZ.x), 0.0, 1.0);
+vec3 cutBevelObj = vec3(cutX.y, cutY.y, cutZ.y);
+
+// Multi-scale organic micro-bump height (drives subtle cavity AO & smooth 3D analytical normal map)
+float surfBump = surfaceMicroBump(volPos, uIsCap);
+float microAO = uIsCap > 0.5 ? mix(0.97, 1.02, surfBump) : mix(0.93, 1.04, surfBump);
+// Grounded contact ambient occlusion right where the object rests on the wooden board
+float boardAO = mix(0.72, 1.0, smoothstep(0.0, 0.14, uvwClamped.y));
+float capRimAO = uIsCap > 0.5 ? mix(0.86, 1.0, smoothstep(0.46, 0.64, volCol.a)) : 1.0;
 
 // Subtle fine granular kinetic-sand sparkle on exposed/scored faces at 500 & 1,000 cuts
 float grainSpark = 0.0;
@@ -238,19 +290,38 @@ if (uSandGrain > 0.01) {
   grainSpark = (gHash - 0.5) * 0.16 * uSandGrain * scoredRegion;
 }
 
-// Fresh internal cross-section looks crisp and slightly moist/bright; cut slits cast tight dark shadow
-vec3 shadedCol = volLinear * (1.0 - cutIntensity * 0.66) + vec3(grainSpark * 0.35);
+// Fresh internal cross-section looks crisp and velvety; cut slits cast tight dark shadow
+vec3 shadedCol = volLinear * microAO * boardAO * capRimAO * (1.0 - cutIntensity * 0.78) + vec3(grainSpark * 0.35);
 diffuseColor.rgb *= max(shadedCol, vec3(0.004));`
         )
         .replace(
           '#include <roughnessmap_fragment>',
           `#include <roughnessmap_fragment>
-roughnessFactor = clamp(volProps.r + cutIntensity * 0.35, 0.06, 0.96);`
+float sNonMetal = 1.0 - smoothstep(0.45, 0.85, volProps.g);
+float sBaseR = uIsCap > 0.5
+  ? clamp(volProps.r + 0.08, 0.28, 0.64)
+  : mix(volProps.r, min(volProps.r, 0.28), sNonMetal * smoothstep(0.28, 0.60, volProps.r));
+float microRoughVar = (surfBump - 0.5) * (uIsCap > 0.5 ? 0.05 : 0.10);
+roughnessFactor = clamp(sBaseR + microRoughVar + cutIntensity * 0.38, 0.06, 0.96);`
         )
         .replace(
           '#include <metalnessmap_fragment>',
           `#include <metalnessmap_fragment>
 metalnessFactor = clamp(volProps.g * (1.0 - cutIntensity * 0.7), 0.0, 0.96);`
+        )
+        .replace(
+          '#include <normal_fragment_maps>',
+          `#include <normal_fragment_maps>
+{
+  // Analytical 3D organic bump + crisp V-groove cut bevel (waxy Hass pebbles on rough fruit, silky gloss on smooth berries!)
+  float nonMetal = 1.0 - smoothstep(0.45, 0.85, metalnessFactor);
+  float organicAmt = smoothstep(0.24, 0.50, volProps.r);
+  float bumpStr = uIsCap > 0.5 ? 0.006 : mix(0.005, 0.032, organicAmt * nonMetal);
+  vec3 objGrad = surfaceBumpGrad(volPos, uIsCap) * bumpStr;
+  vec3 viewPerturb = vObjToView * (objGrad - cutBevelObj * 0.38);
+  vec3 tangPerturb = viewPerturb - normal * dot(viewPerturb, normal);
+  normal = normalize(normal - tangPerturb);
+}`
         )
         .replace(
           '#include <emissivemap_fragment>',

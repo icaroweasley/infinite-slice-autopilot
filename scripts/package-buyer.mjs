@@ -28,6 +28,8 @@ const EXCLUDE_NAMES = new Set([
   'CLOUD-AUTOPILOT.md',
   'autopilot-cloud.mjs',
   'package-buyer.mjs',
+  'repost-youtube-grid.mjs',
+  'youtube-repost-state.json',
 ]);
 
 function copyFiltered(src, dst) {

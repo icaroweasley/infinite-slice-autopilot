@@ -75,32 +75,38 @@ function makeCanvas(w, h) {
 }
 
 function makeWoodTexture(baseHex, grainHex, warm = true) {
-  const c = makeCanvas(512, 512);
+  const S = 1024;
+  const c = makeCanvas(S, S);
   const ctx = c.getContext('2d');
   ctx.fillStyle = baseHex;
-  ctx.fillRect(0, 0, 512, 512);
+  ctx.fillRect(0, 0, S, S);
 
-  const planks = 6;
-  const plankH = 512 / planks;
+  // Realistic butcher-block oak planks with subtle natural tonal shifts
+  const planks = 7;
+  const plankH = S / planks;
   for (let p = 0; p < planks; p++) {
-    ctx.fillStyle = p % 2 === 0 ? 'rgba(255,245,220,0.06)' : 'rgba(60,30,10,0.06)';
-    ctx.fillRect(0, p * plankH, 512, plankH);
-    ctx.fillStyle = 'rgba(40,22,8,0.18)';
-    ctx.fillRect(0, p * plankH, 512, 1.5);
+    const shade = Math.sin(p * 2.7 + 0.5) * 0.5 + 0.5;
+    ctx.fillStyle = shade > 0.5 ? 'rgba(255,244,218,0.08)' : 'rgba(65,36,12,0.075)';
+    ctx.fillRect(0, p * plankH, S, plankH);
+    ctx.fillStyle = 'rgba(42,24,10,0.22)';
+    ctx.fillRect(0, p * plankH, S, 2.0);
   }
 
-  for (let i = 0; i < 420; i++) {
-    const y = (i / 420) * 512;
+  // Fine directional wood fibers & subtle cathedral grain rings
+  for (let i = 0; i < 820; i++) {
+    const y = (i / 820) * S;
     ctx.strokeStyle = grainHex;
-    ctx.globalAlpha = 0.05 + (Math.sin(i * 1.9) * 0.5 + 0.5) * 0.11;
-    ctx.lineWidth = 0.8 + (i % 3) * 0.6;
+    ctx.globalAlpha = 0.035 + (Math.sin(i * 1.7) * 0.5 + 0.5) * 0.095;
+    ctx.lineWidth = 0.7 + (i % 4) * 0.45;
     ctx.beginPath();
     ctx.moveTo(0, y);
-    for (let x = 0; x <= 512; x += 32) {
-      ctx.lineTo(x, y + Math.sin(x * 0.015 + i * 0.17) * (warm ? 3.2 : 1.8));
+    for (let x = 0; x <= S; x += 48) {
+      const wave = Math.sin(x * 0.008 + i * 0.11) * (warm ? 4.2 : 2.2) + Math.cos(x * 0.022 - i * 0.07) * 1.4;
+      ctx.lineTo(x, y + wave);
     }
     ctx.stroke();
   }
+  ctx.globalAlpha = 1.0;
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -322,7 +328,7 @@ export class EnvironmentManager {
     this.textures = {
       honeyWood: makeWoodTexture('#c89c67', '#7b4f26', true),
       rusticWood: makeWoodTexture('#5c3921', '#2a1609', true),
-      darkTiles: makeSubwayTileTexture('#1b302a', '#0c1613', 14),
+      darkTiles: makeSubwayTileTexture('#273d36', '#15231f', 16),
       lightTiles: makeSubwayTileTexture('#e8edf2', '#cfd7df', 8),
       obsidian: makeMarbleTexture('#0b0c10', '#161820', 'rgba(235,192,92,0.62)', 'rgba(198,154,68,0.28)'),
       whiteMarble: makeMarbleTexture('#f4f5f7', '#e8ebef', 'rgba(120,130,145,0.42)', 'rgba(160,170,185,0.22)'),
@@ -630,28 +636,28 @@ export class EnvironmentManager {
       this.wallMat.roughness = 0.34;
       this.wallMat.metalness = 0.08;
 
-      // Commercial hero lighting: ALWAYS bright, crisp, and vibrant on mobile screens
-      this.scene.environmentIntensity = isLight ? 0.78 : 0.66;
+      // High-contrast studio hero lighting: crisp highlights & deep board shadows without flat washout
+      this.scene.environmentIntensity = isLight ? 0.58 : 0.48;
       hemi.color.set('#ffffff');
-      hemi.groundColor.set(isLight ? '#d8d4cc' : '#524b42');
-      hemi.intensity = isLight ? 1.38 : 1.18;
+      hemi.groundColor.set(isLight ? '#c8c4bc' : '#3a342c');
+      hemi.intensity = isLight ? 0.96 : 0.78;
 
       key.color.set(isWarm ? '#fff1d6' : '#ffffff');
-      key.intensity = isLight ? 3.15 : 3.45;
+      key.intensity = isLight ? 3.25 : 3.55;
 
       const fillCol = baseCol.clone().offsetHSL(0.06, 0.12, 0.45);
       const fHsl = { h: 0, s: 0, l: 0 };
       fillCol.getHSL(fHsl);
       fillCol.setHSL(fHsl.h, Math.min(fHsl.s, isNeon ? 0.65 : 0.25), Math.max(0.76, fHsl.l));
       fill.color.copy(fillCol);
-      fill.intensity = isNeon ? 1.65 : 1.35;
+      fill.intensity = isNeon ? 1.15 : 0.76;
 
       const rimCol = isWarm ? new THREE.Color('#ffd48a') : baseCol.clone().offsetHSL(0.45, 0.22, 0.45);
       const rHsl = { h: 0, s: 0, l: 0 };
       rimCol.getHSL(rHsl);
       rimCol.setHSL(rHsl.h, Math.min(rHsl.s, isNeon ? 0.78 : 0.45), Math.max(0.72, rHsl.l));
       rim.color.copy(rimCol);
-      rim.intensity = isNeon ? 1.9 : 1.55;
+      rim.intensity = isNeon ? 1.65 : 1.35;
 
       this.wallMat.needsUpdate = true;
       this.counterMat.needsUpdate = true;
@@ -659,113 +665,113 @@ export class EnvironmentManager {
     }
 
     if (id === 'classic-viral') {
-      this.scene.background = new THREE.Color('#182b26');
-      this.scene.environmentIntensity = 0.66;
-      this.counterMat.color.set('#222a2d');
-      this.counterMat.roughness = 0.50;
-      this.counterMat.metalness = 0.12;
-      this.wallMat.color.set('#ffffff');
+      this.scene.background = new THREE.Color('#13211d');
+      this.scene.environmentIntensity = 0.44;
+      this.counterMat.color.set('#1f2322');
+      this.counterMat.roughness = 0.56;
+      this.counterMat.metalness = 0.08;
+      this.wallMat.color.set('#dce8e3');
       this.wallMat.map = this.textures.darkTiles;
-      this.wallMat.roughness = 0.24;
-      this.wallMat.metalness = 0.10;
-      hemi.color.set('#f2faf8'); hemi.groundColor.set('#4c4134'); hemi.intensity = 1.22;
-      key.color.set('#fff6e8'); key.intensity = 3.25;
-      fill.color.set('#cdeaf4'); fill.intensity = 1.28;
-      rim.color.set('#ffe2b8'); rim.intensity = 1.35;
+      this.wallMat.roughness = 0.44;
+      this.wallMat.metalness = 0.04;
+      hemi.color.set('#edf6f3'); hemi.groundColor.set('#33281e'); hemi.intensity = 0.72;
+      key.color.set('#fff5e4'); key.intensity = 3.55;
+      fill.color.set('#bce0ed'); fill.intensity = 0.62;
+      rim.color.set('#ffdcb0'); rim.intensity = 1.25;
     } else if (id === 'glass-lab') {
-      this.scene.background = new THREE.Color('#e4ebf2');
-      this.scene.environmentIntensity = 0.78;
-      this.counterMat.color.set('#f2f5f9');
+      this.scene.background = new THREE.Color('#dfe7f0');
+      this.scene.environmentIntensity = 0.58;
+      this.counterMat.color.set('#edf2f7');
       this.counterMat.roughness = 0.34;
       this.counterMat.metalness = 0.04;
-      this.wallMat.color.set('#f8fafc');
+      this.wallMat.color.set('#f4f7fb');
       this.wallMat.map = this.textures.lightTiles;
       this.wallMat.roughness = 0.26;
       this.wallMat.metalness = 0.04;
-      hemi.color.set('#ffffff'); hemi.groundColor.set('#d5e0ea'); hemi.intensity = 1.35;
-      key.color.set('#ffffff'); key.intensity = 2.85;
-      fill.color.set('#d4e9ff'); fill.intensity = 1.25;
-      rim.color.set('#b4f7ec'); rim.intensity = 1.15;
+      hemi.color.set('#ffffff'); hemi.groundColor.set('#c4d2e0'); hemi.intensity = 0.96;
+      key.color.set('#ffffff'); key.intensity = 3.20;
+      fill.color.set('#d4e9ff'); fill.intensity = 0.82;
+      rim.color.set('#b4f7ec'); rim.intensity = 1.10;
     } else if (id === 'tropical-leaf') {
-      this.scene.background = new THREE.Color('#342416');
-      this.scene.environmentIntensity = 0.68;
-      this.counterMat.color.set('#4a311e');
+      this.scene.background = new THREE.Color('#2c1e12');
+      this.scene.environmentIntensity = 0.48;
+      this.counterMat.color.set('#442c1a');
       this.counterMat.map = this.textures.rusticWood;
       this.counterMat.roughness = 0.72;
       this.counterMat.metalness = 0.02;
-      this.wallMat.color.set('#413122');
+      this.wallMat.color.set('#38291b');
       this.wallMat.roughness = 0.80;
       this.wallMat.metalness = 0.02;
-      hemi.color.set('#fff0d1'); hemi.groundColor.set('#553b22'); hemi.intensity = 1.25;
-      key.color.set('#ffd99e'); key.intensity = 3.45;
-      fill.color.set('#bce8b3'); fill.intensity = 1.15;
-      rim.color.set('#ffbe6e'); rim.intensity = 1.45;
+      hemi.color.set('#fff0d1'); hemi.groundColor.set('#442d18'); hemi.intensity = 0.84;
+      key.color.set('#ffd99e'); key.intensity = 3.55;
+      fill.color.set('#bce8b3'); fill.intensity = 0.72;
+      rim.color.set('#ffbe6e'); rim.intensity = 1.35;
     } else if (id === 'luxury-obsidian') {
-      this.scene.background = new THREE.Color('#14161e');
-      this.scene.environmentIntensity = 0.68;
-      this.counterMat.color.set('#1c1f29');
+      this.scene.background = new THREE.Color('#10121a');
+      this.scene.environmentIntensity = 0.50;
+      this.counterMat.color.set('#181b24');
       this.counterMat.roughness = 0.38;
       this.counterMat.metalness = 0.22;
-      this.wallMat.color.set('#222531');
+      this.wallMat.color.set('#1e212d');
       this.wallMat.roughness = 0.68;
       this.wallMat.metalness = 0.12;
-      hemi.color.set('#eef2ff'); hemi.groundColor.set('#4a3d2a'); hemi.intensity = 1.12;
-      key.color.set('#fff5e0'); key.intensity = 3.55;
-      fill.color.set('#b8c7eb'); fill.intensity = 1.22;
-      rim.color.set('#ffd47d'); rim.intensity = 1.85;
+      hemi.color.set('#eef2ff'); hemi.groundColor.set('#382d1e'); hemi.intensity = 0.76;
+      key.color.set('#fff5e0'); key.intensity = 3.65;
+      fill.color.set('#b8c7eb'); fill.intensity = 0.74;
+      rim.color.set('#ffd47d'); rim.intensity = 1.75;
     } else if (id === 'pro-kitchen') {
-      this.scene.background = new THREE.Color('#1f2630');
-      this.scene.environmentIntensity = 0.72;
-      this.counterMat.color.set('#323b47');
+      this.scene.background = new THREE.Color('#1a2029');
+      this.scene.environmentIntensity = 0.54;
+      this.counterMat.color.set('#2c3540');
       this.counterMat.roughness = 0.36;
       this.counterMat.metalness = 0.56;
-      this.wallMat.color.set('#36414f');
+      this.wallMat.color.set('#303a47');
       this.wallMat.map = this.textures.steel;
       this.wallMat.roughness = 0.42;
       this.wallMat.metalness = 0.48;
-      hemi.color.set('#f0f7ff'); hemi.groundColor.set('#3d4957'); hemi.intensity = 1.24;
-      key.color.set('#ffffff'); key.intensity = 3.25;
-      fill.color.set('#bedcf7'); fill.intensity = 1.28;
-      rim.color.set('#ffe4c4'); rim.intensity = 1.35;
+      hemi.color.set('#f0f7ff'); hemi.groundColor.set('#303a47'); hemi.intensity = 0.84;
+      key.color.set('#ffffff'); key.intensity = 3.45;
+      fill.color.set('#bedcf7'); fill.intensity = 0.78;
+      rim.color.set('#ffe4c4'); rim.intensity = 1.30;
     } else if (id === 'frozen-block') {
-      this.scene.background = new THREE.Color('#16324a');
-      this.scene.environmentIntensity = 0.74;
-      this.counterMat.color.set('#1e405e');
+      this.scene.background = new THREE.Color('#122a3f');
+      this.scene.environmentIntensity = 0.56;
+      this.counterMat.color.set('#1a3854');
       this.counterMat.roughness = 0.25;
       this.counterMat.metalness = 0.16;
-      this.wallMat.color.set('#21486b');
+      this.wallMat.color.set('#1d4060');
       this.wallMat.roughness = 0.38;
       this.wallMat.metalness = 0.10;
-      hemi.color.set('#d9f3ff'); hemi.groundColor.set('#285275'); hemi.intensity = 1.30;
-      key.color.set('#eefaff'); key.intensity = 3.20;
-      fill.color.set('#99d6ff'); fill.intensity = 1.35;
-      rim.color.set('#ccf7ff'); rim.intensity = 1.55;
+      hemi.color.set('#d9f3ff'); hemi.groundColor.set('#204464'); hemi.intensity = 0.88;
+      key.color.set('#eefaff'); key.intensity = 3.40;
+      fill.color.set('#99d6ff'); fill.intensity = 0.85;
+      rim.color.set('#ccf7ff'); rim.intensity = 1.45;
     } else if (id === 'cyberpunk-neon') {
-      this.scene.background = new THREE.Color('#130f26');
-      this.scene.environmentIntensity = 0.65;
-      this.counterMat.color.set('#1e1738');
+      this.scene.background = new THREE.Color('#100c20');
+      this.scene.environmentIntensity = 0.48;
+      this.counterMat.color.set('#1a1432');
       this.counterMat.roughness = 0.28;
       this.counterMat.metalness = 0.38;
-      this.wallMat.color.set('#261d45');
+      this.wallMat.color.set('#22193e');
       this.wallMat.roughness = 0.44;
       this.wallMat.metalness = 0.22;
-      hemi.color.set('#d5f9ff'); hemi.groundColor.set('#58218a'); hemi.intensity = 1.15;
-      key.color.set('#faf8ff'); key.intensity = 3.15;
-      fill.color.set('#7dd3fc'); fill.intensity = 1.65;
-      rim.color.set('#fb7185'); rim.intensity = 1.95;
+      hemi.color.set('#d5f9ff'); hemi.groundColor.set('#451a6e'); hemi.intensity = 0.78;
+      key.color.set('#faf8ff'); key.intensity = 3.35;
+      fill.color.set('#7dd3fc'); fill.intensity = 1.15;
+      rim.color.set('#fb7185'); rim.intensity = 1.80;
     } else if (id === 'sunset-terracotta') {
-      this.scene.background = new THREE.Color('#4f2b21');
-      this.scene.environmentIntensity = 0.72;
-      this.counterMat.color.set('#754032');
+      this.scene.background = new THREE.Color('#44241b');
+      this.scene.environmentIntensity = 0.52;
+      this.counterMat.color.set('#68382b');
       this.counterMat.roughness = 0.54;
       this.counterMat.metalness = 0.04;
-      this.wallMat.color.set('#914e3b');
+      this.wallMat.color.set('#824433');
       this.wallMat.roughness = 0.68;
       this.wallMat.metalness = 0.02;
-      hemi.color.set('#fff3e0'); hemi.groundColor.set('#6b331c'); hemi.intensity = 1.28;
-      key.color.set('#ffdda6'); key.intensity = 3.35;
-      fill.color.set('#fecdd3'); fill.intensity = 1.18;
-      rim.color.set('#fdba74'); rim.intensity = 1.55;
+      hemi.color.set('#fff3e0'); hemi.groundColor.set('#562816'); hemi.intensity = 0.86;
+      key.color.set('#ffdda6'); key.intensity = 3.55;
+      fill.color.set('#fecdd3'); fill.intensity = 0.74;
+      rim.color.set('#fdba74'); rim.intensity = 1.45;
     }
 
     this.wallMat.needsUpdate = true;

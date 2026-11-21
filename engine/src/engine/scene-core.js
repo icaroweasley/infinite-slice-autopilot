@@ -69,16 +69,16 @@ export class InfiniteSliceEngine {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 1.08;
     this.renderer.localClippingEnabled = true;
 
     this.scene = new THREE.Scene();
 
-    // Studio softbox IBL (PMREM RoomEnvironment) so metallic blades, marble, glass, and glossy interiors gleam crisply
+    // Studio softbox IBL (PMREM RoomEnvironment) balanced for rich specular highlights without washing out shadows
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
     this.scene.environment = this.envRT.texture;
-    this.scene.environmentIntensity = 0.56;
+    this.scene.environmentIntensity = 0.44;
     pmrem.dispose();
 
     // Locked 3/4 isometric perspective camera tuned specifically for 9:16 vertical composition
@@ -86,29 +86,29 @@ export class InfiniteSliceEngine {
     this.camera.position.set(5.85, 7.55, 8.10);
     this.camera.lookAt(0.0, 0.34, 0.14);
 
-    // 3-Point + Overhead Softbox Studio Lighting Rig
-    const hemi = new THREE.HemisphereLight(0xf2f7f5, 0x483f36, 1.15);
+    // High-Contrast Commercial Cinema 3-Point Studio Lighting Rig
+    const hemi = new THREE.HemisphereLight(0xf0f7f4, 0x30271e, 0.68);
     this.scene.add(hemi);
 
-    const key = new THREE.DirectionalLight(0xfff6e8, 3.25);
-    key.position.set(5.2, 10.6, 5.8);
+    const key = new THREE.DirectionalLight(0xfff5e4, 3.45);
+    key.position.set(4.6, 10.4, 4.4);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
     key.shadow.camera.near = 2.0;
-    key.shadow.camera.far = 26.0;
-    key.shadow.camera.left = -4.2;
-    key.shadow.camera.right = 4.2;
-    key.shadow.camera.top = 4.2;
-    key.shadow.camera.bottom = -4.2;
-    key.shadow.bias = -0.0005;
-    key.shadow.normalBias = 0.018;
+    key.shadow.camera.far = 24.0;
+    key.shadow.camera.left = -3.1;
+    key.shadow.camera.right = 3.1;
+    key.shadow.camera.top = 3.1;
+    key.shadow.camera.bottom = -3.1;
+    key.shadow.bias = -0.0004;
+    key.shadow.normalBias = 0.015;
     this.scene.add(key);
 
-    const fill = new THREE.DirectionalLight(0xd4ecff, 1.25);
-    fill.position.set(-5.6, 6.8, 5.4);
+    const fill = new THREE.DirectionalLight(0xc2e2f7, 0.62);
+    fill.position.set(-5.8, 6.2, 5.0);
     this.scene.add(fill);
 
-    const rim = new THREE.DirectionalLight(0xffe1b8, 1.35);
+    const rim = new THREE.DirectionalLight(0xffddb0, 1.25);
     rim.position.set(-2.5, 6.4, -6.2);
     this.scene.add(rim);
 

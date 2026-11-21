@@ -69,12 +69,18 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.8-flash' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Publishing Method A (n8n / Make webhook) OR Method B (Meta Graph API + Cloudinary)
+          # Publishing Method A (n8n / Make webhook) OR Method B (Meta Graph API direct upload)
           N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
           CLOUDINARY_UPLOAD_PRESET: ${{ secrets.CLOUDINARY_UPLOAD_PRESET }}
+          # Optional YouTube Shorts Cross-Posting (Upload-Post pre-audited OR Direct YouTube Data API v3)
+          UPLOAD_POST_API_KEY: ${{ secrets.UPLOAD_POST_API_KEY }}
+          UPLOAD_POST_USER: ${{ secrets.UPLOAD_POST_USER }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
         run: |
           FLAGS="--res 720x1280 --fps 30 --scale 0.78"
           if [ "${{ inputs.quick }}" = "true" ]; then
