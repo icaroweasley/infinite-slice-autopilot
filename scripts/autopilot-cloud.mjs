@@ -85,24 +85,24 @@ ${previousError ? `\nPREVIOUS BUILD FAILED WITH THIS ERROR — FIX IT:\n${previo
 }
 
 const CLOUD_EN_OBJECTS = [
-  'Vibrant Pink Dragon Fruit with white seed-speckled core',
-  'Ripe Avocado with glossy wooden pit',
-  'Cracked Obsidian Volcano with glowing magma core',
-  'Luxury Gold Mechanical Watch with internal gears',
-  'Transparent Crystal Heart filled with molten gold',
-  'Wagyu A5 Marble Steak with fine white marbling',
-  'Artisan Swiss Cheese Block with real hollow 3D holes',
-  'Matcha Mille-Crepe Cake with 14 alternating layers',
-  'Giant Neon Jawbreaker with 12 concentric candy rings',
+  'Giant Glossy Red Strawberry with emerald green leaves',
+  'Sweet Striped Watermelon with juicy red seeded flesh',
+  'Ripe Tropical Mango with sunset blush skin',
+  'Pepperoni Pizza with melted mozzarella and golden crust',
   'Stack of 100 Dollar Bills bound with a gold band',
-  'Blue Cut Diamond with radiant glowing core',
-  'Mirror Pokeball with cyan plasma core',
+  'Stack of 6 golden pancakes with melting butter and maple syrup',
+  'Swiss chocolate bar blocks stuffed with molten caramel',
+  'Seared Wagyu A5 Marble Steak with fine white marbling',
+  'Artisan Swiss Cheese Block with real hollow 3D holes',
   'Clay Brick hiding a rainbow layer cake inside',
-  'Arctic Ice Block with frozen pirate gold coins',
-  'Ripe Red Pomegranate packed with ruby seeds',
+  'Vibrant Pink Dragon Fruit with white seed-speckled core',
+  'Cracked Obsidian Volcano with glowing magma core',
+  'Uramaki Salmon Sushi Roll with sesame rice and nori',
+  'Mirror Pokeball with cyan plasma core',
   'Nintendo Switch OLED with copper circuit board inside',
+  'Ripe Avocado with glossy wooden pit',
   'Galaxy Purple Translucent Soap with gold mica veins',
-  'Italian Tiramisu Cake with espresso and cocoa layers',
+  'Blue Cut Diamond with radiant glowing core',
 ];
 
 const CLOUD_EN_CUTTERS = [

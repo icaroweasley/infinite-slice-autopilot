@@ -595,6 +595,400 @@ export function generateObjectFromPrompt(rawPrompt) {
     };
   }
 
+  // 11. Giant Glossy Red Strawberry (44M+ view viral icon — leafy green crown + golden seeds + juicy star core!)
+  if (norm.includes('morang') || norm.includes('strawberr')) {
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Giant Glossy Strawberry',
+      subtitle: 'Crimson seeded berry + bright emerald crown + juicy white-pink star interior',
+      bounds: { w: 1.68, h: 1.82, d: 1.68 },
+      gridRes: { x: 92, y: 92, z: 92 },
+      physics: { restitution: 0.14, friction: 0.62, cohesion: 0.72, density: 0.95, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        if (ny < 0.01 || ny > 0.99) return false;
+        const rXZ = Math.hypot(nx / 0.48, nz / 0.48);
+        // Leafy 5-petal green crown on top (ny in 0.80..0.98)
+        if (ny > 0.80) {
+          const ang = Math.atan2(nz, nx);
+          const leafRadius = 0.22 + 0.56 * Math.pow(0.5 + 0.5 * Math.cos(ang * 5.0), 1.6);
+          const crownDrop = smoothstep(0.98, 0.82, ny);
+          if (rXZ < leafRadius * crownDrop && ny < 0.94) return true;
+        }
+        // Plump conical-heart berry body (wide shoulders near top, tapered sweet tip at bottom or lying plumply)
+        const y01 = clamp(ny / 0.86, 0, 1);
+        const profile = Math.sin(Math.pow(y01, 0.72) * Math.PI) * (0.68 + 0.36 * Math.sin(y01 * Math.PI * 0.85));
+        return rXZ <= Math.max(0.02, profile);
+      },
+      sampleVolume(nx, ny, nz) {
+        const rXZ = Math.hypot(nx / 0.48, nz / 0.48);
+        const ang = Math.atan2(nz, nx);
+        const n = fbm3(nx * 18, ny * 18, nz * 18, 2);
+
+        // Bright emerald leafy calyx crown on top
+        if (ny > 0.79) {
+          const leafWave = 0.5 + 0.5 * Math.cos(ang * 5.0);
+          if (ny > 0.83 || (rXZ < 0.25 + 0.50 * leafWave && ny > 0.80)) {
+            return {
+              r: lerp(0.10, 0.22, leafWave),
+              g: lerp(0.54, 0.74, leafWave + n * 0.12),
+              b: lerp(0.12, 0.20, leafWave),
+              roughness: 0.44,
+              metalness: 0.02,
+              emissive: 0,
+            };
+          }
+        }
+
+        const y01 = clamp(ny / 0.86, 0, 1);
+        const profile = Math.max(0.05, Math.sin(Math.pow(y01, 0.72) * Math.PI) * (0.68 + 0.36 * Math.sin(y01 * Math.PI * 0.85)));
+        const normR = rXZ / profile;
+
+        // Glossy crimson skin with recessed tiny golden seeds!
+        if (normR > 0.88) {
+          const seedU = fract((ang / (Math.PI * 2)) * 18 + Math.floor(ny * 14) * 0.5);
+          const seedV = fract(ny * 14);
+          const seedD = Math.hypot(seedU - 0.5, seedV - 0.5);
+          if (seedD < 0.16 && ny > 0.10 && ny < 0.78) {
+            return { r: 0.96, g: 0.82, b: 0.28, roughness: 0.38, metalness: 0.04, emissive: 0 };
+          }
+          return { r: 0.88 + n * 0.06, g: 0.07 + n * 0.03, b: 0.11 + n * 0.03, roughness: 0.18, metalness: 0.04, emissive: 0.02 };
+        }
+
+        // Authentic strawberry cross-section: vibrant red outer flesh -> pinkish-white star core!
+        const star = 0.10 * Math.cos(ang * 5.0);
+        const coreT = smoothstep(0.18, 0.62, normR + star);
+        return {
+          r: lerp(0.99, 0.90, coreT),
+          g: lerp(0.88, 0.15, coreT),
+          b: lerp(0.86, 0.19, coreT),
+          roughness: 0.26,
+          metalness: 0.02,
+          emissive: 0.02,
+        };
+      },
+      createOuterGeometry() {
+        const { w, h, d } = this.bounds;
+        // Plump berry body + merged 5-petal leafy crown
+        const body = new THREE.SphereGeometry(0.5, 48, 36);
+        const bPos = body.attributes.position;
+        for (let i = 0; i < bPos.count; i++) {
+          const ux = bPos.getX(i);
+          const uy = bPos.getY(i);
+          const uz = bPos.getZ(i);
+          const y01 = clamp(uy + 0.5, 0, 1);
+          const rHoriz = Math.hypot(ux, uz);
+          const targetR = Math.sin(Math.pow(y01, 0.72) * Math.PI) * (0.68 + 0.36 * Math.sin(y01 * Math.PI * 0.85)) * 0.48;
+          const scale = rHoriz > 1e-5 ? targetR / rHoriz : 0;
+          bPos.setXYZ(i, ux * scale * w, y01 * h * 0.86, uz * scale * d);
+        }
+        body.computeVertexNormals();
+
+        // Leafy green star calyx sitting on top
+        const crown = new THREE.CylinderGeometry(0.06, 0.44, h * 0.15, 40, 4);
+        const cPos = crown.attributes.position;
+        for (let i = 0; i < cPos.count; i++) {
+          const cx = cPos.getX(i);
+          const cy = cPos.getY(i);
+          const cz = cPos.getZ(i);
+          const ang = Math.atan2(cz, cx);
+          const petal = 0.42 + 0.58 * Math.pow(0.5 + 0.5 * Math.cos(ang * 5.0), 1.5);
+          cPos.setXYZ(i, cx * petal * w * 0.92, cy + h * 0.865, cz * petal * d * 0.92);
+        }
+        crown.computeVertexNormals();
+
+        // Merge body + crown into single clean BufferGeometry
+        const bNon = body.toNonIndexed();
+        const cNon = crown.toNonIndexed();
+        const pA = bNon.attributes.position.array;
+        const pB = cNon.attributes.position.array;
+        const nA = bNon.attributes.normal.array;
+        const nB = cNon.attributes.normal.array;
+        const mergedPos = new Float32Array(pA.length + pB.length);
+        mergedPos.set(pA, 0);
+        mergedPos.set(pB, pA.length);
+        const mergedNorm = new Float32Array(nA.length + nB.length);
+        mergedNorm.set(nA, 0);
+        mergedNorm.set(nB, nA.length);
+        const out = new THREE.BufferGeometry();
+        out.setAttribute('position', new THREE.BufferAttribute(mergedPos, 3));
+        out.setAttribute('normal', new THREE.BufferAttribute(mergedNorm, 3));
+        body.dispose(); crown.dispose(); bNon.dispose(); cNon.dispose();
+        return out;
+      },
+    };
+  }
+
+  // 12. Striped Sweet Watermelon (12.8M+ view viral icon — striped emerald rind + white ring + ruby flesh + black seeds!)
+  if (norm.includes('melanc') || norm.includes('watermelon')) {
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Sweet Striped Watermelon',
+      subtitle: 'Striped emerald rind + crisp white ring + vibrant ruby red seeded flesh',
+      bounds: { w: 2.26, h: 1.48, d: 1.66 },
+      gridRes: { x: 100, y: 68, z: 76 },
+      physics: { restitution: 0.14, friction: 0.58, cohesion: 0.70, density: 1.0, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        if (ny < 0.01 || ny > 0.99) return false;
+        const dx = nx / 0.485;
+        const dy = (ny - 0.5) / 0.485;
+        const dz = nz / 0.485;
+        return dx * dx + dy * dy + dz * dz <= 1.0;
+      },
+      sampleVolume(nx, ny, nz) {
+        const dx = nx / 0.485;
+        const dy = (ny - 0.5) / 0.485;
+        const dz = nz / 0.485;
+        const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const n = fbm3(nx * 16, ny * 16, nz * 16, 2);
+
+        // Dark green / bright lime jagged stripes on outer rind
+        if (r > 0.895) {
+          const theta = Math.atan2(dy, dz);
+          const stripe = Math.sin(theta * 9.0 + n * 2.4 + Math.sin(nx * 12) * 0.45);
+          const isDark = stripe > 0.05;
+          return {
+            r: isDark ? 0.05 : 0.24,
+            g: isDark ? 0.24 + n * 0.04 : 0.56 + n * 0.06,
+            b: isDark ? 0.08 : 0.14,
+            roughness: 0.24,
+            metalness: 0.03,
+            emissive: 0,
+          };
+        }
+        // Crisp pale white-green inner rind ring
+        if (r > 0.815) {
+          const t = smoothstep(0.815, 0.895, r);
+          return {
+            r: lerp(0.95, 0.84, t),
+            g: lerp(0.97, 0.92, t),
+            b: lerp(0.86, 0.72, t),
+            roughness: 0.34,
+            metalness: 0.01,
+            emissive: 0,
+          };
+        }
+        // Glossy black teardrop seeds arranged in natural inner ring (r in 0.42..0.70)
+        if (r > 0.36 && r < 0.74) {
+          const gx = Math.floor((nx + 0.5) * 14);
+          const gy = Math.floor(ny * 10);
+          const gz = Math.floor((nz + 0.5) * 12);
+          const h1 = hash3(gx, gy, gz);
+          if (h1 > 0.74) {
+            const fx = fract((nx + 0.5) * 14) - 0.5;
+            const fy = fract(ny * 10) - 0.5;
+            const fz = fract((nz + 0.5) * 12) - 0.5;
+            if (Math.hypot(fx, fy * 0.85, fz) < 0.26) {
+              return { r: 0.06, g: 0.05, b: 0.05, roughness: 0.22, metalness: 0.06, emissive: 0 };
+            }
+          }
+        }
+        // Ultra-juicy ruby-red watermelon flesh
+        const centerSweet = 1.0 - smoothstep(0.0, 0.82, r) * 0.14;
+        return {
+          r: clamp(0.96 * centerSweet + n * 0.04, 0, 1),
+          g: clamp(0.14 + (1 - centerSweet) * 0.14 + n * 0.03, 0, 1),
+          b: clamp(0.20 + n * 0.03, 0, 1),
+          roughness: 0.22,
+          metalness: 0.02,
+          emissive: 0.03,
+        };
+      },
+      createOuterGeometry() {
+        return makeSphereGeo(this.bounds.w, this.bounds.h, this.bounds.d);
+      },
+    };
+  }
+
+  // 13. Ripe Tropical Mango (21.2M+ view viral icon — sunset red-yellow-green skin + juicy saffron flesh + flat pit!)
+  if (norm.includes('manga') || norm.includes('mango')) {
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Ripe Tropical Mango',
+      subtitle: 'Sunset blush skin + vibrant saffron-orange flesh + flat pale central pit',
+      bounds: { w: 2.15, h: 1.24, d: 1.50 },
+      gridRes: { x: 96, y: 60, z: 72 },
+      physics: { restitution: 0.14, friction: 0.60, cohesion: 0.72, density: 1.0, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        if (ny < 0.01 || ny > 0.99) return false;
+        const dx = nx / 0.485;
+        const dy = (ny - 0.5) / 0.48;
+        const dz = nz / 0.48;
+        const taper = 1.0 - 0.14 * smoothstep(0.05, 0.48, nx);
+        return dx * dx + (dy * dy + dz * dz) / (taper * taper) <= 1.0;
+      },
+      sampleVolume(nx, ny, nz) {
+        const dx = nx / 0.485;
+        const dy = (ny - 0.5) / 0.48;
+        const dz = nz / 0.48;
+        const taper = 1.0 - 0.14 * smoothstep(0.05, 0.48, nx);
+        const r = Math.sqrt(dx * dx + (dy * dy + dz * dz) / (taper * taper));
+        const n = fbm3(nx * 14, ny * 14, nz * 14, 2);
+
+        // Flat fibrous pale mango pit at center
+        const pit = Math.hypot(nx / 0.28, (ny - 0.5) / 0.12, nz / 0.24);
+        if (pit < 1.0) {
+          return { r: 0.90 + n * 0.05, g: 0.84 + n * 0.05, b: 0.66, roughness: 0.68, metalness: 0, emissive: 0 };
+        }
+        // Sunset red -> golden yellow -> fresh lime skin
+        if (r > 0.89) {
+          const grad = clamp(nx + 0.5 + (ny - 0.5) * 0.45 + n * 0.08, 0, 1);
+          if (grad < 0.45) {
+            const t = grad / 0.45;
+            return { r: lerp(0.86, 0.98, t), g: lerp(0.18, 0.72, t), b: lerp(0.14, 0.12, t), roughness: 0.26, metalness: 0.03, emissive: 0 };
+          }
+          const t = (grad - 0.45) / 0.55;
+          return { r: lerp(0.98, 0.34, t), g: lerp(0.72, 0.70, t), b: lerp(0.12, 0.18, t), roughness: 0.26, metalness: 0.03, emissive: 0 };
+        }
+        // Juicy vibrant saffron-golden mango flesh
+        return { r: 0.99, g: 0.68 + n * 0.05, b: 0.09, roughness: 0.24, metalness: 0.02, emissive: 0.02 };
+      },
+      createOuterGeometry() {
+        const geo = makeSphereGeo(this.bounds.w, this.bounds.h, this.bounds.d);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i);
+          const y = pos.getY(i);
+          const z = pos.getZ(i);
+          const taper = 1.0 - 0.14 * smoothstep(0.05, 0.48, x / this.bounds.w);
+          pos.setXYZ(i, x, (y - this.bounds.h * 0.5) * taper + this.bounds.h * 0.5, z * taper);
+        }
+        geo.computeVertexNormals();
+        return geo;
+      },
+    };
+  }
+
+  // 14. Pepperoni Pizza (4.2M+ view viral icon — golden crust + mozzarella + red pepperoni slices!)
+  if (norm.includes('pizza')) {
+    const peps = [
+      [0.0, 0.0], [0.22, 0.14], [-0.22, 0.16], [0.20, -0.18], [-0.20, -0.16],
+      [0.0, 0.27], [0.02, -0.27], [0.30, -0.02], [-0.30, 0.0],
+    ];
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Pepperoni Pizza',
+      subtitle: 'Crispy golden crust + melted mozzarella + rich tomato sauce + glossy pepperoni',
+      bounds: { w: 2.38, h: 0.44, d: 2.38 },
+      gridRes: { x: 100, y: 28, z: 100 },
+      physics: { restitution: 0.10, friction: 0.72, cohesion: 0.76, density: 0.9, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        const r = Math.hypot(nx, nz);
+        if (r > 0.49 || ny < 0) return false;
+        const crustRim = smoothstep(0.36, 0.46, r);
+        const maxY = lerp(0.72, 1.0, crustRim);
+        return ny <= maxY;
+      },
+      sampleVolume(nx, ny, nz) {
+        const r = Math.hypot(nx, nz);
+        const n = fbm3(nx * 20, ny * 18, nz * 20, 2);
+        // Outer golden baked crust + dough base
+        if (r > 0.39 || ny < 0.34) {
+          const bake = smoothstep(0.34, 0.95, ny) * smoothstep(0.37, 0.48, r);
+          return {
+            r: lerp(0.88, 0.76, bake) + n * 0.05,
+            g: lerp(0.68, 0.46, bake) + n * 0.04,
+            b: lerp(0.36, 0.20, bake),
+            roughness: 0.76,
+            metalness: 0,
+            emissive: 0,
+          };
+        }
+        // Rich red tomato sauce middle layer
+        if (ny < 0.50) {
+          return { r: 0.78, g: 0.12, b: 0.09, roughness: 0.36, metalness: 0, emissive: 0 };
+        }
+        // Pepperoni slices on top of melted mozzarella
+        for (const [px, pz] of peps) {
+          const dPep = Math.hypot(nx - px, nz - pz);
+          if (dPep < 0.088 && ny > 0.56) {
+            const fatSpeck = hash3(Math.floor(nx * 60), Math.floor(nz * 60), 3) > 0.88;
+            return {
+              r: fatSpeck ? 0.94 : 0.72,
+              g: fatSpeck ? 0.66 : 0.12,
+              b: fatSpeck ? 0.54 : 0.10,
+              roughness: 0.28,
+              metalness: 0.02,
+              emissive: 0,
+            };
+          }
+        }
+        // Melted golden-cream mozzarella cheese
+        return { r: 0.98, g: 0.86 + n * 0.04, b: 0.46 + n * 0.06, roughness: 0.34, metalness: 0.01, emissive: 0 };
+      },
+      createOuterGeometry() {
+        const { w, h, d } = this.bounds;
+        const geo = new THREE.CylinderGeometry(0.49, 0.48, h, 56, 10);
+        geo.translate(0, h * 0.5, 0);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const ux = pos.getX(i);
+          const uy = pos.getY(i);
+          const uz = pos.getZ(i);
+          const r = Math.hypot(ux, uz);
+          const crust = smoothstep(0.36, 0.46, r);
+          const topScale = lerp(0.72, 1.0, crust);
+          pos.setXYZ(i, ux * w, uy > h * 0.4 ? uy * topScale : uy, uz * d);
+        }
+        geo.computeVertexNormals();
+        return geo;
+      },
+    };
+  }
+
+  // 15. Stack of $100 Dollar Bills (526K+ view viral icon — layered green paper stack + currency strap!)
+  if (norm.includes('dolar') || norm.includes('dollar') || norm.includes('cash') || norm.includes('money') || norm.includes('dinheir') || norm.includes('nota')) {
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Stack of $100 Dollar Bills',
+      subtitle: 'Crisp stacked green banknotes with printed borders & currency strap',
+      bounds: { w: 2.30, h: 0.96, d: 1.18 },
+      gridRes: { x: 96, y: 48, z: 54 },
+      physics: { restitution: 0.10, friction: 0.68, cohesion: 0.80, density: 1.1, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        return ny >= 0 && ny <= 1 && Math.abs(nx) <= 0.5 && Math.abs(nz) <= 0.5;
+      },
+      sampleVolume(nx, ny, nz) {
+        // White/gold bank currency strap around middle
+        if (Math.abs(nx) < 0.11 && (ny > 0.94 || ny < 0.06 || Math.abs(nz) > 0.47)) {
+          const stripe = Math.abs(nx) > 0.08;
+          return { r: stripe ? 0.94 : 0.96, g: stripe ? 0.72 : 0.94, b: stripe ? 0.16 : 0.86, roughness: 0.62, metalness: 0.04, emissive: 0 };
+        }
+        // Crisp individual banknote paper striations along Y
+        const sheet = Math.sin(ny * 155.0) * 0.5 + 0.5;
+        if (ny > 0.92) {
+          // Top $100 face print pattern
+          const border = Math.abs(nx) > 0.43 || Math.abs(nz) > 0.41;
+          const oval = Math.hypot(nx / 0.14, nz / 0.24) < 1.0 && Math.hypot(nx / 0.11, nz / 0.19) > 0.72;
+          if (border) return { r: 0.86, g: 0.90, b: 0.82, roughness: 0.74, metalness: 0, emissive: 0 };
+          if (oval) return { r: 0.18, g: 0.36, b: 0.22, roughness: 0.72, metalness: 0, emissive: 0 };
+          return { r: 0.52, g: 0.72, b: 0.50, roughness: 0.74, metalness: 0, emissive: 0 };
+        }
+        // Layered green & cream paper stack
+        return {
+          r: lerp(0.46, 0.76, sheet),
+          g: lerp(0.68, 0.84, sheet),
+          b: lerp(0.44, 0.72, sheet),
+          roughness: 0.78,
+          metalness: 0,
+          emissive: 0,
+        };
+      },
+      createOuterGeometry() {
+        return makeRoundedBoxGeo(this.bounds.w, this.bounds.h, this.bounds.d, 24);
+      },
+    };
+  }
+
   // --- Universal Semantic Composer (generates ANY arbitrary user prompt!) ---
   const seed = hashString(norm || 'mystery');
   const matchedColors = [];
