@@ -63,7 +63,7 @@ function hashPromptSeed(str) {
 }
 
 function parseHexColor(norm, fallback) {
-  if (norm.includes('lavand') || norm.includes('lilas') || norm.includes('lilac')) return '#a78bfa';
+  if (norm.includes('lavand') || norm.includes('lavend') || norm.includes('lilas') || norm.includes('lilac')) return '#a78bfa';
   if (norm.includes('rox') || norm.includes('purple') || norm.includes('violet') || norm.includes('ametist') || norm.includes('plum')) return '#6d28d9';
   if (norm.includes('sakura') || norm.includes('blush') || norm.includes('pastel pink')) return '#f472b6';
   if (norm.includes('coral') || norm.includes('salmao') || norm.includes('peach') || norm.includes('pesseg')) return '#fb7185';
@@ -680,7 +680,9 @@ export class EnvironmentManager {
     if (surfaceId === 'custom' && customPrompt.trim()) {
       const norm = normalizeText(customPrompt);
       const seed = hashPromptSeed(norm);
-      const colHex = parseHexColor(norm, '#b88c58');
+      // Strip secondary vein/chip/accent clause before picking the primary base material color!
+      const baseOnlyNorm = norm.replace(/\b(with|com)\s+.*$/, '').trim() || norm;
+      const colHex = parseHexColor(baseOnlyNorm, parseHexColor(norm, '#b88c58'));
       this.boardMat.color.set(colHex);
       this.rimMat.color.set(colHex).multiplyScalar(0.6);
 

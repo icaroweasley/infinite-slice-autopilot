@@ -60,9 +60,9 @@ export function buildCutterTool(cutterId = 'chef-knife', customPrompt = '') {
   let forceGlow = false;
   if (cutterId === 'custom' || (customPrompt && customPrompt.trim().length > 0)) {
     if (norm.includes('sabre') || norm.includes('laser') || norm.includes('plasma') || norm.includes('luz')) style = 'lightsaber';
+    else if (norm.includes('cutelo') || norm.includes('cleaver') || norm.includes('machad') || norm.includes('axe')) style = 'cleaver';
     else if (norm.includes('1000') || norm.includes('quente') || norm.includes('fogo') || norm.includes('brasa') || norm.includes('lava')) style = 'hot-knife-1000c';
     else if (norm.includes('katana') || norm.includes('samurai') || norm.includes('espada') || norm.includes('sword')) style = 'katana';
-    else if (norm.includes('cutelo') || norm.includes('cleaver') || norm.includes('machad') || norm.includes('axe')) style = 'cleaver';
     else if (norm.includes('cartao') || norm.includes('card') || norm.includes('carta')) style = 'credit-card';
     else if (norm.includes('espatula') || norm.includes('regua') || norm.includes('scraper')) style = 'steel-scraper';
     else if (norm.includes('serra') || norm.includes('saw')) style = 'saw';
@@ -91,10 +91,10 @@ export function buildCutterTool(cutterId = 'chef-knife', customPrompt = '') {
     bladeGeo.translate(0, 0.06, -0.02);
 
     bladeMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
+      color: saberCol,
       emissive: saberCol,
-      emissiveIntensity: 2.2,
-      roughness: 0.1,
+      emissiveIntensity: 1.45,
+      roughness: 0.12,
       metalness: 0.0,
     });
     const coreMesh = new THREE.Mesh(bladeGeo, bladeMat);
@@ -102,13 +102,13 @@ export function buildCutterTool(cutterId = 'chef-knife', customPrompt = '') {
     bladeMatsToFade.push(bladeMat);
 
     // Outer translucent plasma glow sheath
-    const auraGeo = new THREE.CylinderGeometry(0.105, 0.105, 3.10, 18);
+    const auraGeo = new THREE.CylinderGeometry(0.115, 0.115, 3.12, 18);
     auraGeo.rotateX(Math.PI * 0.5);
     auraGeo.translate(0, 0.06, -0.02);
     edgeMat = new THREE.MeshBasicMaterial({
       color: saberCol,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
