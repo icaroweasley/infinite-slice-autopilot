@@ -35,7 +35,7 @@ const EXCLUDE_NAMES = new Set([
 function copyFiltered(src, dst) {
   const stat = fs.statSync(src);
   const base = path.basename(src);
-  if (EXCLUDE_NAMES.has(base)) return;
+  if (EXCLUDE_NAMES.has(base) || base.endsWith('.zip')) return;
 
   if (stat.isDirectory()) {
     fs.mkdirSync(dst, { recursive: true });

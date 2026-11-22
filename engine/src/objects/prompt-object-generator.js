@@ -595,149 +595,308 @@ export function generateObjectFromPrompt(rawPrompt) {
     };
   }
 
-  // 11. Giant Glossy Red Strawberry (44M+ view viral icon — leafy green crown + golden seeds + juicy star core!)
+  // 11. Giant Glossy Red Strawberry (44.2M+ view #1 viral icon — true broad-shoulder heart silhouette + sculpted 7-petal emerald calyx & curved stem!)
   if (norm.includes('morang') || norm.includes('strawberr')) {
+    // u = 0 at broad leafy crown shoulder (+X), u = 1 at pointed glossy heart tip (-X)
+    // Peak width occurs at u = 0.31 (plump, rounded organic strawberry shoulder), tapering smoothly to a sweet heart tip.
+    const berryRadius = (u) => {
+      if (u <= 0 || u >= 1) return 0;
+      return 0.485 * (Math.pow(u, 0.33) * Math.pow(1.0 - u, 0.72)) / 0.517;
+    };
+    // Subtle organic 5-lobed fullness + natural resting cheek on the cutting board
+    const berryLobe = (ang, u) => 1.0 + 0.032 * Math.cos(ang * 5.0 + 0.4) * Math.sin(u * Math.PI);
+    const berryYCenter = (u) => {
+      const r = berryRadius(u);
+      return 0.49 - Math.max(0, 0.47 - r) * 0.22;
+    };
+
+    const BERRY_X0 = -0.47; // pointed heart tip (-X)
+    const BERRY_X1 = 0.33;  // broad flat-rounded shoulder (+X)
+    const BERRY_SPAN = BERRY_X1 - BERRY_X0; // 0.80
+
     return {
       id: 'prompt-custom',
       slug,
       name: prompt,
       englishName: 'Giant Glossy Strawberry',
-      subtitle: 'Crimson seeded berry + bright emerald crown + juicy white-pink star interior',
-      bounds: { w: 1.68, h: 1.82, d: 1.68 },
-      gridRes: { x: 92, y: 92, z: 92 },
+      subtitle: 'Plump ruby heart-berry with dimpled golden seeds + sculpted 7-leaf emerald calyx & juicy star core',
+      bounds: { w: 2.18, h: 1.48, d: 1.54 },
+      gridRes: { x: 108, y: 76, z: 76 },
       physics: { restitution: 0.14, friction: 0.62, cohesion: 0.72, density: 0.95, soundProfile: 'culinary' },
       contains(nx, ny, nz) {
-        if (ny < 0.01 || ny > 0.99) return false;
-        const rXZ = Math.hypot(nx / 0.48, nz / 0.48);
-        // Leafy 5-petal green crown on top (ny in 0.80..0.98)
-        if (ny > 0.80) {
-          const ang = Math.atan2(nz, nx);
-          const leafRadius = 0.22 + 0.56 * Math.pow(0.5 + 0.5 * Math.cos(ang * 5.0), 1.6);
-          const crownDrop = smoothstep(0.99, 0.83, ny);
-          if (rXZ < leafRadius * crownDrop && ny < 0.965) return true;
+        if (ny < 0.005 || ny > 0.995) return false;
+        // 1. Plump conical heart-berry (nx in [-0.47, +0.33])
+        if (nx >= BERRY_X0 && nx <= BERRY_X1) {
+          const u = clamp((BERRY_X1 - nx) / BERRY_SPAN, 0, 1);
+          const yc = berryYCenter(u);
+          const dy = (ny - yc) / 0.97;
+          const dz = nz / 0.97;
+          const ang = Math.atan2(dz, dy);
+          const maxR = berryRadius(u) * berryLobe(ang, u);
+          if (Math.hypot(dy, dz) <= maxR) return true;
         }
-        // Plump conical-heart berry body (wide shoulders near top, tapered sweet tip at bottom or lying plumply)
-        const y01 = clamp(ny / 0.86, 0, 1);
-        const profile = Math.sin(Math.pow(y01, 0.72) * Math.PI) * (0.68 + 0.36 * Math.sin(y01 * Math.PI * 0.85));
-        return rXZ <= Math.max(0.02, profile);
-      },
-      sampleVolume(nx, ny, nz) {
-        const rXZ = Math.hypot(nx / 0.48, nz / 0.48);
-        const ang = Math.atan2(nz, nx);
-        const n = fbm3(nx * 18, ny * 18, nz * 18, 2);
-
-        // Bright emerald leafy calyx crown on top (veined 5-petal star!)
-        if (ny > 0.77) {
-          const leafWave = 0.5 + 0.5 * Math.cos(ang * 5.0);
-          const vein = Math.pow(0.5 + 0.5 * Math.cos(ang * 25.0), 4.0) * 0.12;
-          if (ny > 0.815 || (rXZ < 0.34 + 0.64 * leafWave && ny > 0.78)) {
-            return {
-              r: clamp(lerp(0.08, 0.20, leafWave) + vein * 0.4, 0, 1),
-              g: clamp(lerp(0.50, 0.74, leafWave) + n * 0.08 + vein, 0, 1),
-              b: clamp(lerp(0.10, 0.18, leafWave) + vein * 0.2, 0, 1),
-              roughness: 0.40,
-              metalness: 0.02,
-              emissive: 0,
-            };
+        // 2. Curved emerald stem on crown (+X: nx in [0.32, 0.48])
+        if (nx >= 0.32 && nx <= 0.48) {
+          const st = (nx - 0.32) / 0.16;
+          const stemY = 0.49 + Math.pow(st, 1.5) * 0.075;
+          const rStem = Math.hypot(ny - stemY, nz);
+          if (rStem <= lerp(0.072, 0.044, st)) return true;
+        }
+        // 3. Seven pointed emerald calyx leaves hugging & flaring off the broad shoulder (nx in [0.14, 0.36])
+        if (nx >= 0.14 && nx <= 0.36) {
+          const dy = ny - 0.49;
+          const ang = Math.atan2(nz, dy);
+          const rYZ = Math.hypot(dy, nz);
+          const petal = Math.pow(0.5 + 0.5 * Math.cos(ang * 7.0), 1.6);
+          const uLeaf = clamp((0.35 - nx) / 0.21, 0, 1);
+          const uBerry = clamp((BERRY_X1 - nx) / BERRY_SPAN, 0, 1);
+          const surfR = berryRadius(uBerry) * berryLobe(ang, uBerry);
+          const leafR = Math.max(0.06, surfR) + 0.025 + uLeaf * 0.055;
+          if (uLeaf <= 0.24 + 0.76 * petal && rYZ <= leafR + 0.035 && rYZ >= Math.max(0.02, surfR - 0.01)) {
+            return true;
           }
         }
+        return false;
+      },
+      sampleVolume(nx, ny, nz) {
+        const n = fbm3(nx * 22, ny * 22, nz * 22, 2);
+        const nFine = fbm3(nx * 56, ny * 56, nz * 56, 2);
 
-        const y01 = clamp(ny / 0.86, 0, 1);
-        const profile = Math.max(0.05, Math.sin(Math.pow(y01, 0.72) * Math.PI) * (0.68 + 0.36 * Math.sin(y01 * Math.PI * 0.85)));
-        const normR = rXZ / profile;
+        const uBerry = clamp((BERRY_X1 - nx) / BERRY_SPAN, 0, 1);
+        const yc = berryYCenter(uBerry);
+        const dyB = (ny - yc) / 0.97;
+        const dzB = nz / 0.97;
+        const angYZ = Math.atan2(dzB, dyB);
+        const bRad = berryRadius(uBerry) * berryLobe(angYZ, uBerry);
+        const rBerry = Math.hypot(dyB, dzB);
+        const inBerryCore = nx >= BERRY_X0 && nx <= BERRY_X1 - 0.012 && rBerry <= bRad * 0.995;
 
-        // Glossy crimson skin with smooth anti-aliased golden ovoid seeds nestled inside subtle ruby dimples!
-        if (normR > 0.88) {
-          const nFine = fbm3(nx * 42, ny * 42, nz * 42, 2);
-          const seedU = fract((ang / (Math.PI * 2)) * 20 + Math.floor(ny * 15) * 0.5);
-          const seedV = fract(ny * 15);
-          const seedD = Math.hypot((seedU - 0.5) * 1.15, (seedV - 0.5) * 0.85);
-          if (ny > 0.08 && ny < 0.78) {
-            const seedMask = 1.0 - smoothstep(0.11, 0.16, seedD);
-            const dimpleShade = 1.0 - (1.0 - smoothstep(0.14, 0.30, seedD)) * 0.24;
-            const shoulder = smoothstep(0.66, 0.82, ny);
-            const baseR = lerp(0.86, 0.94, shoulder) * dimpleShade + nFine * 0.04;
-            const baseG = lerp(0.06, 0.22, shoulder) * dimpleShade + nFine * 0.02;
-            const baseB = lerp(0.10, 0.20, shoulder) * dimpleShade;
+        // Pure lush emerald calyx leaves & stem (100% outside berry core -> ZERO red bleed!)
+        if (!inBerryCore && nx >= 0.12) {
+          const dyStem = ny - 0.49;
+          const angL = Math.atan2(nz, dyStem);
+          const leafRidge = Math.pow(0.5 + 0.5 * Math.cos(angL * 7.0), 1.4);
+          const vein = Math.pow(0.5 + 0.5 * Math.cos(angL * 28.0), 3.0) * 0.11;
+          const isStem = nx > 0.335;
+          const tipFade = smoothstep(0.34, 0.15, nx);
+          return {
+            r: clamp((isStem ? 0.15 : lerp(0.07, 0.17, leafRidge + tipFade * 0.25)) + vein * 0.25, 0, 1),
+            g: clamp((isStem ? 0.54 : lerp(0.38, 0.68, leafRidge)) + n * 0.07 + vein, 0, 1),
+            b: clamp((isStem ? 0.10 : lerp(0.06, 0.14, leafRidge)) + vein * 0.15, 0, 1),
+            roughness: isStem ? 0.52 : 0.38,
+            metalness: 0.02,
+            emissive: 0,
+          };
+        }
+
+        const normR = bRad > 0.02 ? rBerry / bRad : 1.0;
+
+        // Glossy ruby strawberry skin with recessed golden teardrop seeds
+        if (normR > 0.87) {
+          const seedRows = 12.0;
+          const seedCols = 17.0;
+          const rowIdx = Math.floor(uBerry * seedRows);
+          const seedU = fract((angYZ / (Math.PI * 2) + 1.0) * seedCols + (rowIdx % 2) * 0.5);
+          const seedV = fract(uBerry * seedRows);
+          // Teardrop seed shape slightly elongated along berry axis
+          const sdX = (seedU - 0.5) * 1.45;
+          const sdY = (seedV - 0.5) * 0.92;
+          const seedD = Math.hypot(sdX, sdY);
+          if (uBerry > 0.08 && uBerry < 0.92) {
+            const seedMask = 1.0 - smoothstep(0.11, 0.165, seedD);
+            const dimpleShade = 1.0 - (1.0 - smoothstep(0.15, 0.36, seedD)) * 0.30;
+            // Slightly lighter blush-red near leafy crown shoulder (uBerry -> 0), richer ruby toward tip
+            const crownBlush = 1.0 - smoothstep(0.04, 0.24, uBerry);
+            const tipRich = smoothstep(0.68, 0.98, uBerry);
+            const baseR = lerp(0.87, 0.94, crownBlush) * lerp(1.0, 0.86, tipRich) * dimpleShade + nFine * 0.025;
+            const baseG = lerp(0.045, 0.24, crownBlush) * dimpleShade + nFine * 0.015;
+            const baseB = lerp(0.075, 0.19, crownBlush) * dimpleShade;
             return {
-              r: lerp(baseR, 0.96, seedMask),
-              g: lerp(baseG, 0.80, seedMask),
-              b: lerp(baseB, 0.24, seedMask),
-              roughness: lerp(0.16, 0.40, seedMask),
+              r: clamp(lerp(baseR, 0.95, seedMask), 0, 1),
+              g: clamp(lerp(baseG, 0.77, seedMask), 0, 1),
+              b: clamp(lerp(baseB, 0.22, seedMask), 0, 1),
+              roughness: lerp(0.13, 0.38, seedMask),
               metalness: 0.03,
               emissive: 0.01,
             };
           }
-          return { r: 0.88 + n * 0.05, g: 0.07 + n * 0.03, b: 0.11 + n * 0.03, roughness: 0.16, metalness: 0.03, emissive: 0.01 };
+          return { r: 0.84 + n * 0.04, g: 0.05 + n * 0.02, b: 0.08 + n * 0.02, roughness: 0.14, metalness: 0.03, emissive: 0.01 };
         }
 
-        // Authentic strawberry cross-section: vibrant red outer flesh -> pinkish-white star core!
-        const star = 0.10 * Math.cos(ang * 5.0);
-        const coreT = smoothstep(0.18, 0.62, normR + star);
+        // Hyper-appetizing sliced strawberry interior: crimson outer cortex -> pink-red vascular rays -> creamy white pith ring -> ruby heart center!
+        const rays = 0.075 * Math.cos(angYZ * 9.0) + 0.035 * Math.cos(angYZ * 5.0);
+        const rStar = normR + rays * smoothstep(0.15, 0.75, normR);
+        // White-pink pith ring peaks around normR = 0.30..0.46
+        const whiteRing = Math.exp(-Math.pow((rStar - 0.36) / 0.16, 2.0));
+        const outerRuby = smoothstep(0.46, 0.84, rStar);
+        const innerHeart = 1.0 - smoothstep(0.08, 0.26, rStar);
+
+        let ir = lerp(0.96, 0.85, outerRuby);
+        let ig = lerp(0.42, 0.07, outerRuby);
+        let ib = lerp(0.46, 0.11, outerRuby);
+
+        // Blend creamy juicy white-pink ring
+        ir = lerp(ir, 0.99, whiteRing * 0.78);
+        ig = lerp(ig, 0.86, whiteRing * 0.78);
+        ib = lerp(ib, 0.84, whiteRing * 0.78);
+
+        // Juicy crimson center core
+        ir = lerp(ir, 0.91, innerHeart * 0.75);
+        ig = lerp(ig, 0.24, innerHeart * 0.75);
+        ib = lerp(ib, 0.28, innerHeart * 0.75);
+
         return {
-          r: lerp(0.99, 0.90, coreT),
-          g: lerp(0.88, 0.15, coreT),
-          b: lerp(0.86, 0.19, coreT),
-          roughness: 0.24,
-          metalness: 0.02,
-          emissive: 0.02,
+          r: clamp(ir + nFine * 0.03, 0, 1),
+          g: clamp(ig + nFine * 0.02, 0, 1),
+          b: clamp(ib + nFine * 0.02, 0, 1),
+          roughness: 0.18,
+          metalness: 0.01,
+          emissive: 0.015,
         };
       },
       createOuterGeometry() {
         const { w, h, d } = this.bounds;
-        // Smooth 64x48 plump berry body + merged 5-petal leafy crown (preserving non-overlapping UV groups!)
+        // --- PART 0: Plump sculpted conical heart-berry with real 3D seed dimples ---
         const body = new THREE.SphereGeometry(0.5, 64, 48);
+        body.rotateZ(-Math.PI * 0.5); // poles along X: ux in [-0.5, +0.5]
         const bPos = body.attributes.position;
         for (let i = 0; i < bPos.count; i++) {
           const ux = bPos.getX(i);
           const uy = bPos.getY(i);
           const uz = bPos.getZ(i);
-          const y01 = clamp(uy + 0.5, 0, 1);
-          const rHoriz = Math.hypot(ux, uz);
-          const targetR = Math.sin(Math.pow(y01, 0.72) * Math.PI) * (0.68 + 0.36 * Math.sin(y01 * Math.PI * 0.85)) * 0.48;
-          const scale = rHoriz > 1e-5 ? targetR / rHoriz : 0;
-          bPos.setXYZ(i, ux * scale * w, y01 * h * 0.86, uz * scale * d);
+          // u = 0 at +X crown shoulder, u = 1 at -X pointed heart tip
+          const u = clamp(0.5 - ux, 0, 1);
+          const nx = BERRY_X1 - u * BERRY_SPAN;
+          const rYZ = Math.hypot(uy, uz);
+          const ang = Math.atan2(uz, uy);
+          const targetR = berryRadius(u) * berryLobe(ang, u);
+          const yc = berryYCenter(u);
+          const rowIdx = Math.floor(u * 12.0);
+          const sU = fract((ang / (Math.PI * 2) + 1.0) * 17.0 + (rowIdx % 2) * 0.5);
+          const sV = fract(u * 12.0);
+          const sD = Math.hypot((sU - 0.5) * 1.45, (sV - 0.5) * 0.92);
+          const dimple = (u > 0.08 && u < 0.92) ? (1.0 - smoothstep(0.08, 0.26, sD)) * 0.018 : 0;
+          const finalR = Math.max(0.001, targetR - dimple);
+          const sc = rYZ > 1e-5 ? finalR / rYZ : 0;
+          let ny = yc + uy * sc * 0.97;
+          // Gentle natural flat contact where berry rests on cutting board
+          if (ny < 0.04) ny = 0.004 + (ny / 0.04) * 0.036;
+          ny = clamp(ny, 0.004, 0.996);
+          const nz = uz * sc * 0.97;
+          bPos.setXYZ(i, nx * w, ny * h, nz * d);
         }
         body.computeVertexNormals();
 
-        // Leafy green star calyx sitting cleanly above berry shoulders (ny >= 0.81)
-        const crown = new THREE.CylinderGeometry(0.05, 0.44, h * 0.13, 56, 6);
-        const cPos = crown.attributes.position;
-        for (let i = 0; i < cPos.count; i++) {
-          const cx = cPos.getX(i);
-          const cy = cPos.getY(i);
-          const cz = cPos.getZ(i);
-          const ang = Math.atan2(cz, cx);
-          const petal = 0.42 + 0.58 * Math.pow(0.5 + 0.5 * Math.cos(ang * 5.0), 1.5);
-          cPos.setXYZ(i, cx * petal * w * 0.92, cy + h * 0.895, cz * petal * d * 0.92);
-        }
-        crown.computeVertexNormals();
+        // --- PART 1: Seven individual 3D curved pointed emerald calyx sepals (star rosette hugging & flaring over crown — ZERO clipping!) ---
+        const sepalCount = 7;
+        const sepalGeos = [];
+        for (let p = 0; p < sepalCount; p++) {
+          const baseAng = (p / sepalCount) * Math.PI * 2 + 0.22;
+          const lenSpan = 0.165 + (p % 2) * 0.032;
+          const halfArc = 0.34 + (p % 3) * 0.025;
+          const curlLift = 0.052 + (p % 2) * 0.024;
+          const leaf = new THREE.BoxGeometry(1.0, 1.0, 1.0, 12, 6, 1);
+          const lPos = leaf.attributes.position;
+          const lUv = leaf.attributes.uv;
+          for (let i = 0; i < lPos.count; i++) {
+            const s = lPos.getX(i) + 0.5;   // 0 = stem center, 1 = pointed leaf tip
+            const vW = lPos.getY(i) * 2.0;  // [-1, +1] across leaf blade width
+            const vT = lPos.getZ(i);        // [-0.5, +0.5] leaf blade thickness
 
-        // Merge body + crown preserving position, normal, uv, and 2 distinct UV groups for Ultra-HD baking!
+            // Wide lush emerald base fanning across the shoulder -> razor-pointed fluttering tip
+            const widthEnv = Math.sin(Math.pow(s, 0.62) * Math.PI) * (1.0 - s * 0.10) + (1.0 - s) * 0.22;
+            const ang = baseAng + vW * halfArc * widthEnv;
+
+            // Sweep radially out across the crown face (s=0..0.4), then curve gently back over the berry shoulders (s=0.4..1.0)
+            const nx = 0.346 - Math.pow(s, 1.85) * lenSpan;
+            let rad;
+            let yc;
+            if (nx >= BERRY_X1 - 0.004) {
+              // Sweeping across the crown face right in front of the berry shoulder
+              yc = berryYCenter(0.03);
+              rad = lerp(0.045, 0.385, Math.min(1, s / 0.42));
+            } else {
+              const uRef = clamp((BERRY_X1 - nx) / BERRY_SPAN, 0.01, 0.55);
+              yc = berryYCenter(uRef);
+              const surfR = berryRadius(uRef) * berryLobe(ang, uRef);
+              // Mathematically guaranteed OUTSIDE berry skin (+0.026..+0.085) so entire emerald rosette is 100% visible!
+              rad = Math.max(lerp(0.045, 0.46, s), surfR + 0.028 + Math.pow(s, 1.7) * curlLift);
+            }
+            const thickOff = vT * 0.022;
+            const ny = clamp(yc + Math.cos(ang) * (rad + thickOff) * 0.97, 0.02, 0.99);
+            const nz = Math.sin(ang) * (rad + thickOff) * 0.97;
+            // Also keep slight X thickness near flat crown face so top/bottom leaf surfaces never Z-fight
+            const xOff = nx >= BERRY_X1 - 0.01 ? vT * 0.014 : 0;
+            lPos.setXYZ(i, (nx + xOff) * w, ny * h, nz * d);
+            lUv.setXY(i, (p + (vW * 0.44 + 0.5)) / sepalCount, clamp(s * 0.92 + 0.04, 0.02, 0.98));
+          }
+          leaf.computeVertexNormals();
+          sepalGeos.push(leaf.toNonIndexed());
+          leaf.dispose();
+        }
+
+        // --- PART 2: Curved emerald green stem (openEnded cylinder + clean end cap, 100% at nx >= 0.335!) ---
+        const stem = new THREE.CylinderGeometry(0.042, 0.072, 0.155 * w, 24, 6, false);
+        stem.rotateZ(-Math.PI * 0.5);
+        const sPos = stem.attributes.position;
+        for (let i = 0; i < sPos.count; i++) {
+          const lx = sPos.getX(i); // [-0.0775w, +0.0775w]
+          const ly = sPos.getY(i);
+          const lz = sPos.getZ(i);
+          const st = clamp(lx / (0.155 * w) + 0.5, 0, 1);
+          const nx = lerp(0.335, 0.482, st);
+          const curveY = Math.pow(st, 1.5) * 0.072;
+          const ny = clamp(0.49 + curveY + ly * 0.95, 0.02, 0.99);
+          const nz = lz * 0.95;
+          sPos.setXYZ(i, nx * w, ny * h, nz * d);
+        }
+        stem.computeVertexNormals();
+        const stemNon = stem.toNonIndexed();
+        stem.dispose();
+
+        // Merge all parts with distinct UV groups so the 1024x1024 baker keeps Berry, Calyx, and Stem 100% isolated!
         const bNon = body.toNonIndexed();
-        const cNon = crown.toNonIndexed();
-        const pA = bNon.attributes.position.array;
-        const pB = cNon.attributes.position.array;
-        const nA = bNon.attributes.normal.array;
-        const nB = cNon.attributes.normal.array;
-        const uA = bNon.attributes.uv.array;
-        const uB = cNon.attributes.uv.array;
-        const mergedPos = new Float32Array(pA.length + pB.length);
-        mergedPos.set(pA, 0);
-        mergedPos.set(pB, pA.length);
-        const mergedNorm = new Float32Array(nA.length + nB.length);
-        mergedNorm.set(nA, 0);
-        mergedNorm.set(nB, nA.length);
-        const mergedUv = new Float32Array(uA.length + uB.length);
-        mergedUv.set(uA, 0);
-        mergedUv.set(uB, uA.length);
+        body.dispose();
+        const parts = [bNon, ...sepalGeos, stemNon];
+        const totalVerts = parts.reduce((acc, g) => acc + g.attributes.position.count, 0);
+        const mergedPos = new Float32Array(totalVerts * 3);
+        const mergedNorm = new Float32Array(totalVerts * 3);
+        const mergedUv = new Float32Array(totalVerts * 2);
+
         const out = new THREE.BufferGeometry();
+        let vOffset = 0;
+        // Group 0: Berry
+        const bCount = bNon.attributes.position.count;
+        mergedPos.set(bNon.attributes.position.array, 0);
+        mergedNorm.set(bNon.attributes.normal.array, 0);
+        mergedUv.set(bNon.attributes.uv.array, 0);
+        out.addGroup(0, bCount, 0);
+        vOffset += bCount;
+
+        // Group 1: All 7 emerald sepals (already packed into non-overlapping horizontal UV strips)
+        const sepStart = vOffset;
+        let sepCount = 0;
+        for (const sg of sepalGeos) {
+          const cnt = sg.attributes.position.count;
+          mergedPos.set(sg.attributes.position.array, vOffset * 3);
+          mergedNorm.set(sg.attributes.normal.array, vOffset * 3);
+          mergedUv.set(sg.attributes.uv.array, vOffset * 2);
+          vOffset += cnt;
+          sepCount += cnt;
+        }
+        out.addGroup(sepStart, sepCount, 1);
+
+        // Group 2: Stem
+        const stCount = stemNon.attributes.position.count;
+        mergedPos.set(stemNon.attributes.position.array, vOffset * 3);
+        mergedNorm.set(stemNon.attributes.normal.array, vOffset * 3);
+        mergedUv.set(stemNon.attributes.uv.array, vOffset * 2);
+        out.addGroup(vOffset, stCount, 2);
+
         out.setAttribute('position', new THREE.BufferAttribute(mergedPos, 3));
         out.setAttribute('normal', new THREE.BufferAttribute(mergedNorm, 3));
         out.setAttribute('uv', new THREE.BufferAttribute(mergedUv, 2));
-        out.addGroup(0, pA.length / 3, 0);
-        out.addGroup(pA.length / 3, pB.length / 3, 1);
-        body.dispose(); crown.dispose(); bNon.dispose(); cNon.dispose();
+        for (const g of parts) g.dispose();
         return out;
       },
     };

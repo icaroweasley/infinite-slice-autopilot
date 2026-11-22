@@ -17,12 +17,12 @@ function mulberry32(seed) {
 }
 
 /**
- * Simple 2-pole biquad bandpass/highpass filter applied to a short burst buffer.
+ * 2-pole biquad filter (bandpass / highpass / lowpass) applied cleanly to a short foley burst.
  */
 function filterBurst(input, type, freq, Q) {
   const out = new Float32Array(input.length);
-  const w0 = (2 * Math.PI * Math.min(freq, SAMPLE_RATE * 0.45)) / SAMPLE_RATE;
-  const alpha = Math.sin(w0) / (2 * Math.max(0.3, Q));
+  const w0 = (2 * Math.PI * Math.max(40, Math.min(freq, SAMPLE_RATE * 0.45))) / SAMPLE_RATE;
+  const alpha = Math.sin(w0) / (2 * Math.max(0.35, Q));
   const cosW0 = Math.cos(w0);
 
   let b0, b1, b2;
@@ -30,8 +30,11 @@ function filterBurst(input, type, freq, Q) {
     b0 = (1 + cosW0) / 2;
     b1 = -(1 + cosW0);
     b2 = (1 + cosW0) / 2;
+  } else if (type === 'lowpass') {
+    b0 = (1 - cosW0) / 2;
+    b1 = 1 - cosW0;
+    b2 = (1 - cosW0) / 2;
   } else {
-    // bandpass (constant 0 dB peak gain)
     b0 = alpha;
     b1 = 0;
     b2 = -alpha;
@@ -66,35 +69,142 @@ function mixMono(left, right, startSample, buf, gain, pan = 0) {
 }
 
 function makeNoiseBurst(durSec, rand) {
-  const len = Math.max(16, Math.floor(durSec * SAMPLE_RATE));
+  const len = Math.max(24, Math.floor(durSec * SAMPLE_RATE));
   const buf = new Float32Array(len);
   for (let i = 0; i < len; i++) buf[i] = rand() * 2 - 1;
   return buf;
 }
 
-function synthToneSweep(durSec, fStart, fEnd, shape = 'sine', amp = 0.5) {
-  const len = Math.max(16, Math.floor(durSec * SAMPLE_RATE));
-  const buf = new Float32Array(len);
-  let phase = 0;
-  for (let i = 0; i < len; i++) {
-    const t = i / len;
-    const freq = fStart * Math.pow(Math.max(20, fEnd) / Math.max(20, fStart), t);
-    phase += (2 * Math.PI * freq) / SAMPLE_RATE;
-    const env = Math.exp(-5.2 * t) * Math.min(1, i / 28);
-    let s;
-    if (shape === 'triangle') {
-      const p = ((phase / (2 * Math.PI)) % 1 + 1) % 1;
-      s = 4 * Math.abs(p - 0.5) - 1;
-    } else {
-      s = Math.sin(phase);
-    }
-    buf[i] = s * env * amp;
+/**
+ * Generates an authentic, dry, close-mic acoustic wood/stone/glass cutting-board knock ("THOCK / TOK")
+ * using damped multi-modal resonant body impulses + razor-edge transient click — ZERO electronic sine sweeps!
+ */
+function synthAcousticBoardChop(surface, jitter, rand, amp) {
+  const durSec = 0.036;
+  const len = Math.floor(durSec * SAMPLE_RATE);
+  const out = new Float32Array(len);
+
+  // Modal body resonances of a real physical cutting surface (short ultra-dry acoustic decay!)
+  let modes;
+  let clickFreq = 3200;
+  let clickGain = 0.42;
+  if (surface === 'stone') {
+    modes = [
+      { f: 340, a: 0.45, d: 110 },
+      { f: 890, a: 0.34, d: 145 },
+      { f: 2150, a: 0.22, d: 190 },
+    ];
+    clickFreq = 4600;
+    clickGain = 0.52;
+  } else if (surface === 'glass' || surface === 'ice') {
+    modes = [
+      { f: 680, a: 0.28, d: 95 },
+      { f: 1620, a: 0.24, d: 120 },
+      { f: 3480, a: 0.16, d: 155 },
+    ];
+    clickFreq = 5800;
+    clickGain = 0.46;
+  } else if (surface === 'metal') {
+    modes = [
+      { f: 520, a: 0.32, d: 95 },
+      { f: 1380, a: 0.26, d: 110 },
+      { f: 2920, a: 0.18, d: 135 },
+    ];
+    clickFreq = 5200;
+    clickGain = 0.50;
+  } else if (surface === 'leaf') {
+    modes = [
+      { f: 165, a: 0.52, d: 130 },
+      { f: 390, a: 0.30, d: 160 },
+      { f: 840, a: 0.14, d: 210 },
+    ];
+    clickFreq = 2600;
+    clickGain = 0.30;
+  } else {
+    // Classic viral close-mic solid oak butcher block ("crisp woody THOCK!")
+    modes = [
+      { f: 195, a: 0.58, d: 125 },
+      { f: 465, a: 0.38, d: 155 },
+      { f: 1080, a: 0.22, d: 210 },
+    ];
+    clickFreq = 3400;
+    clickGain = 0.46;
   }
-  return buf;
+
+  // 1. Resonant damped wood/stone modes excited by sharp micro-impulse (0.8ms attack)
+  for (let i = 0; i < len; i++) {
+    const t = i / SAMPLE_RATE;
+    const attack = i < 14 ? i / 14 : 1.0;
+    let sum = 0;
+    for (let m = 0; m < modes.length; m++) {
+      const mo = modes[m];
+      sum += Math.sin(2 * Math.PI * mo.f * jitter * t) * mo.a * Math.exp(-mo.d * t);
+    }
+    out[i] = sum * attack;
+  }
+
+  // 2. Ultra-crisp 3ms razor-edge contact click (bandpassed noise transient — makes it sound 100% real!)
+  const clickRaw = makeNoiseBurst(0.012, rand);
+  const clickFilt = filterBurst(clickRaw, 'bandpass', clickFreq * jitter, 1.5);
+  for (let i = 0; i < clickFilt.length && i < len; i++) {
+    const t = i / SAMPLE_RATE;
+    out[i] += clickFilt[i] * clickGain * Math.exp(-360 * t);
+  }
+
+  // 3. Dry low-mid wooden thump body noise (adds warm close-mic presence)
+  const thumpRaw = makeNoiseBurst(0.024, rand);
+  const thumpFilt = filterBurst(thumpRaw, 'lowpass', 480 * jitter, 0.9);
+  for (let i = 0; i < thumpFilt.length && i < len; i++) {
+    const t = i / SAMPLE_RATE;
+    out[i] += thumpFilt[i] * 0.48 * Math.exp(-145 * t);
+  }
+
+  for (let i = 0; i < len; i++) out[i] *= amp;
+  return out;
 }
 
 /**
- * Renders an exact timeline of ASMR cut & cascade events into a 48kHz 16-bit Stereo WAV file.
+ * Generates an authentic close-mic fibrous knife-through-object slice ("shhhk / krrch")
+ * that swells cleanly RIGHT into the board strike.
+ */
+function synthFibrousSlice(profile, axis, speedFactor, jitter, rand, amp) {
+  const isFast = speedFactor > 10;
+  const durSec = isFast ? 0.018 : (axis === 'y' ? 0.078 : 0.048);
+  const raw = makeNoiseBurst(durSec, rand);
+
+  // Dual-band organic slice: juicy body shear + crisp skin/fiber tear
+  let midFreq = axis === 'y' ? 1650 : 1350;
+  let hiFreq = 4800;
+  let midQ = 1.1;
+  let hiGain = 0.55;
+
+  if (profile === 'crystal') {
+    midFreq = 2600; hiFreq = 6800; midQ = 1.6; hiGain = 0.85;
+  } else if (profile === 'tech' || profile === 'plastic') {
+    midFreq = 2100; hiFreq = 5600; midQ = 1.5; hiGain = 0.72;
+  } else if (profile === 'metal') {
+    midFreq = 2900; hiFreq = 7200; midQ = 2.2; hiGain = 0.78;
+  }
+
+  const mid = filterBurst(raw, 'bandpass', midFreq * jitter, midQ);
+  const hi = filterBurst(raw, 'highpass', hiFreq * jitter, 0.9);
+  const out = new Float32Array(raw.length);
+
+  for (let i = 0; i < raw.length; i++) {
+    const u = i / raw.length;
+    // Crisp organic slice swell into the cut impact, then rapid clean damping
+    const env = u < 0.28
+      ? Math.pow(u / 0.28, 0.7)
+      : Math.exp(-5.4 * ((u - 0.28) / 0.72));
+    // Subtle micro-crunch grain texture (like slicing crisp watermelon, carrot, cucumber, or fruit skin!)
+    const crunch = 0.78 + 0.22 * Math.sin(u * 42.0 * jitter);
+    out[i] = (mid[i] * 0.82 + hi[i] * hiGain) * env * crunch * amp;
+  }
+  return out;
+}
+
+/**
+ * Renders an exact timeline of hyper-realistic acoustic ASMR foley events into a 48kHz 16-bit Stereo WAV file.
  */
 export function synthesizeAsmrWav({ durationSec, audioEvents, outputPath, seed = 20261121 }) {
   const totalSamples = Math.max(SAMPLE_RATE, Math.ceil((durationSec + 0.35) * SAMPLE_RATE));
@@ -112,61 +222,29 @@ export function synthesizeAsmrWav({ durationSec, audioEvents, outputPath, seed =
 
     if (ev.kind === 'cut') {
       const sf = ev.speedFactor || 1;
-      // Escalate audio tick rate cleanly across 10 -> 50 -> 100 -> 250 -> 500 -> 1,000 cuts!
-      const minGap = sf > 18 ? 0.0075 : sf > 8 ? 0.011 : sf > 3 ? 0.016 : 0.010;
+      const minGap = sf > 18 ? 0.0085 : sf > 8 ? 0.013 : sf > 3 ? 0.018 : 0.012;
       if (tSec - lastCutSec < minGap) continue;
       lastCutSec = tSec;
 
-      const jitter = 0.93 + rand() * 0.14;
-      // Subtle pitch & crispness lift at supersonic speeds (500-1,000 cuts sounds like a rapid precision razor zipper!)
-      const speedPitch = sf > 15 ? 1.24 : sf > 7 ? 1.12 : 1.0;
-      const gainScale = sf > 18 ? 0.34 : sf > 8 ? 0.44 : sf > 3 ? 0.62 : 0.90;
-      const pan = (rand() - 0.5) * 0.18;
+      const jitter = 0.94 + rand() * 0.12;
+      const speedPitch = sf > 16 ? 1.14 : sf > 7 ? 1.06 : 1.0;
+      const gainScale = sf > 18 ? 0.38 : sf > 8 ? 0.50 : sf > 3 ? 0.70 : 0.96;
+      const pan = (rand() - 0.5) * 0.14;
       const profile = ev.soundProfile || 'culinary';
       const surface = ev.surfaceAudio || 'wood';
 
-      // 1. Material Slice Shear
-      const rawNoise = makeNoiseBurst(sf > 12 ? 0.024 : (ev.axis === 'y' ? 0.085 : 0.055), rand);
-      let freq = (ev.axis === 'y' ? 2300 : 1850) * speedPitch;
-      let q = 1.8;
-      let fType = 'bandpass';
-      let sliceGain = 0.34 * gainScale;
+      // 1. Crisp juicy blade-through-object fibrous slice (starts slightly before impact for ultra-real foley!)
+      const sliceBuf = synthFibrousSlice(profile, ev.axis, sf, jitter * speedPitch, rand, 0.54 * gainScale);
+      const preRoll = ev.axis === 'y' ? 0 : Math.floor((sf > 10 ? 0.006 : 0.018) * SAMPLE_RATE);
+      mixMono(left, right, sampleIdx - preRoll, sliceBuf, 1.0, pan);
 
-      if (profile === 'tech') {
-        freq = 3400; q = 3.2; sliceGain = 0.38 * gainScale;
-      } else if (profile === 'crystal') {
-        freq = 2800; q = 1.0; fType = 'highpass'; sliceGain = 0.24 * gainScale;
-        const ping = synthToneSweep(0.14, (2400 + rand() * 1400) * jitter, 2000 * jitter, 'sine', 0.16 * gainScale);
-        mixMono(left, right, sampleIdx, ping, 1.0, pan * 1.4);
-      } else if (profile === 'metal') {
-        freq = 4200; q = 5.0; sliceGain = 0.28 * gainScale;
-        const ring = synthToneSweep(0.13, (1250 + rand() * 420) * jitter, 1180 * jitter, 'sine', 0.20 * gainScale);
-        mixMono(left, right, sampleIdx, ring, 1.0, pan);
-      } else if (profile === 'plastic') {
-        freq = 2600; q = 2.6; sliceGain = 0.34 * gainScale;
-      }
-
-      const filtered = filterBurst(rawNoise, fType, freq * jitter, q);
-      for (let i = 0; i < filtered.length; i++) {
-        const t = i / filtered.length;
-        filtered[i] *= Math.exp(-5.5 * t) * Math.min(1, i / 18);
-      }
-      mixMono(left, right, sampleIdx, filtered, sliceGain, pan);
-
-      // 2. Cutting Board / Surface Impact Thud (vertical X and Z cuts)
+      // 2. Dry close-mic hardwood/stone cutting-board "THOCK" right on impact (vertical X & Z cuts!)
       if (ev.axis !== 'y') {
-        let f0 = 168, f1 = 68, dur = 0.062, shape = 'triangle', amp = 0.44 * gainScale;
-        if (surface === 'glass') { f0 = 1480; f1 = 860; dur = 0.048; shape = 'sine'; amp = 0.26 * gainScale; }
-        else if (surface === 'leaf') { f0 = 120; f1 = 52; dur = 0.050; shape = 'sine'; amp = 0.32 * gainScale; }
-        else if (surface === 'stone') { f0 = 420; f1 = 160; dur = 0.046; shape = 'triangle'; amp = 0.36 * gainScale; }
-        else if (surface === 'metal') { f0 = 920; f1 = 540; dur = 0.064; shape = 'sine'; amp = 0.24 * gainScale; }
-        else if (surface === 'ice') { f0 = 1120; f1 = 420; dur = 0.054; shape = 'triangle'; amp = 0.26 * gainScale; }
-
-        const thud = synthToneSweep(dur, f0 * jitter, f1 * jitter, shape, amp);
-        mixMono(left, right, sampleIdx, thud, 1.0, pan * 0.5);
+        const chopBuf = synthAcousticBoardChop(surface, jitter * speedPitch, rand, 0.68 * gainScale);
+        mixMono(left, right, sampleIdx, chopBuf, 1.0, pan * 0.45);
       }
     } else if (ev.kind === 'cascade') {
-      if (tSec - lastCascadeSec < 0.052) continue;
+      if (tSec - lastCascadeSec < 0.055) continue;
       lastCascadeSec = tSec;
 
       const tier = ev.tier || 1;
@@ -174,43 +252,52 @@ export function synthesizeAsmrWav({ durationSec, audioEvents, outputPath, seed =
       const intensity = Math.min(1.2, ev.intensity || 0.8);
 
       if (tier === 1) {
-        const taps = Math.min(5, Math.max(2, Math.round(intensity * 3)));
+        // Organic muffled piece tumbles hitting the board ("tok-plop-tok", ZERO sine beeps!)
+        const taps = Math.min(6, Math.max(2, Math.round(intensity * 3.5)));
         for (let k = 0; k < taps; k++) {
-          const offset = Math.floor((0.055 + k * 0.032 + rand() * 0.022) * SAMPLE_RATE);
-          const f =
-            profile === 'crystal' ? 1600 + rand() * 900 :
-            profile === 'metal' ? 980 + rand() * 520 :
-            profile === 'tech' || profile === 'plastic' ? 680 + rand() * 320 :
-            125 + rand() * 65;
-          const shape = (profile === 'culinary') ? 'triangle' : 'sine';
-          const tap = synthToneSweep(0.042, f, f * 0.55, shape, 0.11 * intensity);
-          mixMono(left, right, sampleIdx + offset, tap, 1.0, (rand() - 0.5) * 0.55);
+          const offset = Math.floor((0.055 + k * 0.036 + rand() * 0.024) * SAMPLE_RATE);
+          const tapDur = 0.026;
+          const raw = makeNoiseBurst(tapDur, rand);
+          const fBase =
+            profile === 'crystal' ? 2200 + rand() * 900 :
+            profile === 'metal' ? 1400 + rand() * 600 :
+            profile === 'tech' || profile === 'plastic' ? 950 + rand() * 380 :
+            360 + rand() * 190;
+          const filt = filterBurst(raw, 'bandpass', fBase, 2.0);
+          for (let i = 0; i < filt.length; i++) {
+            const u = i / filt.length;
+            filt[i] *= Math.exp(-8.5 * u) * (i < 12 ? i / 12 : 1.0);
+          }
+          mixMono(left, right, sampleIdx + offset, filt, 0.34 * intensity, (rand() - 0.5) * 0.55);
         }
       } else {
-        const dur = tier === 3 ? 0.24 : 0.15;
+        // Silky kinetic-sand / micro-cube crisp granular shower ("shhhhhh-crisp!")
+        const dur = tier === 3 ? 0.26 : 0.16;
         const raw = makeNoiseBurst(dur, rand);
-        const filt = filterBurst(raw, 'bandpass', tier === 3 ? 4200 : 2800, tier === 3 ? 0.9 : 1.6);
-        for (let i = 0; i < filt.length; i++) {
-          const t = i / filt.length;
-          const env = t < 0.12 ? t / 0.12 : Math.exp(-4.6 * ((t - 0.12) / 0.88));
-          filt[i] *= env;
+        const body = filterBurst(raw, 'bandpass', tier === 3 ? 3400 : 2100, 0.85);
+        const sparkle = filterBurst(raw, 'highpass', 5400, 0.9);
+        const out = new Float32Array(raw.length);
+        for (let i = 0; i < raw.length; i++) {
+          const t = i / raw.length;
+          const env = t < 0.10 ? t / 0.10 : Math.exp(-4.4 * ((t - 0.10) / 0.90));
+          out[i] = (body[i] * 0.72 + sparkle[i] * 0.38) * env;
         }
-        const gain = (tier === 3 ? 0.24 : 0.16) * intensity;
-        mixMono(left, right, sampleIdx + Math.floor(0.015 * SAMPLE_RATE), filt, gain, (rand() - 0.5) * 0.42);
+        const gain = (tier === 3 ? 0.28 : 0.20) * intensity;
+        mixMono(left, right, sampleIdx + Math.floor(0.012 * SAMPLE_RATE), out, gain, (rand() - 0.5) * 0.38);
       }
     }
   }
 
-  // Write 16-bit Stereo PCM WAV with soft tanh studio limiter (zero digital clipping)
+  // Write 16-bit Stereo PCM WAV with smooth studio soft-clipper
   const dataBytes = totalSamples * 4;
   const wav = Buffer.alloc(44 + dataBytes);
   wav.write('RIFF', 0);
   wav.writeUInt32LE(36 + dataBytes, 4);
   wav.write('WAVE', 8);
   wav.write('fmt ', 12);
-  wav.writeUInt32LE(16, 16);        // PCM chunk size
-  wav.writeUInt16LE(1, 20);         // PCM format
-  wav.writeUInt16LE(2, 22);         // Stereo
+  wav.writeUInt32LE(16, 16);
+  wav.writeUInt16LE(1, 20);
+  wav.writeUInt16LE(2, 22);
   wav.writeUInt32LE(SAMPLE_RATE, 24);
   wav.writeUInt32LE(SAMPLE_RATE * 4, 28);
   wav.writeUInt16LE(4, 32);
@@ -220,8 +307,8 @@ export function synthesizeAsmrWav({ durationSec, audioEvents, outputPath, seed =
 
   let ptr = 44;
   for (let i = 0; i < totalSamples; i++) {
-    const sL = Math.tanh(left[i] * 1.15) * 0.92;
-    const sR = Math.tanh(right[i] * 1.15) * 0.92;
+    const sL = Math.tanh(left[i] * 1.25) * 0.94;
+    const sR = Math.tanh(right[i] * 1.25) * 0.94;
     wav.writeInt16LE(Math.max(-32767, Math.min(32767, Math.round(sL * 32767))), ptr);
     wav.writeInt16LE(Math.max(-32767, Math.min(32767, Math.round(sR * 32767))), ptr + 2);
     ptr += 4;

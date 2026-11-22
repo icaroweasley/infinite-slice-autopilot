@@ -47,7 +47,7 @@ function detectAiProvider() {
   return 'fallback';
 }
 
-function buildAiSystemPrompt(usedSlugs, previousError = '') {
+function buildAiSystemPrompt(usedSlugs, usedScenes = [], previousError = '') {
   const specObj = fs.readFileSync(path.join(ROOT, 'references', 'object-recipe-spec.md'), 'utf8');
   const specSlots = fs.readFileSync(path.join(ROOT, 'references', 'ai-slots-spec.md'), 'utf8');
 
@@ -63,12 +63,15 @@ Invent ONE completely original, never-repeated, MEGA-VIRAL 4-part scene engineer
    - IMPORTANT FOR OUR 1024x1024 ULTRA-HD SURFACE BAKER:
      * Use high-segment smooth geometry (e.g., SphereGeometry(0.5, 64, 48), CylinderGeometry(..., 64, 28)) with valid UVs!
      * Use smoothstep() transitions for stripes, seeds, rings, and veins so the 1024x1024 outer texture and 512x512 cut caps look razor-sharp and photorealistic — ZERO pixelated hard jumps!
-2. A WILDLY CREATIVE, UNIQUE 3D Cutter/Blade (edge strictly along local y=0, z in [-1.5, +1.5], handle extending to -Z) — ALWAYS vary dramatically every video! Mix Damascus samurai katanas, 1000°C glowing red-hot knives, neon plasma lightsabers, 24k gold cleavers, luxury black credit cards, translucent diamond crystal blades, obsidian magma blades, surgical scalpels, laser cutters, etc. NEVER repeat the same plain chef knife!
-3. A WILDLY CREATIVE, UNIQUE procedural Cutting Surface (1024x1024 or 512x512 CanvasTexture + PBR material on boardMat/rimMat) — ALWAYS vary dramatically every video! Mix giant tropical banana leaves, black & gold obsidian marble, arctic ice blocks, pastel terrazzo, cyberpunk glowing neon grids, turquoise epoxy resin river wood, white Carrara marble, brushed Michelin steel, volcanic lava stone, frosted glass, bamboo, etc.
-4. A WILDLY CREATIVE, UNIQUE bright Studio Environment (scene.background + wallMat + counterMat + 3-point lighting) — ALWAYS vary dramatically every video (Cyberpunk Neon, Frozen Arctic, Luxury Obsidian Gold, White Minimalist Lab, Terracotta Sunset, Tropical Cabin, Emerald Kitchen, Galaxy Purple, Michelin Steel Kitchen) while keeping lighting bright, crisp, and high-contrast!
+2. A WILDLY CREATIVE, UNIQUE 3D Cutter/Blade (edge strictly along local y=0, z in [-1.5, +1.5], handle extending to -Z) — MUST BE 100% DIFFERENT from every previous scene listed below! Invent original blades: hammered Damascus santoku, frosted sapphire crystal sword, copper mezzaluna blade, rose-gold ceramic chef blade, glowing emerald plasma edge, obsidian volcanic dagger, holographic prism blade, frosted acrylic pastry blade, brass Meiji cleaver, titanium surgical scalpel, etc. NEVER repeat the same silhouette or color twice!
+3. A WILDLY CREATIVE, UNIQUE procedural Cutting Surface (1024x1024 or 512x512 CanvasTexture + PBR material on boardMat/rimMat) — MUST BE 100% DIFFERENT from every previous scene listed below! Invent bespoke textures: turquoise epoxy resin walnut river, sage-green Venetian terrazzo, pastel terracotta checkerboard ceramic, rose-quartz veined marble, warm fluted bamboo, lavender frosted glass, hammered brushed copper slab, deep malachite stone, cobalt Moroccan zellige tile, cream travertine slab, etc. NEVER repeat an old preset look!
+4. A WILDLY CREATIVE, UNIQUE bright Studio Environment (scene.background + wallMat + counterMat + 3-point lighting) — MUST BE 100% DIFFERENT from every previous scene listed below! Invent fresh color palettes & architectural backdrops (Mediterranean pastel lime plaster, Japanese hinoki fluted wood slats, Parisian blush patisserie tiles, Midnight indigo velvet & brass, Kyoto matcha ceramic studio, Amalfi lemon & azure mosaic, Dusty lavender minimalist atelier, Warm copper espresso bar, Mint Nordic daylight studio) while ALWAYS keeping hero lighting bright, crisp, and high-contrast!
 
 ALREADY USED SLUGS (DO NOT REPEAT ANY OF THESE OR OBVIOUS DUPLICATES):
 ${usedSlugs.length ? usedSlugs.join(', ') : '(none yet)'}
+
+PREVIOUSLY USED SCENES (DO NOT REPEAT ANY OF THESE BLADES, BOARDS, OR STUDIO PALETTES):
+${usedScenes.length ? usedScenes.slice(-24).join('\n') : '(none yet)'}
 
 TECHNICAL CONTRACTS (MUST FOLLOW 100% STRICTLY):
 ${specObj}
@@ -79,7 +82,7 @@ CRITICAL RULES FOR ZERO ERRORS:
 - Output ONLY a single valid JSON object (no markdown fences, no prose) with exact keys:
   {
     "slug": "unique-kebab-case",
-    "conceptSummary": "1-sentence English summary",
+    "conceptSummary": "1-sentence English summary naming object + unique blade + unique board + unique studio palette",
     "objectCode": "full ES module code for engine/src/objects/object-builder.js exporting customObject (imports * as THREE from 'three' and helpers from './noise.js')",
     "cutterCode": "full ES module code for engine/src/engine/custom-cutter.js exporting customCutter (imports * as THREE from 'three')",
     "surfaceCode": "full ES module code for engine/src/engine/custom-surface.js exporting customSurface (imports * as THREE from 'three')",
@@ -121,57 +124,128 @@ const CLOUD_EN_OBJECTS = [
 
 const CLOUD_EN_CUTTERS = [
   'Mirror-polished Japanese chef knife with dark walnut handle',
-  'Damascus steel samurai katana with gold guard',
+  'Blue Damascus steel samurai katana with gold guard',
   '1000C glowing red-hot chef knife',
   'Solid 24k gold Chinese cleaver',
   'Neon purple plasma lightsaber',
+  'Emerald green plasma lightsaber',
   'Luxury metallic black credit card with gold chip',
-  'Translucent blue diamond crystal blade',
+  'Translucent sapphire diamond crystal blade',
+  'Rose pink crystal katana sword',
+  'Copper-forged serrated precision saw',
+  'Glowing lava magma cleaver',
+  'Chrome steel pastry scraper blade',
 ];
 
 const CLOUD_EN_SURFACES = [
-  'Warm natural honey oak butcher block cutting board',
-  'Striped Japanese bamboo cutting board',
-  'White Carrara marble slab with soft grey veins',
-  'Deep purple marble slab with liquid gold veins',
   'Walnut wood and turquoise epoxy resin river board',
-  'Black volcanic stone with glowing ember veins',
-  'Frosted glass slab with cyan LED edge glow',
+  'Maple wood and amethyst purple epoxy resin river board',
+  'Natural green Japanese bamboo cutting board',
+  'Sage green pastel Venetian terrazzo stone slab',
+  'Coral peach ceramic checkerboard tile cutting board',
+  'Rose pink marble slab with gold veins',
+  'Deep navy indigo marble slab with silver veins',
+  'Black volcanic stone with glowing orange magma veins',
+  'Frosted lavender glass slab with glow edge',
+  'Brushed copper metallic Michelin slab',
+  'Warm honey oak wood butcher block',
+  'Deep emerald jade stone slab with gold veins',
 ];
 
 const CLOUD_EN_ENVS = [
-  'Classic dark emerald subway tile kitchen with bright warm studio spotlight',
-  'Dark Michelin restaurant kitchen with brushed steel and warm spotlight',
-  'Minimalist Scandinavian studio with soft morning light',
-  'Futuristic ultra-white surgical lab studio',
-  'Luxury black jewelry studio with golden rim light',
-  'Cozy terracotta sunset atelier with warm amber light',
-  'Cyberpunk Japanese kitchen at night with cyan and magenta neon lights',
+  'Warm fluted wood Japanese minimalist studio',
+  'Pastel blush pink Parisian patisserie tile kitchen',
+  'Mint sage Nordic daylight ceramic tile studio',
+  'Deep midnight navy luxury hex mosaic boutique studio',
+  'Warm terracotta sunset plaster atelier',
+  'Cyberpunk violet neon brushed metal studio',
+  'Dusty lavender architectural minimalist studio',
+  'Espresso bronze industrial copper kitchen',
+  'Amalfi lemon yellow sunny Mediterranean studio',
+  'Turquoise coastal spa hex mosaic studio',
 ];
+
+async function discoverActiveGeminiModels(apiKey) {
+  const preferred = (process.env.GEMINI_MODEL || '').trim();
+  const candidates = [];
+  if (preferred) candidates.push(preferred);
+
+  try {
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(listUrl);
+    if (res.ok) {
+      const json = await res.json();
+      const valid = (json.models || [])
+        .filter((m) => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
+        .map((m) => (m.name || '').replace(/^models\//, ''))
+        .filter((n) => n.startsWith('gemini-') && !n.includes('embedding') && !n.includes('tts') && !n.includes('image') && !n.includes('live'));
+
+      // Prioritize newest stable/preview Gemini 3/2.5 Flash & Pro models
+      const score = (name) => {
+        let s = 0;
+        if (name.includes('gemini-3.5-flash') || name.includes('gemini-3.8-flash')) s += 100;
+        else if (name.includes('gemini-3-flash')) s += 90;
+        else if (name.includes('gemini-2.5-flash') && !name.includes('lite')) s += 80;
+        else if (name.includes('gemini-3') && name.includes('pro')) s += 75;
+        else if (name.includes('gemini-2.5-pro')) s += 70;
+        else if (name.includes('flash')) s += 50;
+        if (name.includes('lite')) s -= 15;
+        if (name.includes('exp')) s -= 10;
+        return s;
+      };
+      valid.sort((a, b) => score(b) - score(a));
+      for (const m of valid.slice(0, 4)) {
+        if (!candidates.includes(m)) candidates.push(m);
+      }
+    }
+  } catch (e) {
+    console.warn(`[autopilot] Model discovery warning: ${e.message}`);
+  }
+
+  for (const fb of ['gemini-3-flash-preview', 'gemini-2.5-flash', 'gemini-2.5-pro']) {
+    if (!candidates.includes(fb)) candidates.push(fb);
+  }
+  return candidates;
+}
 
 async function callGemini(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const model = (process.env.GEMINI_MODEL || 'gemini-3.8-flash').trim();
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-  console.log(`[autopilot] Calling Gemini model: ${model}`);
+  const models = await discoverActiveGeminiModels(apiKey);
+  let lastErr = 'No Gemini models responded';
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 1.0,
-        responseMimeType: 'application/json',
-      },
-    }),
-  });
-  const json = await res.json();
-  if (!res.ok) throw new Error(`Gemini API error (${res.status}): ${JSON.stringify(json).slice(0, 400)}`);
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('Gemini returned empty response');
-  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-  return JSON.parse(cleaned);
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    console.log(`[autopilot] Calling Gemini model: ${model}`);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 1.0,
+          responseMimeType: 'application/json',
+        },
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      lastErr = `Gemini ${model} (${res.status}): ${JSON.stringify(json).slice(0, 320)}`;
+      console.warn(`[autopilot] ${lastErr}`);
+      if (res.status === 404 || res.status === 400 || res.status === 429) continue;
+      throw new Error(lastErr);
+    }
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      lastErr = `Gemini ${model} returned empty response`;
+      continue;
+    }
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    console.log(`[autopilot] SUCCESS: Gemini ${model} invented 4 brand-new custom 3D modules!`);
+    return JSON.parse(cleaned);
+  }
+
+  throw new Error(lastErr);
 }
 
 async function callClaude(prompt) {
@@ -241,6 +315,13 @@ async function main() {
     ...usedSlugs,
     ...hist.entries.map((e) => (e.name || e.englishName || '').toLowerCase()).filter(Boolean),
   ];
+  const usedCutters = hist.entries.map((e) => (e.cutterPrompt || e.cutterId || '').toLowerCase()).filter(Boolean);
+  const usedSurfaces = hist.entries.map((e) => (e.surfacePrompt || e.surfaceId || '').toLowerCase()).filter(Boolean);
+  const usedEnvs = hist.entries.map((e) => (e.envPrompt || e.envId || '').toLowerCase()).filter(Boolean);
+  const usedScenes = hist.entries.map((e) =>
+    e.conceptSummary ||
+    `${e.englishName || e.name || e.slug} | blade=${e.cutterPrompt || e.cutterId || 'unknown'} | board=${e.surfacePrompt || e.surfaceId || 'unknown'} | studio=${e.envPrompt || e.envId || 'unknown'}`
+  );
 
   const provider = detectAiProvider();
   console.log(`\n=== Infinite Slice 24/7 Cloud Autopilot ===`);
@@ -289,6 +370,7 @@ async function main() {
   };
 
   let aiSucceeded = false;
+  let conceptSummary = '';
 
   if (provider === 'gemini' || provider === 'claude') {
     // Backup current 4 AI slot files before generation
@@ -300,7 +382,7 @@ async function main() {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         console.log(`[autopilot] Asking ${provider.toUpperCase()} to invent & code 4 bespoke 3D modules (attempt ${attempt}/2)...`);
-        const prompt = buildAiSystemPrompt(usedSlugs, lastErr);
+        const prompt = buildAiSystemPrompt(usedSlugs, usedScenes, lastErr);
         const generated = provider === 'gemini' ? await callGemini(prompt) : await callClaude(prompt);
 
         if (!generated.objectCode || !generated.cutterCode || !generated.surfaceCode || !generated.environmentCode) {
@@ -319,6 +401,7 @@ async function main() {
         }
 
         console.log(`[autopilot] AI 3D modules compiled cleanly! Ready to render.`);
+        conceptSummary = generated.conceptSummary || generated.slug || '';
         renderOpts = {
           ...renderOpts,
           objectId: 'custom',
@@ -342,9 +425,10 @@ async function main() {
   if (!aiSucceeded) {
     console.log('[autopilot] Using built-in zero-API semantic 3D composer (picking fresh non-repeated English concept)...');
     const objPrompt = pickUnusedSuggestion(CLOUD_EN_OBJECTS, usedStrings);
-    const cutterPrompt = pickUnusedSuggestion(CLOUD_EN_CUTTERS, []);
-    const surfacePrompt = pickUnusedSuggestion(CLOUD_EN_SURFACES, []);
-    const envPrompt = pickUnusedSuggestion(CLOUD_EN_ENVS, []);
+    const cutterPrompt = pickUnusedSuggestion(CLOUD_EN_CUTTERS, usedCutters);
+    const surfacePrompt = pickUnusedSuggestion(CLOUD_EN_SURFACES, usedSurfaces);
+    const envPrompt = pickUnusedSuggestion(CLOUD_EN_ENVS, usedEnvs);
+    conceptSummary = `${objPrompt} | blade=${cutterPrompt} | board=${surfacePrompt} | studio=${envPrompt}`;
     console.log(`[autopilot] Concept:\n  Object:  ${objPrompt}\n  Cutter:  ${cutterPrompt}\n  Surface: ${surfacePrompt}\n  Env:     ${envPrompt}`);
     renderOpts = {
       ...renderOpts,
@@ -370,8 +454,12 @@ async function main() {
     name: manifest.name,
     englishName: manifest.englishName,
     cutterId: manifest.cutterId,
+    cutterPrompt: renderOpts.cutterPrompt || '',
     surfaceId: manifest.surfaceId,
+    surfacePrompt: renderOpts.surfacePrompt || '',
     envId: manifest.envId,
+    envPrompt: renderOpts.envPrompt || '',
+    conceptSummary,
     rounds: manifest.rounds,
     maxCubes: manifest.maxCubes,
     durationSec: manifest.durationSec,

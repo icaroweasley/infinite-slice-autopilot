@@ -53,17 +53,44 @@ function normalizeText(str) {
   return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 }
 
+function hashPromptSeed(str) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
 function parseHexColor(norm, fallback) {
-  if (norm.includes('rox') || norm.includes('purple') || norm.includes('violet')) return '#6d28d9';
-  if (norm.includes('rosa') || norm.includes('pink') || norm.includes('magenta')) return '#db2777';
-  if (norm.includes('vermelh') || norm.includes('red') || norm.includes('rubi')) return '#b91c1c';
-  if (norm.includes('laranj') || norm.includes('orange') || norm.includes('terracot') || norm.includes('ambar')) return '#c2410c';
-  if (norm.includes('ouro') || norm.includes('dourad') || norm.includes('gold')) return '#d4a334';
-  if (norm.includes('verd') || norm.includes('green') || norm.includes('bambu') || norm.includes('florest')) return '#1e6b3a';
-  if (norm.includes('ciano') || norm.includes('cyan') || norm.includes('gelo')) return '#0ea5e9';
-  if (norm.includes('azul') || norm.includes('blue')) return '#1d4ed8';
-  if (norm.includes('branc') || norm.includes('white') || norm.includes('claro') || norm.includes('creme') || norm.includes('bege')) return '#e7e4dc';
-  if (norm.includes('pret') || norm.includes('black') || norm.includes('escuro') || norm.includes('obsidian')) return '#111318';
+  if (norm.includes('lavand') || norm.includes('lilas') || norm.includes('lilac')) return '#a78bfa';
+  if (norm.includes('rox') || norm.includes('purple') || norm.includes('violet') || norm.includes('ametist') || norm.includes('plum')) return '#6d28d9';
+  if (norm.includes('sakura') || norm.includes('blush') || norm.includes('pastel pink')) return '#f472b6';
+  if (norm.includes('coral') || norm.includes('salmao') || norm.includes('peach') || norm.includes('pesseg')) return '#fb7185';
+  if (norm.includes('rosa') || norm.includes('pink') || norm.includes('magenta') || norm.includes('fucsia')) return '#db2777';
+  if (norm.includes('borgonh') || norm.includes('burgundy') || norm.includes('vinho') || norm.includes('wine')) return '#881337';
+  if (norm.includes('vermelh') || norm.includes('red') || norm.includes('rubi') || norm.includes('crimson')) return '#dc2626';
+  if (norm.includes('cobre') || norm.includes('copper') || norm.includes('bronze')) return '#b45309';
+  if (norm.includes('terracot') || norm.includes('argil') || norm.includes('clay')) return '#c2410c';
+  if (norm.includes('laranj') || norm.includes('orange') || norm.includes('ambar') || norm.includes('amber') || norm.includes('sunset')) return '#ea580c';
+  if (norm.includes('amarel') || norm.includes('yellow') || norm.includes('sunny') || norm.includes('mostard') || norm.includes('mustard') || norm.includes('saffron')) return '#eab308';
+  if (norm.includes('ouro') || norm.includes('dourad') || norm.includes('gold') || norm.includes('champagn')) return '#d4a334';
+  if (norm.includes('menta') || norm.includes('mint') || norm.includes('pistach') || norm.includes('sage')) return '#34d399';
+  if (norm.includes('esmerald') || norm.includes('emerald') || norm.includes('jade')) return '#059669';
+  if (norm.includes('oliv') || norm.includes('moss') || norm.includes('musg')) return '#4d7c0f';
+  if (norm.includes('verd') || norm.includes('green') || norm.includes('bambu') || norm.includes('bamboo') || norm.includes('florest')) return '#16a34a';
+  if (norm.includes('turques') || norm.includes('turquoise') || norm.includes('teal') || norm.includes('aqua')) return '#0d9488';
+  if (norm.includes('ciano') || norm.includes('cyan') || norm.includes('gelo') || norm.includes('arctic') || norm.includes('glacial')) return '#0ea5e9';
+  if (norm.includes('indigo') || norm.includes('navy') || norm.includes('marinh') || norm.includes('midnight')) return '#312e81';
+  if (norm.includes('azul') || norm.includes('blue') || norm.includes('cobalt') || norm.includes('sapphir')) return '#2563eb';
+  if (norm.includes('espress') || norm.includes('cafe') || norm.includes('coffee') || norm.includes('walnut') || norm.includes('nogueir')) return '#5c3a21';
+  if (norm.includes('branc') || norm.includes('white') || norm.includes('claro') || norm.includes('creme') || norm.includes('cream') || norm.includes('bege') || norm.includes('ivory') || norm.includes('scandinav')) return '#ebe7df';
+  if (norm.includes('pret') || norm.includes('black') || norm.includes('escuro') || norm.includes('obsidian') || norm.includes('charcoal') || norm.includes('volcan')) return '#14171f';
+  // Deterministic unique hue for any other custom description so no two prompts ever look identical!
+  if (norm && norm.length > 3) {
+    const h = (hashPromptSeed(norm) % 360) / 360;
+    return '#' + new THREE.Color().setHSL(h, 0.52, 0.46).getHexString();
+  }
   return fallback;
 }
 
@@ -284,22 +311,227 @@ function makeIceTexture() {
   return tex;
 }
 
-function makeNeonGridTexture() {
+function makeNeonGridTexture(gridRgba = 'rgba(56, 189, 248, 0.28)', borderRgba = 'rgba(244, 63, 142, 0.65)') {
   const c = makeCanvas(512, 512);
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#0c0f18';
   ctx.fillRect(0, 0, 512, 512);
-  ctx.strokeStyle = 'rgba(56, 189, 248, 0.28)';
+  ctx.strokeStyle = gridRgba;
   ctx.lineWidth = 1.5;
   for (let i = 0; i <= 512; i += 32) {
     ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
   }
-  ctx.strokeStyle = 'rgba(244, 63, 142, 0.65)';
+  ctx.strokeStyle = borderRgba;
   ctx.lineWidth = 8;
   ctx.strokeRect(4, 4, 504, 504);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeEpoxyRiverTexture(woodHex = '#4b2d18', riverHex = '#0ea5e9', seed = 1) {
+  const S = 1024;
+  const c = makeCanvas(S, S);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = woodHex;
+  ctx.fillRect(0, 0, S, S);
+  // Natural walnut wood grain flanks
+  for (let i = 0; i < 640; i++) {
+    const y = (i / 640) * S;
+    ctx.strokeStyle = 'rgba(22,10,4,0.22)';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    for (let x = 0; x <= S; x += 64) {
+      ctx.lineTo(x, y + Math.sin(x * 0.01 + i * 0.16 + seed) * 4.0);
+    }
+    ctx.stroke();
+  }
+  // Flowing translucent resin river down the center
+  const rc = new THREE.Color(riverHex);
+  const lightRiver = '#' + rc.clone().offsetHSL(0.03, 0.1, 0.22).getHexString();
+  const deepRiver = '#' + rc.clone().offsetHSL(-0.02, 0.05, -0.18).getHexString();
+  ctx.save();
+  ctx.beginPath();
+  for (let y = 0; y <= S; y += 16) {
+    const xL = S * 0.34 + Math.sin(y * 0.008 + seed) * 62 + Math.cos(y * 0.021) * 18;
+    if (y === 0) ctx.moveTo(xL, y); else ctx.lineTo(xL, y);
+  }
+  for (let y = S; y >= 0; y -= 16) {
+    const xR = S * 0.66 + Math.sin(y * 0.008 + seed + 0.5) * 62 - Math.cos(y * 0.018) * 18;
+    ctx.lineTo(xR, y);
+  }
+  ctx.closePath();
+  const rg = ctx.createLinearGradient(S * 0.3, 0, S * 0.7, S);
+  rg.addColorStop(0, deepRiver);
+  rg.addColorStop(0.48, lightRiver);
+  rg.addColorStop(1, deepRiver);
+  ctx.fillStyle = rg;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+  ctx.lineWidth = 5;
+  ctx.stroke();
+  // Soft translucent mica swirl ribbons inside liquid glass resin
+  ctx.clip();
+  for (let k = 0; k < 14; k++) {
+    ctx.beginPath();
+    ctx.strokeStyle = k % 2 === 0 ? 'rgba(255,255,255,0.14)' : 'rgba(186,245,255,0.18)';
+    ctx.lineWidth = 10 + (k % 4) * 5;
+    for (let y = 0; y <= S; y += 24) {
+      const x = S * 0.38 + (k / 14) * S * 0.24 + Math.sin(y * 0.007 + k * 0.55 + seed) * 28;
+      if (y === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeBambooTexture(baseHex = '#cfa866') {
+  const S = 1024;
+  const c = makeCanvas(S, S);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = baseHex;
+  ctx.fillRect(0, 0, S, S);
+  const slats = 14;
+  const sw = S / slats;
+  const bc = new THREE.Color(baseHex);
+  for (let i = 0; i < slats; i++) {
+    const shade = ((i * 37) % 11 - 5) * 0.012;
+    ctx.fillStyle = '#' + bc.clone().offsetHSL(0, 0, shade).getHexString();
+    ctx.fillRect(i * sw, 0, sw - 2, S);
+    ctx.fillStyle = 'rgba(72,48,18,0.24)';
+    ctx.fillRect(i * sw + sw - 2, 0, 2, S);
+    // Bamboo horizontal joints staggered per slat
+    for (let j = 0; j < 3; j++) {
+      const ny = ((i * 197 + j * 340) % S);
+      ctx.fillStyle = 'rgba(92,62,24,0.34)';
+      ctx.fillRect(i * sw + 1, ny, sw - 4, 6);
+      ctx.fillStyle = 'rgba(255,245,215,0.20)';
+      ctx.fillRect(i * sw + 1, ny + 6, sw - 4, 3);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeCheckerboardTexture(colA = '#f8f5f0', colB = '#1e293b', cells = 8) {
+  const S = 512;
+  const c = makeCanvas(S, S);
+  const ctx = c.getContext('2d');
+  const sz = S / cells;
+  for (let r = 0; r < cells; r++) {
+    for (let col = 0; col < cells; col++) {
+      ctx.fillStyle = (r + col) % 2 === 0 ? colA : colB;
+      ctx.fillRect(col * sz, r * sz, sz, sz);
+      ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(col * sz + 1, r * sz + 1, sz - 2, sz - 2);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeCustomTerrazzoTexture(baseHex = '#f5ece6', accentHex = '#e899a8', seed = 1) {
+  const c = makeCanvas(512, 512);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = baseHex;
+  ctx.fillRect(0, 0, 512, 512);
+  const ac = new THREE.Color(accentHex);
+  const chips = [
+    '#' + ac.getHexString(),
+    '#' + ac.clone().offsetHSL(0.18, -0.05, 0.08).getHexString(),
+    '#' + ac.clone().offsetHSL(0.48, 0.05, -0.04).getHexString(),
+    '#' + ac.clone().offsetHSL(0.72, -0.1, 0.10).getHexString(),
+    '#d9b56c',
+  ];
+  for (let i = 0; i < 290; i++) {
+    const h = (i * 73 + seed * 31) >>> 0;
+    const x = (h * 17) % 512;
+    const y = ((i * 131 + seed * 47) * 13) % 512;
+    const sz = 5 + ((h + i) % 13);
+    ctx.fillStyle = chips[i % chips.length];
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + sz, y + (i % 5) - 2);
+    ctx.lineTo(x + sz * 0.65, y + sz);
+    ctx.lineTo(x - sz * 0.35, y + sz * 0.72);
+    ctx.closePath();
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeFlutedWallTexture(baseHex = '#d6c2a8') {
+  const S = 512;
+  const c = makeCanvas(S, S);
+  const ctx = c.getContext('2d');
+  const bc = new THREE.Color(baseHex);
+  const dark = '#' + bc.clone().offsetHSL(0, 0.04, -0.14).getHexString();
+  const light = '#' + bc.clone().offsetHSL(0, -0.02, 0.09).getHexString();
+  const slats = 16;
+  const w = S / slats;
+  for (let i = 0; i < slats; i++) {
+    const g = ctx.createLinearGradient(i * w, 0, (i + 1) * w, 0);
+    g.addColorStop(0, dark);
+    g.addColorStop(0.28, light);
+    g.addColorStop(0.72, baseHex);
+    g.addColorStop(1, dark);
+    ctx.fillStyle = g;
+    ctx.fillRect(i * w, 0, w, S);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(4, 2);
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeHexMosaicWallTexture(baseHex = '#2a4d5c') {
+  const S = 512;
+  const c = makeCanvas(S, S);
+  const ctx = c.getContext('2d');
+  const bc = new THREE.Color(baseHex);
+  ctx.fillStyle = '#' + bc.clone().offsetHSL(0, 0, -0.14).getHexString();
+  ctx.fillRect(0, 0, S, S);
+  const r = 28;
+  const dx = r * 1.5;
+  const dy = r * Math.sqrt(3);
+  for (let row = -1; row < S / dy + 2; row++) {
+    for (let col = -1; col < S / dx + 2; col++) {
+      const cx = col * dx;
+      const cy = row * dy + (col % 2 === 0 ? 0 : dy * 0.5);
+      const jit = (Math.sin(row * 11.3 + col * 5.7) * 0.5) * 0.06;
+      ctx.fillStyle = '#' + bc.clone().offsetHSL(0, 0, jit).getHexString();
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) {
+        const a = (k * Math.PI) / 3;
+        const px = cx + Math.cos(a) * (r - 2.2);
+        const py = cy + Math.sin(a) * (r - 2.2);
+        if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(3.2, 2.2);
   tex.anisotropy = 8;
   return tex;
 }
@@ -447,47 +679,96 @@ export class EnvironmentManager {
 
     if (surfaceId === 'custom' && customPrompt.trim()) {
       const norm = normalizeText(customPrompt);
+      const seed = hashPromptSeed(norm);
       const colHex = parseHexColor(norm, '#b88c58');
       this.boardMat.color.set(colHex);
       this.rimMat.color.set(colHex).multiplyScalar(0.6);
 
-      if (norm.includes('vidro') || norm.includes('glass')) {
+      if (norm.includes('epoxy') || norm.includes('epoxi') || norm.includes('resin') || norm.includes('river') || norm.includes('rio')) {
+        const woodHex = norm.includes('claro') || norm.includes('maple') || norm.includes('oak') ? '#b68552' : '#4a2b17';
+        this.boardMat.map = makeEpoxyRiverTexture(woodHex, colHex, seed);
+        this.boardMat.color.set('#ffffff');
+        this.boardMat.roughness = 0.22;
+        this.boardMat.metalness = 0.10;
+        this.rimMat.color.set(woodHex);
+        this.surfaceAudio = 'wood';
+      } else if (norm.includes('bambu') || norm.includes('bamboo')) {
+        this.boardMat.map = makeBambooTexture(norm.includes('verd') || norm.includes('green') ? '#6aa84f' : '#d2ab69');
+        this.boardMat.color.set('#ffffff');
+        this.boardMat.roughness = 0.44;
+        this.boardMat.metalness = 0.04;
+        this.rimMat.color.set('#7c5a2b');
+        this.surfaceAudio = 'wood';
+      } else if (norm.includes('terrazzo') || norm.includes('granilit')) {
+        const isDark = norm.includes('pret') || norm.includes('dark') || norm.includes('charcoal');
+        this.boardMat.map = makeCustomTerrazzoTexture(isDark ? '#242730' : '#f6f0ea', colHex, seed);
+        this.boardMat.color.set('#ffffff');
+        this.boardMat.roughness = 0.30;
+        this.boardMat.metalness = 0.06;
+        this.surfaceAudio = 'stone';
+      } else if (norm.includes('checker') || norm.includes('xadrez') || norm.includes('diner') || norm.includes('ceramic') || norm.includes('azulej') || norm.includes('tile')) {
+        const isLightAlt = norm.includes('creme') || norm.includes('white') || norm.includes('branc') || norm.includes('pastel');
+        this.boardMat.map = makeCheckerboardTexture(isLightAlt ? '#faf7f2' : '#f3ece4', colHex, 8);
+        this.boardMat.color.set('#ffffff');
+        this.boardMat.roughness = 0.20;
+        this.boardMat.metalness = 0.06;
+        this.surfaceAudio = 'stone';
+      } else if (norm.includes('grid') || norm.includes('circuit') || norm.includes('cyber') || norm.includes('hologra')) {
+        const cc = new THREE.Color(colHex);
+        const r = Math.round(cc.r * 255), g = Math.round(cc.g * 255), b = Math.round(cc.b * 255);
+        this.boardMat.map = makeNeonGridTexture(`rgba(${r},${g},${b},0.35)`, `rgba(${r},${g},${b},0.85)`);
+        this.boardMat.color.set('#ffffff');
+        this.boardMat.roughness = 0.16;
+        this.boardMat.metalness = 0.36;
+        this.rimMat.emissive.set(colHex);
+        this.rimMat.emissiveIntensity = 1.5;
+        this.surfaceAudio = 'glass';
+      } else if (norm.includes('vidro') || norm.includes('glass') || norm.includes('acrilic') || norm.includes('acrylic') || norm.includes('crystal')) {
         this.boardMat.roughness = 0.08;
         this.boardMat.metalness = 0.14;
         this.boardMat.transparent = true;
         this.boardMat.opacity = 0.72;
         this.surfaceAudio = 'glass';
-      } else if (norm.includes('gelo') || norm.includes('ice')) {
+      } else if (norm.includes('gelo') || norm.includes('ice') || norm.includes('glacial')) {
         this.boardMat.map = this.textures.ice;
         this.boardMat.roughness = 0.14;
         this.boardMat.transparent = true;
         this.boardMat.opacity = 0.86;
         this.surfaceAudio = 'ice';
-      } else if (norm.includes('folha') || norm.includes('leaf') || norm.includes('grama')) {
+      } else if (norm.includes('folha') || norm.includes('leaf') || norm.includes('grama') || norm.includes('palm')) {
         this.boardMat.map = this.textures.rusticWood;
         this.leafMesh.visible = true;
         this.surfaceAudio = 'leaf';
-      } else if (norm.includes('marmor') || norm.includes('pedra') || norm.includes('marble') || norm.includes('lava')) {
-        const isDark = norm.includes('pret') || norm.includes('escuro') || norm.includes('obsidian') || norm.includes('lava') || norm.includes('rox');
-        const vein = norm.includes('ouro') || norm.includes('dourad') ? 'rgba(235,192,92,0.68)' : norm.includes('lava') ? 'rgba(255,90,20,0.85)' : 'rgba(255,255,255,0.45)';
-        this.boardMat.map = makeMarbleTexture(colHex, isDark ? '#1a1c24' : '#f3f4f6', vein, 'rgba(255,255,255,0.18)');
+      } else if (norm.includes('marmor') || norm.includes('pedra') || norm.includes('marble') || norm.includes('stone') || norm.includes('slate') || norm.includes('granit') || norm.includes('lava') || norm.includes('volcan') || norm.includes('quartz') || norm.includes('jade') || norm.includes('onyx')) {
+        const isDark = norm.includes('pret') || norm.includes('black') || norm.includes('escuro') || norm.includes('dark') || norm.includes('obsidian') || norm.includes('lava') || norm.includes('volcan') || norm.includes('slate') || norm.includes('rox') || norm.includes('purple') || norm.includes('navy') || norm.includes('emerald') || norm.includes('esmerald');
+        const vein = norm.includes('ouro') || norm.includes('dourad') || norm.includes('gold')
+          ? 'rgba(235,192,92,0.72)'
+          : norm.includes('lava') || norm.includes('ember') || norm.includes('magma')
+            ? 'rgba(255,95,20,0.88)'
+            : isDark ? 'rgba(255,255,255,0.44)' : 'rgba(110,120,138,0.42)';
+        const bg2 = isDark ? '#' + new THREE.Color(colHex).multiplyScalar(0.42).getHexString() : '#f6f7f9';
+        this.boardMat.map = makeMarbleTexture(colHex, bg2, vein, 'rgba(255,255,255,0.18)');
         this.boardMat.color.set('#ffffff');
-        this.boardMat.roughness = 0.18;
+        this.boardMat.roughness = 0.16;
         this.boardMat.metalness = 0.22;
         this.surfaceAudio = 'stone';
-      } else if (norm.includes('aco') || norm.includes('metal') || norm.includes('ouro') || norm.includes('prata') || norm.includes('inox')) {
+      } else if (norm.includes('aco') || norm.includes('steel') || norm.includes('metal') || norm.includes('ouro') || norm.includes('gold') || norm.includes('copper') || norm.includes('cobre') || norm.includes('brass') || norm.includes('bronze') || norm.includes('prata') || norm.includes('silver') || norm.includes('inox') || norm.includes('chrome')) {
         this.boardMat.map = this.textures.steel;
-        this.boardMat.roughness = 0.24;
+        this.boardMat.roughness = 0.22;
         this.boardMat.metalness = 0.86;
         this.surfaceAudio = 'metal';
       } else {
-        this.boardMat.map = this.textures.honeyWood;
-        this.boardMat.roughness = 0.54;
+        // Custom tinted wood species (walnut, cherry, maple, rosewood, dyed studio wood)
+        const baseC = new THREE.Color(colHex);
+        const grainHex = '#' + baseC.clone().multiplyScalar(0.52).getHexString();
+        this.boardMat.map = makeWoodTexture(colHex, grainHex, true);
+        this.boardMat.color.set('#ffffff');
+        this.boardMat.roughness = 0.50;
         this.boardMat.metalness = 0.04;
         this.surfaceAudio = 'wood';
       }
 
-      if (norm.includes('neon') || norm.includes('brilh') || norm.includes('lava')) {
+      if (norm.includes('neon') || norm.includes('brilh') || norm.includes('glow') || norm.includes('lava') || norm.includes('ember')) {
         this.rimMat.emissive.set(colHex);
         this.rimMat.emissiveIntensity = 1.4;
       }
@@ -625,9 +906,20 @@ export class EnvironmentManager {
       const wHsl = { h: 0, s: 0, l: 0 };
       wallCol.getHSL(wHsl);
       if (!isLight && wHsl.l < 0.17) wallCol.setHSL(wHsl.h, Math.min(wHsl.s, 0.30), 0.17);
-      this.wallMat.color.copy(wallCol);
-      if (norm.includes('azulej') || norm.includes('cozinh') || norm.includes('kitchen') || norm.includes('lab') || norm.includes('tile')) {
-        this.wallMat.map = isLight ? this.textures.lightTiles : this.textures.darkTiles;
+      const wallHex = '#' + wallCol.getHexString();
+      this.wallMat.color.set('#ffffff');
+      if (norm.includes('flut') || norm.includes('slat') || norm.includes('ripad') || norm.includes('japandi') || norm.includes('scandinav') || norm.includes('sauna') || norm.includes('wood') || norm.includes('madeir')) {
+        this.wallMat.map = makeFlutedWallTexture(wallHex);
+      } else if (norm.includes('hex') || norm.includes('mosaic') || norm.includes('boutique') || norm.includes('spa') || norm.includes('jewel') || norm.includes('luxur')) {
+        this.wallMat.map = makeHexMosaicWallTexture(wallHex);
+      } else if (norm.includes('azulej') || norm.includes('cozinh') || norm.includes('kitchen') || norm.includes('lab') || norm.includes('tile') || norm.includes('bistro') || norm.includes('diner') || norm.includes('cafe') || norm.includes('bak')) {
+        const groutHex = '#' + wallCol.clone().multiplyScalar(0.68).getHexString();
+        this.wallMat.map = makeSubwayTileTexture(wallHex, groutHex, 12);
+      } else if (norm.includes('steel') || norm.includes('metal') || norm.includes('industrial') || norm.includes('brass') || norm.includes('copper')) {
+        this.wallMat.color.copy(wallCol);
+        this.wallMat.map = this.textures.steel;
+      } else {
+        this.wallMat.color.copy(wallCol);
       }
       this.wallMat.roughness = 0.34;
       this.wallMat.metalness = 0.08;

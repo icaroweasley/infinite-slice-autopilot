@@ -121,26 +121,41 @@ export function buildClippedPieceGeometry(source, objDef, box, cutFlags) {
     isCapList.push(isCap, isCap, isCap);
   };
 
-  // 1. Exact curved outer shell clipped cleanly to the 6 cell planes
+  // 1. Exact curved outer shell clipped cleanly to the 6 cell planes.
+  // CRITICAL: On outer object boundaries (where cutFlags.* is false), expand bounds outward by +0.08
+  // so Float32Array precision (+2e-8 on flat BoxGeometry tops like Chocolate Bar / Cash / Cheese)
+  // NEVER deletes the object's own outer skin or leaves sliced chunks hollow!
+  const bx0 = cutFlags.negX ? x0 : x0 - 0.08;
+  const bx1 = cutFlags.posX ? x1 : x1 + 0.08;
+  const by0 = cutFlags.negY ? y0 : y0 - 0.08;
+  const by1 = cutFlags.posY ? y1 : y1 + 0.08;
+  const bz0 = cutFlags.negZ ? z0 : z0 - 0.08;
+  const bz1 = cutFlags.posZ ? z1 : z1 + 0.08;
+  const AABB_EPS = 0.002;
+
   const tris = source.triangles;
   for (let i = 0; i < tris.length; i++) {
     const tr = tris[i];
-    if (tr.maxX < x0 || tr.minX > x1 || tr.maxY < y0 || tr.minY > y1 || tr.maxZ < z0 || tr.minZ > z1) {
+    if (
+      tr.maxX < bx0 - AABB_EPS || tr.minX > bx1 + AABB_EPS ||
+      tr.maxY < by0 - AABB_EPS || tr.minY > by1 + AABB_EPS ||
+      tr.maxZ < bz0 - AABB_EPS || tr.minZ > bz1 + AABB_EPS
+    ) {
       continue;
     }
 
     let poly = [tr.v0, tr.v1, tr.v2];
-    poly = clipPolygonAxis(poly, 'x', x0, true);
+    poly = clipPolygonAxis(poly, 'x', bx0, true);
     if (poly.length < 3) continue;
-    poly = clipPolygonAxis(poly, 'x', x1, false);
+    poly = clipPolygonAxis(poly, 'x', bx1, false);
     if (poly.length < 3) continue;
-    poly = clipPolygonAxis(poly, 'y', y0, true);
+    poly = clipPolygonAxis(poly, 'y', by0, true);
     if (poly.length < 3) continue;
-    poly = clipPolygonAxis(poly, 'y', y1, false);
+    poly = clipPolygonAxis(poly, 'y', by1, false);
     if (poly.length < 3) continue;
-    poly = clipPolygonAxis(poly, 'z', z0, true);
+    poly = clipPolygonAxis(poly, 'z', bz0, true);
     if (poly.length < 3) continue;
-    poly = clipPolygonAxis(poly, 'z', z1, false);
+    poly = clipPolygonAxis(poly, 'z', bz1, false);
     if (poly.length < 3) continue;
 
     for (let k = 1; k < poly.length - 1; k++) {

@@ -320,8 +320,10 @@ float h2 = gHash(gCell + vec3(19.1, 37.7, 11.3));
 float h3 = gHash(gCell + vec3(47.3, 13.9, 61.7));
 
 // Feathered stochastic granular perimeter so mound dissolves seamlessly into scattered loose grains!
-float edgeDensity = smoothstep(0.002, 0.028, vMoundPos.y);
-if (edgeDensity < h2) discard;
+// Strict y >= 0.0035 + <= check prevents stray black dots on an empty cutting board before pieces fall!
+if (vMoundPos.y < 0.0035) discard;
+float edgeDensity = smoothstep(0.0035, 0.028, vMoundPos.y);
+if (edgeDensity <= h2) discard;
 
 // Jittered NearestFilter lookup into un-blended pure pigment textures A & B:
 // ZERO muddy color averaging and ZERO parallel grid stripes — authentic organic speckled micro-cube sand!
@@ -464,14 +466,17 @@ normal = normalize(normal + microN * 0.62);`
       this.tier2Mat.roughness = objDef.physics.soundProfile === 'tech' ? 0.30 : 0.46;
       this.tier2Mat.metalness = objDef.physics.soundProfile === 'tech' || objDef.physics.soundProfile === 'metal' ? 0.30 : 0.06;
       this.tier2Mesh.visible = true;
-      this.moundVisible = totalCuts >= 200;
-      this.moundMesh.visible = this.moundVisible;
+      // Keep mound hidden until the FIRST grain actually lands on the board (zero stray spots before cutting!)
+      this.moundEnabled = totalCuts >= 200;
+      this.moundVisible = false;
+      this.moundMesh.visible = false;
       this.moundUniforms.uGrainFreq.value = Math.min(240, 1.0 / Math.max(0.005, this.dx));
     } else {
       this.activeTier = 3;
       this.subMode = '3';
-      this.moundVisible = true;
-      this.moundMesh.visible = true;
+      this.moundEnabled = true;
+      this.moundVisible = false;
+      this.moundMesh.visible = false;
       this.tier3Points.visible = true;
       this.pUniforms.uPointScale.value = totalCuts >= 900 ? 22.0 : 29.0;
       this.moundUniforms.uGrainFreq.value = totalCuts >= 900 ? 275.0 : 195.0;
@@ -506,6 +511,7 @@ normal = normalize(normal + microN * 0.62);`
     this._syncMoundGeometry();
     this.moundMesh.visible = false;
     this.moundVisible = false;
+    this.moundEnabled = false;
 
     this.pState.fill(0);
     this.pCursor = 0;
@@ -951,6 +957,10 @@ normal = normalize(normal + microN * 0.62);`
       target[p4 + 3] = 255;
     }
     this.hfDirty = true;
+    if (this.moundEnabled && !this.moundVisible) {
+      this.moundVisible = true;
+      this.moundMesh.visible = true;
+    }
   }
 
   /**
