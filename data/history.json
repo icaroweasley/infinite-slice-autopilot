@@ -297,6 +297,43 @@
         "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17868683121684267",
         "caption": "Cutting a Raw Golden Honeycomb like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795310772428",
+      "createdAt": "2026-11-22T01:26:12.428Z",
+      "status": "published",
+      "source": "cloud-autopilot:gemini",
+      "objectId": "custom",
+      "slug": "exotic-dragon-fruit",
+      "name": "Exotic Pitaya Dragon Fruit",
+      "englishName": "Vibrant Dragon Fruit",
+      "cutterId": "ai-custom",
+      "cutterPrompt": "",
+      "surfaceId": "ai-custom",
+      "surfacePrompt": "",
+      "envId": "ai-custom",
+      "envPrompt": "",
+      "conceptSummary": "Exotic Pitaya Dragon Fruit with snow-white pulp and hundreds of crunchy black seeds sliced by an Iridescent Prism Nakiri on a Deep Malachite Stone slab inside a Kyoto Hinoki & Sage daylight atelier.",
+      "rounds": [
+        10,
+        50,
+        250,
+        1000
+      ],
+      "maxCubes": 13282850,
+      "durationSec": 35.533,
+      "resolution": "720x1280",
+      "fps": 30,
+      "videoFile": "output/infinite-slice-custom-ai-custom-2026-11-22T00-59-31.mp4",
+      "caption": "Cutting a Vibrant Dragon Fruit like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-22T01:26:52.925Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17868717573684267",
+        "mediaId": "18123981802939706",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17868717573684267",
+        "caption": "Cutting a Vibrant Dragon Fruit like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
