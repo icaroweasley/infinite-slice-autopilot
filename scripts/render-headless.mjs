@@ -243,7 +243,7 @@ export async function renderHeadlessVideo({
         '-c:v', 'libx264',
         '-profile:v', 'high',
         '-level', '4.2',
-        '-preset', 'medium',
+        '-preset', process.env.CI ? 'veryfast' : 'medium',
         '-crf', '18',
         '-vf', 'scale=in_range=full:out_range=tv,format=yuv420p',
         '-r', String(FPS),
