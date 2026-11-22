@@ -1,18 +1,18 @@
 name: Infinite Slice 24/7 Reels Autopilot
 
 on:
-  # Default safe schedule: 3 Reels/day at off-peak minute (:23 avoids GitHub Actions :00 cron storm & drops!)
-  # 09:23, 15:23, 21:23 UTC = 05:23, 11:23, 17:23 (-04:00) / 06:23, 12:23, 18:23 (Brasilia -03:00)
+  # 6 Reels/day (every 4 hours) at off-peak minute :23 to avoid GitHub Actions :00 cron congestion
+  # UTC: 01:23, 05:23, 09:23, 13:23, 17:23, 21:23
+  # Local (-04:00): 21:23, 01:23, 05:23, 09:23, 13:23, 17:23
+  # Brasilia (-03:00): 22:23, 02:23, 06:23, 10:23, 14:23, 18:23
   schedule:
-    - cron: '23 9,15,21 * * *'
-    # One-shot live cron verification test (fires ONCE on Nov 22 at 13:17 UTC = 09:17 GMT-4)
-    - cron: '17 13 22 11 *'
+    - cron: '23 1,5,9,13,17,21 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
         description: 'Dry-run only (render MP4 + preview caption, do NOT post to Instagram)'
         type: boolean
-        default: true
+        default: false
       quick:
         description: 'Quick test render (540x960 @ 30fps, 3 rounds)'
         type: boolean
@@ -21,10 +21,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: infinite-slice-autopilot
+  cancel-in-progress: false
+
 jobs:
   generate-and-post:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
 
     steps:
       - name: Check if scheduled run has publishing secrets configured
@@ -84,7 +88,7 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
         run: |
-          FLAGS="--res 720x1280 --fps 30 --scale 0.65"
+          FLAGS="--res 720x1280 --fps 60 --scale 0.72"
           if [ "${{ inputs.quick }}" = "true" ]; then
             FLAGS="--quick"
           fi
