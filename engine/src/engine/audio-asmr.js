@@ -175,4 +175,30 @@ export class AsmrAudioEngine {
       src.start(now, Math.random() * 0.8, dur + 0.02);
     }
   }
+
+  playCtaChime() {
+    if (this.headless || this.muted) return;
+    this.ensureContext();
+    const now = this.ctx.currentTime;
+    const notes = [
+      { delay: 0.000, f1: 987.77,  f2: 1975.53, amp: 0.24, dur: 0.42 },
+      { delay: 0.068, f1: 1318.51, f2: 2637.02, amp: 0.34, dur: 0.72 },
+    ];
+    for (const n of notes) {
+      const t = now + n.delay;
+      for (const [freq, mult] of [[n.f1, 1.0], [n.f2, 0.42]]) {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(n.amp * mult, t + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0008, t + n.dur);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + n.dur + 0.02);
+      }
+    }
+  }
 }

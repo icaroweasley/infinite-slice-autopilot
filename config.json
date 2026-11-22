@@ -14,6 +14,16 @@
     "showHud": true,
     "outputDir": "output"
   },
+  "ctaOutro": {
+    "enabled": true,
+    "eyebrow": "TRY IT YOURSELF!",
+    "headlineTop": "Make YOUR OWN",
+    "headlineAccent": "viral 3D",
+    "headlineSuffix": "videos!",
+    "pill": "LINK IN BIO",
+    "subline": "Slice ANYTHING in 1 click",
+    "durationSec": 2.5
+  },
   "environments": {
     "default": "classic-viral",
     "rotate": true,

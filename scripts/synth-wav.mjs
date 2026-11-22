@@ -204,6 +204,53 @@ function synthFibrousSlice(profile, axis, speedFactor, jitter, rand, amp) {
 }
 
 /**
+ * Generates a bright, sparkling, ultra-clean notification chime ("PLIM!")
+ * played the exact millisecond the outro CTA card springs onto screen.
+ */
+function synthCtaPlimChime(rand) {
+  const durSec = 0.85;
+  const len = Math.floor(durSec * SAMPLE_RATE);
+  const out = new Float32Array(len);
+
+  // Two-tone ascending crystal bell ("pa-PLIM!"): B5 (987.77 Hz) -> E6 (1318.51 Hz) + silky octave shimmer
+  const notes = [
+    { start: 0.000, f1: 987.77,  f2: 1975.53, f3: 2963.30, amp: 0.42, decay: 9.5 },
+    { start: 0.068, f1: 1318.51, f2: 2637.02, f3: 3955.53, amp: 0.62, decay: 5.2 },
+  ];
+
+  for (const n of notes) {
+    const startIdx = Math.floor(n.start * SAMPLE_RATE);
+    for (let i = startIdx; i < len; i++) {
+      const t = (i - startIdx) / SAMPLE_RATE;
+      const attack = t < 0.003 ? t / 0.003 : 1.0;
+      const env1 = Math.exp(-n.decay * t);
+      const env2 = Math.exp(-(n.decay * 1.65) * t);
+      const env3 = Math.exp(-(n.decay * 2.8) * t);
+      const val =
+        Math.sin(2 * Math.PI * n.f1 * t) * 0.62 * env1 +
+        Math.sin(2 * Math.PI * n.f2 * t) * 0.28 * env2 +
+        Math.sin(2 * Math.PI * n.f3 * t) * 0.12 * env3;
+      out[i] += val * attack * n.amp;
+    }
+  }
+
+  // Tiny 4ms crystalline glass-mallet sparkle right at the attack
+  const sparkRaw = makeNoiseBurst(0.014, rand);
+  const sparkFilt = filterBurst(sparkRaw, 'bandpass', 5800, 2.4);
+  for (let i = 0; i < sparkFilt.length && i < len; i++) {
+    const t = i / SAMPLE_RATE;
+    out[i] += sparkFilt[i] * 0.18 * Math.exp(-320 * t);
+  }
+  const spark2Idx = Math.floor(0.068 * SAMPLE_RATE);
+  for (let i = 0; i < sparkFilt.length && (spark2Idx + i) < len; i++) {
+    const t = i / SAMPLE_RATE;
+    out[spark2Idx + i] += sparkFilt[i] * 0.24 * Math.exp(-290 * t);
+  }
+
+  return out;
+}
+
+/**
  * Renders an exact timeline of hyper-realistic acoustic ASMR foley events into a 48kHz 16-bit Stereo WAV file.
  */
 export function synthesizeAsmrWav({ durationSec, audioEvents, outputPath, seed = 20261121 }) {
@@ -285,6 +332,11 @@ export function synthesizeAsmrWav({ durationSec, audioEvents, outputPath, seed =
         const gain = (tier === 3 ? 0.28 : 0.20) * intensity;
         mixMono(left, right, sampleIdx + Math.floor(0.012 * SAMPLE_RATE), out, gain, (rand() - 0.5) * 0.38);
       }
+    } else if (ev.kind === 'ctaChime') {
+      const chimeBuf = synthCtaPlimChime(rand);
+      // Slight gentle stereo shimmer centered cleanly for phone speakers
+      mixMono(left, right, sampleIdx, chimeBuf, 0.92, -0.06);
+      mixMono(left, right, sampleIdx + Math.floor(0.004 * SAMPLE_RATE), chimeBuf, 0.32, 0.12);
     }
   }
 

@@ -74,10 +74,12 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.8-flash' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Publishing Method A (n8n / Make webhook) OR Method B (Meta Graph API direct upload)
+          # Publishing Method A (n8n / Make webhook) OR Method B (Meta Graph API direct upload: Instagram + Facebook Page Reels)
           N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
           CLOUDINARY_UPLOAD_PRESET: ${{ secrets.CLOUDINARY_UPLOAD_PRESET }}
           # Optional YouTube Shorts + TikTok Cross-Posting (Upload-Post pre-audited OR Direct YouTube Data API v3)

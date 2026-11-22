@@ -211,7 +211,143 @@ async function publishViaMetaGraph(videoPath, manifest, caption) {
   return { provider: isIgLogin ? 'instagram-api' : 'meta-graph', creationId, mediaId: pubJson.id, videoUrl };
 }
 
-export async function publishReel({ videoPath, manifestPath, dryRun = false, captionOverride } = {}) {
+/**
+ * Resolves the linked Facebook Page ID + Page Access Token for simultaneous Facebook Reels publishing.
+ * Supports either explicit FB_PAGE_ID + FB_PAGE_ACCESS_TOKEN env/secrets OR automatic discovery from
+ * IG_ACCESS_TOKEN when it has pages_show_list + pages_manage_posts permissions.
+ */
+async function resolveFacebookPageCredentials() {
+  const explicitId = (process.env.FB_PAGE_ID || '').trim();
+  const explicitToken = (process.env.FB_PAGE_ACCESS_TOKEN || '').trim();
+  if (explicitId && explicitToken) {
+    return { pageId: explicitId, pageToken: explicitToken, pageName: explicitId };
+  }
+
+  const userToken = (process.env.IG_ACCESS_TOKEN || '').trim();
+  if (!userToken || userToken.startsWith('IGAA') || userToken.startsWith('IGQ')) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,access_token,instagram_business_account{id}&access_token=${encodeURIComponent(userToken)}`
+    );
+    const json = await res.json();
+    const pages = Array.isArray(json.data) ? json.data : [];
+    if (pages.length === 0) return null;
+
+    const targetIgId = (process.env.IG_USER_ID || '').trim();
+    const matched =
+      (explicitId && pages.find((p) => p.id === explicitId)) ||
+      (targetIgId && pages.find((p) => p.instagram_business_account?.id === targetIgId)) ||
+      pages[0];
+
+    if (matched?.id && matched?.access_token) {
+      return { pageId: matched.id, pageToken: matched.access_token, pageName: matched.name || matched.id };
+    }
+  } catch (err) {
+    console.warn(`[publish-fb] Page auto-discovery skipped: ${err.message}`);
+  }
+  return null;
+}
+
+/**
+ * Publishes the exact same 9:16 MP4 directly to the linked Facebook Page as a native Facebook Reel
+ * using Meta's official 3-phase /{page-id}/video_reels API (start -> rupload -> finish).
+ */
+export async function publishFacebookReel({ videoPath, caption }) {
+  const creds = await resolveFacebookPageCredentials();
+  if (!creds) {
+    console.log(
+      '[publish-fb] Skipped Facebook Page cross-post (add pages_show_list + pages_manage_posts to your Meta token, or set FB_PAGE_ID + FB_PAGE_ACCESS_TOKEN).'
+    );
+    return { status: 'skipped' };
+  }
+
+  const { pageId, pageToken, pageName } = creds;
+  const apiBase = 'https://graph.facebook.com/v21.0';
+  const fileBuf = fs.readFileSync(videoPath);
+
+  let videoId = null;
+  let lastErr = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    console.log(`[publish-fb] Starting Facebook Page Reel upload to "${pageName}" (${pageId}) (attempt ${attempt}/3)...`);
+    // Phase 1: start
+    const startRes = await fetch(`${apiBase}/${pageId}/video_reels`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        upload_phase: 'start',
+        access_token: pageToken,
+      }),
+    });
+    const startJson = await startRes.json();
+    if (!startRes.ok || !startJson.video_id || !startJson.upload_url) {
+      lastErr = new Error(`FB video_reels start failed (${startRes.status}): ${JSON.stringify(startJson).slice(0, 320)}`);
+      if (attempt < 3) {
+        console.warn(`[publish-fb] ${lastErr.message} — retrying in 6s...`);
+        await new Promise((r) => setTimeout(r, 6000));
+        continue;
+      }
+      throw lastErr;
+    }
+
+    videoId = startJson.video_id;
+    const uploadUrl = startJson.upload_url;
+
+    // Phase 2: binary upload to rupload.facebook.com
+    console.log(`[publish-fb] Streaming ${(fileBuf.length / (1024 * 1024)).toFixed(2)} MB to Facebook Reels (${videoId})...`);
+    const upRes = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `OAuth ${pageToken}`,
+        offset: '0',
+        file_size: String(fileBuf.length),
+        'Content-Type': 'application/octet-stream',
+      },
+      body: fileBuf,
+    });
+    const upText = await upRes.text();
+    if (!upRes.ok) {
+      lastErr = new Error(`FB video_reels rupload failed (${upRes.status}): ${upText.slice(0, 320)}`);
+      if (attempt < 3) {
+        console.warn(`[publish-fb] ${lastErr.message} — retrying fresh session in 8s...`);
+        await new Promise((r) => setTimeout(r, 8000));
+        continue;
+      }
+      throw lastErr;
+    }
+
+    // Phase 3: finish & publish
+    const finishRes = await fetch(`${apiBase}/${pageId}/video_reels`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        upload_phase: 'finish',
+        video_id: videoId,
+        video_state: 'PUBLISHED',
+        description: caption,
+        access_token: pageToken,
+      }),
+    });
+    const finishJson = await finishRes.json();
+    if (!finishRes.ok || finishJson.error) {
+      lastErr = new Error(`FB video_reels finish failed (${finishRes.status}): ${JSON.stringify(finishJson).slice(0, 320)}`);
+      if (attempt < 3) {
+        console.warn(`[publish-fb] ${lastErr.message} — retrying in 8s...`);
+        await new Promise((r) => setTimeout(r, 8000));
+        continue;
+      }
+      throw lastErr;
+    }
+
+    console.log(`[publish-fb] Facebook Page Reel PUBLISHED on "${pageName}"! videoId=${videoId}`);
+    return { status: 'published', pageId, pageName, videoId, postId: finishJson.post_id || null };
+  }
+  throw lastErr || new Error('Facebook Reel upload failed');
+}
+
+export async function publishReel({ videoPath, manifestPath, dryRun = false, captionOverride, crosspostFacebook = true } = {}) {
   loadDotEnv();
   const cfg = loadConfig();
   const absVideo = path.resolve(ROOT, videoPath);
@@ -247,9 +383,20 @@ export async function publishReel({ videoPath, manifestPath, dryRun = false, cap
     ? await publishViaN8n(absVideo, manifest, caption)
     : await publishViaMetaGraph(absVideo, manifest, caption);
 
-  markPublished(manifest.videoFile || absVideo, { ...result, caption });
+  // Automatically cross-post the exact same Reel to the linked Facebook Page (when FB permissions/token are present)
+  let facebook = null;
+  if (crosspostFacebook && mode === 'meta-graph') {
+    try {
+      facebook = await publishFacebookReel({ videoPath: absVideo, caption });
+    } catch (fbErr) {
+      console.error(`[publish-fb] Facebook Page cross-post warning (IG post succeeded): ${fbErr.message}`);
+      facebook = { status: 'error', error: fbErr.message };
+    }
+  }
+
+  markPublished(manifest.videoFile || absVideo, { ...result, facebook, caption });
   console.log(`[publish] Published successfully via ${result.provider}!`, result);
-  return { ...result, caption };
+  return { ...result, facebook, caption };
 }
 
 // CLI entrypoint

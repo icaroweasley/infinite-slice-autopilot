@@ -133,6 +133,10 @@ export class InfiniteSliceEngine {
     this.currentEnvPrompt = '';
     this.handleText = '@atomslice3d';
     this.showHud = true;
+    this.ctaOutro = null;
+    this.ctaActive = false;
+    this.ctaTimer = 0;
+    this.ctaChimeFired = false;
     this.speedMultiplier = 1.0;
     this.paused = false;
     this.autoSequence = false;
@@ -197,10 +201,15 @@ export class InfiniteSliceEngine {
     rounds = [10, 50, 100, 250, 500, 1000],
     durationScale = 1.0,
     showHud = true,
+    ctaOutro = null,
   } = {}) {
     this.setResolution(width, height);
     this.setHandle(handle);
     this.showHud = showHud;
+    this.ctaOutro = (ctaOutro && ctaOutro.enabled) ? ctaOutro : null;
+    this.ctaActive = false;
+    this.ctaTimer = 0;
+    this.ctaChimeFired = false;
     this.setRounds(rounds, durationScale, false);
 
     // Environment first, then decoupled Cutting Surface (if explicitly chosen or prompted!)
@@ -326,6 +335,9 @@ export class InfiniteSliceEngine {
 
     this.waitingForNextRound = false;
     this.settleTimer = 0;
+    this.ctaActive = false;
+    this.ctaTimer = 0;
+    this.ctaChimeFired = false;
     this.displayCuts = 0;
     this.targetCuts = round.cuts;
     this.displayCubes = 0;
@@ -489,7 +501,34 @@ export class InfiniteSliceEngine {
 
     if (this.waitingForNextRound) {
       this.settleTimer += dt;
-      if (this.settleTimer >= round.settleWait) {
+      const isFinalRound = this.autoSequence && this.roundIndex >= this.rounds.length - 1;
+      const hasCta = Boolean(isFinalRound && this.ctaOutro && this.ctaOutro.enabled);
+      const ctaDelay = 0.48;
+      const ctaDur = hasCta ? Math.max(1.6, Number(this.ctaOutro.durationSec) || 2.4) : 0;
+
+      if (hasCta && this.settleTimer >= ctaDelay) {
+        if (!this.ctaActive) {
+          this.ctaActive = true;
+          this.ctaTimer = 0;
+        } else {
+          this.ctaTimer += dt;
+        }
+        if (!this.ctaChimeFired) {
+          this.ctaChimeFired = true;
+          const chimeEv = {
+            timeSec: Number(this.simTime.toFixed(4)),
+            kind: 'ctaChime',
+          };
+          if (this.headless) {
+            this.audioLog.push(chimeEv);
+          } else {
+            this.audio.playCtaChime?.();
+          }
+        }
+      }
+
+      const effectiveWait = hasCta ? Math.max(round.settleWait, ctaDelay + ctaDur) : round.settleWait;
+      if (this.settleTimer >= effectiveWait) {
         if (this.autoSequence) {
           if (this.roundIndex < this.rounds.length - 1) {
             this.startRound(this.roundIndex + 1, true);
@@ -622,6 +661,263 @@ export class InfiniteSliceEngine {
       ctx.fillText('CUBES', 0, 23 * s);
       ctx.restore();
     }
+
+    if (this.ctaActive && this.ctaOutro?.enabled) {
+      this._drawCtaOutro(ctx, W, H, s);
+    }
+
+    ctx.restore();
+  }
+
+  _drawRoundedRect(ctx, x, y, w, h, r) {
+    const rad = Math.min(r, w * 0.5, h * 0.5);
+    ctx.beginPath();
+    ctx.moveTo(x + rad, y);
+    ctx.lineTo(x + w - rad, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + rad);
+    ctx.lineTo(x + w, y + h - rad);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
+    ctx.lineTo(x + rad, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - rad);
+    ctx.lineTo(x, y + rad);
+    ctx.quadraticCurveTo(x, y, x + rad, y);
+    ctx.closePath();
+  }
+
+  _drawStarSparkle(ctx, x, y, r, color, rot = 0) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI) / 4;
+      const rad = i % 2 === 0 ? r : r * 0.34;
+      const px = Math.cos(a) * rad;
+      const py = Math.sin(a) * rad;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  _drawCtaOutro(ctx, W, H, s) {
+    const t = Math.max(0, this.ctaTimer);
+    // Joyful bouncy elastic pop-in (0.58 -> 1.07 -> 0.98 -> 1.00)
+    const alpha = Math.min(1, t / 0.12);
+    const spring = t < 0.65
+      ? 1.0 - Math.exp(-9.2 * t) * Math.cos(15.5 * t) * 0.42
+      : 1.0;
+    const floatY = Math.exp(-9.5 * t) * 34 * s + Math.sin(t * 3.8) * 3.2 * s;
+
+    ctx.save();
+    // NO dark gloomy scrim — keep the bright, happy 3D studio shining cleanly!
+    const cx = W * 0.5;
+    const cy = H * 0.465 + floatY;
+    const cardW = 434 * s;
+    const cardH = 248 * s;
+    const x0 = -cardW * 0.5;
+    const y0 = -cardH * 0.5;
+
+    ctx.globalAlpha = alpha;
+    ctx.translate(cx, cy);
+
+    // 1. Happy burst of colorful confetti & twinkling 4-point stars popping outward on "PLIM!"
+    const burst = 1.0 - Math.exp(-6.5 * t);
+    const confFade = t > 1.8 ? Math.max(0, 1.0 - (t - 1.8) / 0.7) : 1.0;
+    const confetti = [
+      { ang: -2.65, dist: 252, col: '#ff3b6b', kind: 'star', sz: 14 },
+      { ang: -2.18, dist: 222, col: '#ffe047', kind: 'dot',  sz: 8 },
+      { ang: -0.95, dist: 228, col: '#22d3ee', kind: 'pill', sz: 13 },
+      { ang: -0.45, dist: 256, col: '#4ade80', kind: 'star', sz: 15 },
+      { ang:  0.42, dist: 252, col: '#ffe047', kind: 'star', sz: 14 },
+      { ang:  0.96, dist: 224, col: '#a855f7', kind: 'dot',  sz: 8 },
+      { ang:  2.20, dist: 226, col: '#ff7a18', kind: 'pill', sz: 13 },
+      { ang:  2.70, dist: 255, col: '#38bdf8', kind: 'star', sz: 14 },
+      { ang: -1.56, dist: 162, col: '#ff3b6b', kind: 'dot',  sz: 7 },
+      { ang:  1.56, dist: 164, col: '#4ade80', kind: 'dot',  sz: 7 },
+    ];
+    ctx.save();
+    ctx.globalAlpha = alpha * confFade;
+    for (let i = 0; i < confetti.length; i++) {
+      const c = confetti[i];
+      const px = Math.cos(c.ang) * c.dist * s * (0.45 + 0.55 * burst);
+      const py = Math.sin(c.ang) * (c.dist * 0.72) * s * (0.45 + 0.55 * burst) + t * 14 * s;
+      const rot = t * (i % 2 === 0 ? 2.4 : -2.1) + i;
+      if (c.kind === 'star') {
+        const tw = 0.82 + 0.24 * Math.sin(t * 9.0 + i * 1.7);
+        this._drawStarSparkle(ctx, px, py, c.sz * s * tw, c.col, rot);
+      } else if (c.kind === 'pill') {
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(rot);
+        this._drawRoundedRect(ctx, -c.sz * 0.65 * s, -4.5 * s, c.sz * 1.3 * s, 9 * s, 4.5 * s);
+        ctx.fillStyle = c.col;
+        ctx.fill();
+        ctx.restore();
+      } else {
+        ctx.beginPath();
+        ctx.arc(px, py, c.sz * s, 0, Math.PI * 2);
+        ctx.fillStyle = c.col;
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+
+    ctx.scale(spring, spring);
+
+    // 2. Joyful 3D candy bottom lip (sunny golden-amber base matching our @atomslice3d brand yellow!)
+    ctx.save();
+    ctx.shadowColor = 'rgba(20, 16, 40, 0.28)';
+    ctx.shadowBlur = 32 * s;
+    ctx.shadowOffsetY = 16 * s;
+    this._drawRoundedRect(ctx, x0, y0 + 8 * s, cardW, cardH, 32 * s);
+    ctx.fillStyle = '#f5b800';
+    ctx.fill();
+    ctx.restore();
+
+    // 3. Bright creamy-white cheerful main card body
+    this._drawRoundedRect(ctx, x0, y0, cardW, cardH, 32 * s);
+    const cardGrad = ctx.createLinearGradient(0, y0, 0, y0 + cardH);
+    cardGrad.addColorStop(0, '#ffffff');
+    cardGrad.addColorStop(1, '#fff8e6');
+    ctx.fillStyle = cardGrad;
+    ctx.fill();
+
+    // Thick sunny yellow sticker border
+    this._drawRoundedRect(ctx, x0, y0, cardW, cardH, 32 * s);
+    ctx.lineWidth = 4.5 * s;
+    ctx.strokeStyle = '#ffd836';
+    ctx.stroke();
+
+    // 4. Playful slightly tilted sunny-yellow sticker pill overlapping top edge ("TRY IT YOURSELF!")
+    const eyebrow = (this.ctaOutro.eyebrow || 'TRY IT YOURSELF!').toUpperCase();
+    ctx.save();
+    ctx.translate(0, y0 - 2 * s);
+    ctx.rotate(-0.032);
+    const badgeW = 224 * s;
+    const badgeH = 38 * s;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.16)';
+    ctx.shadowBlur = 10 * s;
+    ctx.shadowOffsetY = 4 * s;
+    this._drawRoundedRect(ctx, -badgeW * 0.5, -badgeH * 0.5, badgeW, badgeH, 19 * s);
+    const tagGrad = ctx.createLinearGradient(-badgeW * 0.5, 0, badgeW * 0.5, 0);
+    tagGrad.addColorStop(0, '#ffe84d');
+    tagGrad.addColorStop(1, '#ffc824');
+    ctx.fillStyle = tagGrad;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 3 * s;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+
+    ctx.font = `900 ${Math.round(15 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = '#18181b';
+    ctx.fillText(eyebrow, 0, 1 * s);
+    ctx.restore();
+
+    // 5. Big, engaging, joyful 2-line headline with vibrant watermelon-coral highlight!
+    const line1 = this.ctaOutro.headlineTop || 'Make YOUR OWN';
+    const accent = this.ctaOutro.headlineAccent || 'viral 3D';
+    const suffix = this.ctaOutro.headlineSuffix || 'videos!';
+    ctx.font = `900 ${Math.round(34 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = '#141824';
+    ctx.fillText(line1, 0, y0 + 68 * s);
+
+    // Measure & center "[viral 3D] [videos!]" cleanly in dual color
+    const fullLine2 = `${accent} ${suffix}`;
+    const wFull = ctx.measureText(fullLine2).width;
+    const wAcc = ctx.measureText(`${accent} `).width;
+    const startX2 = -wFull * 0.5;
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ff2e63';
+    ctx.fillText(accent, startX2, y0 + 108 * s);
+    ctx.fillStyle = '#141824';
+    ctx.fillText(suffix, startX2 + wAcc, y0 + 108 * s);
+    ctx.restore();
+
+    // 6. Super juicy 3D glossy candy CTA button ("LINK IN BIO ↗") with animated pulse & shine!
+    const pillW = 292 * s;
+    const pillH = 58 * s;
+    const pillX = -pillW * 0.5;
+    const pillY = y0 + 136 * s;
+    const pulse = 1.0 + Math.sin(t * 7.8) * 0.032;
+
+    ctx.save();
+    ctx.translate(0, pillY + pillH * 0.5);
+    ctx.scale(pulse, pulse);
+
+    // Candy 3D button bottom lip
+    this._drawRoundedRect(ctx, pillX, -pillH * 0.5 + 5 * s, pillW, pillH, 29 * s);
+    ctx.fillStyle = '#c8194b';
+    ctx.fill();
+
+    // Main vibrant watermelon-coral -> sunny orange gradient button
+    ctx.shadowColor = 'rgba(255, 46, 99, 0.36)';
+    ctx.shadowBlur = 18 * s;
+    ctx.shadowOffsetY = 6 * s;
+    this._drawRoundedRect(ctx, pillX, -pillH * 0.5, pillW, pillH, 29 * s);
+    const btnGrad = ctx.createLinearGradient(pillX, -pillH * 0.5, pillX + pillW, pillH * 0.5);
+    btnGrad.addColorStop(0, '#ff2e63');
+    btnGrad.addColorStop(0.55, '#ff5940');
+    btnGrad.addColorStop(1, '#ff881a');
+    ctx.fillStyle = btnGrad;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Glossy top candy highlight strip inside button
+    this._drawRoundedRect(ctx, pillX + 16 * s, -pillH * 0.5 + 5 * s, pillW - 32 * s, 12 * s, 6 * s);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.26)';
+    ctx.fill();
+
+    // Animated glossy diagonal light sweep across button
+    const sweepU = (t - 0.32) / 0.62;
+    if (sweepU > 0 && sweepU < 1.25) {
+      ctx.save();
+      this._drawRoundedRect(ctx, pillX, -pillH * 0.5, pillW, pillH, 29 * s);
+      ctx.clip();
+      const sx = pillX - 50 * s + sweepU * (pillW + 100 * s);
+      const shine = ctx.createLinearGradient(sx - 28 * s, -pillH * 0.5, sx + 28 * s, pillH * 0.5);
+      shine.addColorStop(0, 'rgba(255,255,255,0)');
+      shine.addColorStop(0.5, 'rgba(255,255,255,0.65)');
+      shine.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = shine;
+      ctx.fillRect(sx - 45 * s, -pillH * 0.6, 90 * s, pillH * 1.2);
+      ctx.restore();
+    }
+
+    // Crisp white CTA label + bouncing vector arrow
+    const pillLabel = (this.ctaOutro.pill || 'LINK IN BIO').toUpperCase();
+    ctx.font = `900 ${Math.round(23 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(130, 10, 35, 0.38)';
+    ctx.shadowBlur = 4 * s;
+    ctx.fillText(pillLabel, -14 * s, 1 * s);
+    ctx.shadowBlur = 0;
+
+    const ax = 82 * s + Math.sin(t * 9.5) * 4.0 * s;
+    const ay = 0;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3.6 * s;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(ax - 7 * s, ay + 6 * s);
+    ctx.lineTo(ax + 6 * s, ay - 6 * s);
+    ctx.moveTo(ax - 2 * s, ay - 6 * s);
+    ctx.lineTo(ax + 6 * s, ay - 6 * s);
+    ctx.lineTo(ax + 6 * s, ay + 2 * s);
+    ctx.stroke();
+    ctx.restore();
+
+    // 7. Playful clean sub-line ("Slice ANYTHING in 1 click • @atomslice3d")
+    const subline = this.ctaOutro.subline || 'Slice ANYTHING in 1 click';
+    const footer = this.handleText ? `${subline}  •  ${this.handleText}` : subline;
+    ctx.font = `800 ${Math.round(14.5 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = '#475569';
+    ctx.fillText(footer, 0, y0 + 221 * s);
 
     ctx.restore();
   }

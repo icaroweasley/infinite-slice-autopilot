@@ -121,6 +121,7 @@ export async function renderHeadlessVideo({
   durationScale = 1.0,
   jpegQuality,
   showHud,
+  ctaOutro,
   outputName,
   serverUrl,
   onProgress,
@@ -133,6 +134,7 @@ export async function renderHeadlessVideo({
   const HANDLE = handle ?? cfg.brand.handle ?? '@cubiccutlab';
   const ROUNDS = (rounds && rounds.length > 0) ? rounds : (cfg.render.rounds || [10, 50, 100, 250, 500, 1000]);
   const SHOW_HUD = showHud ?? cfg.render.showHud ?? true;
+  const CTA_OUTRO = ctaOutro === false ? null : (ctaOutro ?? (cfg.ctaOutro?.enabled ? cfg.ctaOutro : null));
 
   const outDir = path.resolve(ROOT, cfg.render.outputDir || 'output');
   fs.mkdirSync(outDir, { recursive: true });
@@ -227,6 +229,7 @@ export async function renderHeadlessVideo({
         rounds: ROUNDS,
         durationScale,
         showHud: SHOW_HUD,
+        ctaOutro: CTA_OUTRO,
       }
     );
 
@@ -402,6 +405,7 @@ if (
       fps: getFlag('fps', quick ? '30' : undefined) ? Number(getFlag('fps', quick ? '30' : undefined)) : undefined,
       rounds,
       durationScale: quick ? 0.55 : Number(getFlag('scale', '1.0')),
+      ctaOutro: hasFlag('no-cta') ? false : undefined,
       outputName: getFlag('out', undefined),
       serverUrl: getFlag('serverUrl', undefined),
     };
