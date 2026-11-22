@@ -1000,6 +1000,50 @@
         "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17868838947684267",
         "caption": "Watch what happens to a Molten Magma Obsidian Rock at 1,000 cuts 🔊✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795378867708",
+      "createdAt": "2026-11-22T20:21:07.708Z",
+      "status": "published",
+      "source": "cloud-autopilot:fallback",
+      "objectId": "prompt-custom",
+      "slug": "red-hot-chili-pepper-with-spicy-white-pith",
+      "name": "Red Hot Chili Pepper with spicy white pith and seeds",
+      "englishName": "Red Hot Chili Pepper with spicy white pith and seeds",
+      "cutterId": "custom",
+      "cutterPrompt": "Translucent sapphire diamond crystal blade",
+      "surfaceId": "custom",
+      "surfacePrompt": "Black volcanic stone with glowing orange magma veins",
+      "envId": "custom",
+      "envPrompt": "Warm terracotta sunset plaster atelier",
+      "conceptSummary": "Red Hot Chili Pepper with spicy white pith and seeds | blade=Translucent sapphire diamond crystal blade | board=Black volcanic stone with glowing orange magma veins | studio=Warm terracotta sunset plaster atelier",
+      "rounds": [
+        10,
+        50,
+        100,
+        1000
+      ],
+      "maxCubes": 32620157,
+      "durationSec": 34,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-red-hot-chili-pepper-with-spicy--warm-terracotta-sunset-plaster-a-2026-11-22T19-45-14.mp4",
+      "caption": "Slicing a Red Hot Chili Pepper with spicy white pith and seeds 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-22T20:22:02.256Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17868865458684267",
+        "mediaId": "18134545324768995",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17868865458684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1137840635830489",
+          "postId": "122100104505557835"
+        },
+        "caption": "Slicing a Red Hot Chili Pepper with spicy white pith and seeds 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
