@@ -117,7 +117,7 @@ export function generateObjectFromPrompt(rawPrompt) {
   // --- Rich Viral Archetype Templates ---
 
   // 1. Avocado (Abacate com caroço)
-  if (norm.includes('abacat') || norm.includes('avocado')) {
+  if ((norm.includes('abacat') || norm.includes('avocado')) && !norm.includes('sushi') && !norm.includes('uramaki')) {
     return {
       id: 'prompt-custom',
       slug,
@@ -244,7 +244,7 @@ export function generateObjectFromPrompt(rawPrompt) {
     };
   }
 
-  // 3. Swiss Cheese (Queijo Suíço com furos ocos reais!)
+  // 3. Swiss Cheese (Queijo Suíço com furos ocos reais e crateras douradas na casca!)
   if (norm.includes('queij') || norm.includes('cheese')) {
     const holes = [
       [-0.22, 0.48, 0.14, 0.14],
@@ -254,12 +254,27 @@ export function generateObjectFromPrompt(rawPrompt) {
       [0.30, 0.38, 0.18, 0.11],
       [-0.30, 0.62, -0.12, 0.11],
     ];
+    // Iconic visible Emmental Swiss craters across top & side faces
+    const surfaceEyes = [
+      [-0.28, 0.99, 0.16, 0.11],
+      [0.14, 0.99, -0.18, 0.13],
+      [0.24, 0.99, 0.20, 0.085],
+      [-0.04, 0.99, 0.02, 0.075],
+      [-0.30, 0.99, -0.24, 0.09],
+      [0.08, 0.52, 0.50, 0.12],
+      [-0.24, 0.44, 0.50, 0.095],
+      [0.32, 0.68, 0.50, 0.08],
+      [0.50, 0.54, -0.06, 0.12],
+      [0.50, 0.34, 0.22, 0.085],
+      [-0.50, 0.56, 0.10, 0.11],
+      [-0.12, 0.50, -0.50, 0.11],
+    ];
     return {
       id: 'prompt-custom',
       slug,
       name: prompt,
       englishName: 'Swiss Cheese Block',
-      subtitle: 'Queijo amarelo dourado com furos ocos reais em 3D',
+      subtitle: 'Golden Emmental Swiss cheese with iconic dimpled eyes and real hollow 3D holes',
       bounds: { w: 2.24, h: 1.06, d: 1.56 },
       gridRes: { x: 96, y: 52, z: 72 },
       physics: { restitution: 0.14, friction: 0.66, cohesion: 0.72, density: 1.08, soundProfile: 'culinary' },
@@ -272,13 +287,53 @@ export function generateObjectFromPrompt(rawPrompt) {
       },
       sampleVolume(nx, ny, nz) {
         const n = fbm3(nx * 16, ny * 16, nz * 16, 2);
-        const rind = ny < 0.05 || ny > 0.95 || Math.abs(nx) > 0.47 || Math.abs(nz) > 0.47;
-        return rind
-          ? { r: 0.90, g: 0.68, b: 0.14, roughness: 0.52, metalness: 0.0, emissive: 0 }
-          : { r: lerp(0.96, 1.0, n), g: lerp(0.78, 0.86, n), b: lerp(0.18, 0.30, n), roughness: 0.36, metalness: 0.0, emissive: 0.02 };
+        const rind = ny < 0.06 || ny > 0.94 || Math.abs(nx) > 0.46 || Math.abs(nz) > 0.46;
+        // Check iconic shaded Swiss cheese craters on outer skin
+        if (rind) {
+          let craterDepth = 0;
+          for (const [ex, ey, ez, er] of surfaceEyes) {
+            const d = Math.hypot((nx - ex) * 1.15, (ny - ey) * 0.68, (nz - ez) * 1.15);
+            if (d < er) {
+              craterDepth = Math.max(craterDepth, 1.0 - smoothstep(er * 0.25, er, d));
+            }
+          }
+          if (craterDepth > 0.01) {
+            return {
+              r: lerp(0.95, 0.66, craterDepth),
+              g: lerp(0.74, 0.42, craterDepth),
+              b: lerp(0.14, 0.04, craterDepth),
+              roughness: lerp(0.44, 0.68, craterDepth),
+              metalness: 0.0,
+              emissive: 0,
+            };
+          }
+          return { r: 0.96 + n * 0.03, g: 0.76 + n * 0.04, b: 0.14 + n * 0.03, roughness: 0.44, metalness: 0.0, emissive: 0.01 };
+        }
+        return { r: lerp(0.97, 1.0, n), g: lerp(0.79, 0.86, n), b: lerp(0.16, 0.26, n), roughness: 0.34, metalness: 0.0, emissive: 0.02 };
       },
       createOuterGeometry() {
-        return makeRoundedBoxGeo(this.bounds.w, this.bounds.h, this.bounds.d, 16);
+        const g = makeRoundedBoxGeo(this.bounds.w, this.bounds.h, this.bounds.d, 16);
+        // Sculpt gentle 3D dimple indentations into the outer Swiss cheese eyes!
+        const pos = g.attributes.position;
+        const { w, h, d } = this.bounds;
+        for (let i = 0; i < pos.count; i++) {
+          let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+          const nx = x / w, ny = y / h, nz = z / d;
+          for (const [ex, ey, ez, er] of surfaceEyes) {
+            const dist = Math.hypot((nx - ex) * 1.15, (ny - ey) * 0.68, (nz - ez) * 1.15);
+            if (dist < er) {
+              const t = Math.cos((dist / er) * Math.PI * 0.5);
+              if (ey > 0.9 && ny > 0.9) y -= t * 0.055;
+              else if (ez > 0.45 && nz > 0.45) z -= t * 0.055;
+              else if (ez < -0.45 && nz < -0.45) z += t * 0.055;
+              else if (ex > 0.45 && nx > 0.45) x -= t * 0.055;
+              else if (ex < -0.45 && nx < -0.45) x += t * 0.055;
+            }
+          }
+          pos.setXYZ(i, x, y, z);
+        }
+        g.computeVertexNormals();
+        return g;
       },
     };
   }
@@ -517,40 +572,77 @@ export function generateObjectFromPrompt(rawPrompt) {
     };
   }
 
-  // 9. Wagyu Steak (Bife marmorizado)
+  // 9. Wagyu Steak (Bife A5 marmorizado com marcas de grelha + capa de gordura creme + miolo ao ponto!)
   if (norm.includes('bife') || norm.includes('wagyu') || norm.includes('carne') || norm.includes('steak')) {
     return {
       id: 'prompt-custom',
       slug,
       name: prompt,
       englishName: 'Marbled Wagyu Steak',
-      subtitle: 'Crosta selada por fora + marmoreio A5 vermelho e branco por dentro',
-      bounds: { w: 2.36, h: 0.84, d: 1.54 },
+      subtitle: 'Char-grilled ribeye sear marks + creamy fat cap + rosy medium-rare A5 marbling inside',
+      bounds: { w: 2.38, h: 0.78, d: 1.56 },
       gridRes: { x: 104, y: 48, z: 72 },
       physics: { restitution: 0.14, friction: 0.66, cohesion: 0.72, density: 1.1, soundProfile: 'culinary' },
       contains(nx, ny, nz) {
-        if (ny < 0 || ny > 1) return false;
-        const ax = Math.abs(nx * 2);
-        const az = Math.abs(nz * 2);
-        return Math.pow(ax, 8) + Math.pow(az, 8) <= 1.02;
+        if (ny < 0.005 || ny > 0.995) return false;
+        const rXZ = Math.hypot(nx / 0.48, nz / 0.46);
+        const organic = 1.0 + 0.055 * Math.sin(Math.atan2(nz, nx) * 3.0 + 0.5);
+        return rXZ <= organic;
       },
       sampleVolume(nx, ny, nz) {
-        const n1 = fbm3(nx * 14, ny * 14, nz * 14, 3);
-        const n2 = fbm3(nx * 24 + 5, ny * 24 + 2, nz * 24 + 7, 2);
-        const crust = ny < 0.07 || ny > 0.93 || Math.hypot(nx * 1.9, nz * 1.9) > 0.94;
-        if (crust) return { r: 0.26 + n1 * 0.08, g: 0.14 + n1 * 0.04, b: 0.09 + n1 * 0.03, roughness: 0.56, metalness: 0.02, emissive: 0 };
-        const marble = smoothstep(0.56, 0.72, Math.abs(Math.sin(nx * 16 + nz * 12 + n1 * 6)) * 0.6 + n2 * 0.55);
+        const n1 = fbm3(nx * 16, ny * 16, nz * 16, 3);
+        const n2 = fbm3(nx * 28 + 5, ny * 28 + 2, nz * 28 + 7, 2);
+        const ang = Math.atan2(nz, nx);
+        const rEdge = Math.hypot(nx / 0.48, nz / 0.46) / (1.0 + 0.055 * Math.sin(ang * 3.0 + 0.5));
+        const isFatCap = rEdge > 0.84 && nz < -0.10;
+        if (isFatCap) {
+          return { r: 0.94 + n1 * 0.04, g: 0.86 + n1 * 0.04, b: 0.70, roughness: 0.34, metalness: 0.02, emissive: 0 };
+        }
+        const crust = ny < 0.08 || ny > 0.90 || rEdge > 0.92;
+        if (crust) {
+          // Appetizing diamond char-grill sear stripes on top crust!
+          const g1 = Math.pow(Math.max(0, Math.sin((nx + nz * 0.95) * 36.0)), 6.0);
+          const g2 = Math.pow(Math.max(0, Math.sin((nx - nz * 0.95) * 36.0)), 6.0);
+          const grill = ny > 0.85 ? Math.max(g1, g2) : 0;
+          const herbFlake = ny > 0.88 && smoothstep(0.76, 0.86, fbm3(nx * 46, ny * 20, nz * 46, 2));
+          if (herbFlake > 0.5) return { r: 0.18, g: 0.46, b: 0.16, roughness: 0.65, metalness: 0, emissive: 0 };
+          return {
+            r: clamp(lerp(0.38, 0.11, grill) + n1 * 0.08, 0, 1),
+            g: clamp(lerp(0.20, 0.06, grill) + n1 * 0.04, 0, 1),
+            b: clamp(lerp(0.11, 0.04, grill) + n1 * 0.02, 0, 1),
+            roughness: lerp(0.32, 0.72, grill),
+            metalness: 0.04,
+            emissive: 0,
+          };
+        }
+        // Rosy medium-rare ruby beef packed with crisp A5 white marbling spider-veins!
+        const marble = smoothstep(0.52, 0.70, Math.abs(Math.sin(nx * 18 + nz * 14 + n1 * 6.5)) * 0.58 + n2 * 0.56);
         return {
-          r: lerp(0.76, 0.98, marble),
-          g: lerp(0.14, 0.88, marble),
-          b: lerp(0.16, 0.82, marble),
-          roughness: lerp(0.32, 0.24, marble),
+          r: lerp(0.84, 0.98, marble),
+          g: lerp(0.18, 0.90, marble),
+          b: lerp(0.22, 0.85, marble),
+          roughness: lerp(0.24, 0.18, marble),
           metalness: 0.02,
-          emissive: 0,
+          emissive: 0.02,
         };
       },
       createOuterGeometry() {
-        return makeRoundedBoxGeo(this.bounds.w, this.bounds.h, this.bounds.d, 8);
+        const { w, h, d } = this.bounds;
+        const g = new THREE.CylinderGeometry(0.5, 0.5, 1.0, 64, 10);
+        const pos = g.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const ux = pos.getX(i), uy = pos.getY(i), uz = pos.getZ(i);
+          const ang = Math.atan2(uz, ux);
+          const organic = 1.0 + 0.055 * Math.sin(ang * 3.0 + 0.5);
+          const ny = clamp(uy + 0.5, 0, 1);
+          // Bevel top & bottom rim slightly so it looks like a real seared cut ribeye!
+          const rimT = Math.abs(ny - 0.5) * 2.0;
+          const bevel = 1.0 - Math.pow(Math.max(0, rimT - 0.72) / 0.28, 2.0) * 0.07;
+          const rScale = organic * bevel;
+          pos.setXYZ(i, ux * 0.96 * rScale * w, ny * h, uz * 0.92 * rScale * d);
+        }
+        g.computeVertexNormals();
+        return g;
       },
     };
   }
@@ -596,7 +688,7 @@ export function generateObjectFromPrompt(rawPrompt) {
   }
 
   // 11. Giant Glossy Red Strawberry (44.2M+ view #1 viral icon — true broad-shoulder heart silhouette + sculpted 7-petal emerald calyx & curved stem!)
-  if (norm.includes('morang') || norm.includes('strawberr')) {
+  if ((norm.includes('morang') || norm.includes('strawberr')) && !norm.includes('donut') && !norm.includes('rosquinh')) {
     // u = 0 at broad leafy crown shoulder (+X), u = 1 at pointed glossy heart tip (-X)
     // Peak width occurs at u = 0.31 (plump, rounded organic strawberry shoulder), tapering smoothly to a sweet heart tip.
     const berryRadius = (u) => {
@@ -1202,6 +1294,414 @@ export function generateObjectFromPrompt(rawPrompt) {
       },
       createOuterGeometry() {
         return makeRoundedBoxGeo(this.bounds.w, this.bounds.h, this.bounds.d, 24);
+      },
+    };
+  }
+
+  // 16. Fresh Fuzzy Kiwi Fruit (18M+ view viral classic — golden-brown fuzzy oval revealing neon emerald flesh, starburst white core & glossy black seed ring!)
+  if (norm.includes('kiwi')) {
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Fresh Fuzzy Kiwi Fruit',
+      subtitle: 'Fuzzy golden-brown kiwi skin revealing glowing emerald flesh, white starburst core & black seeds',
+      bounds: { w: 2.02, h: 1.44, d: 1.48 },
+      gridRes: { x: 104, y: 74, z: 74 },
+      physics: { restitution: 0.14, friction: 0.64, cohesion: 0.72, density: 0.96, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        if (ny < 0.005 || ny > 0.995) return false;
+        const r = Math.hypot(nx / 0.485, (ny - 0.50) / 0.495, nz / 0.485);
+        return r <= 1.0;
+      },
+      sampleVolume(nx, ny, nz) {
+        const dy = (ny - 0.50) / 0.495;
+        const dz = nz / 0.485;
+        const dx = nx / 0.485;
+        const r3d = Math.hypot(dx, dy, dz);
+        const rYZ = Math.hypot(dy, dz);
+        const maxRYZ = Math.sqrt(Math.max(0.01, 1.0 - dx * dx));
+        const normR = rYZ / maxRYZ;
+        const ang = Math.atan2(dz, dy);
+        const nFuzz = fbm3(nx * 44, ny * 44, nz * 44, 3);
+        const nFine = fbm3(nx * 88, ny * 88, nz * 88, 2);
+
+        // Fuzzy golden-brown kiwi skin + dark woody stem nubs at poles
+        if (r3d > 0.89) {
+          const isPoleNub = Math.abs(dx) > 0.93 && rYZ < 0.24;
+          if (isPoleNub) {
+            return { r: 0.24 + nFine * 0.04, g: 0.16 + nFine * 0.03, b: 0.09, roughness: 0.92, metalness: 0.0, emissive: 0 };
+          }
+          const hairStreak = Math.sin(ang * 42.0 + nFuzz * 14.0) * 0.04;
+          const warmPatch = smoothstep(0.3, 0.75, nFuzz);
+          return {
+            r: clamp(lerp(0.42, 0.56, warmPatch) + hairStreak + nFine * 0.06, 0, 1),
+            g: clamp(lerp(0.30, 0.42, warmPatch) + hairStreak * 0.7 + nFine * 0.04, 0, 1),
+            b: clamp(lerp(0.14, 0.20, warmPatch) + nFine * 0.03, 0, 1),
+            roughness: 0.88,
+            metalness: 0.0,
+            emissive: 0,
+          };
+        }
+
+        // Thin bright-lime sub-rind
+        if (r3d > 0.83) {
+          return { r: 0.44, g: 0.74, b: 0.14, roughness: 0.26, metalness: 0.01, emissive: 0.02 };
+        }
+
+        // Crisp translucent neon-emerald kiwi flesh + white starburst core + ring of 18 glossy jet-black teardrop seeds!
+        const rays = 0.08 * Math.pow(0.5 + 0.5 * Math.cos(ang * 18.0), 2.0);
+        const whiteCore = 1.0 - smoothstep(0.20, 0.36 + rays, normR);
+
+        // Ring of 18 jet-black glossy seeds around the starburst perimeter (normR ~ 0.38..0.54)
+        const seedCount = 18.0;
+        const sector = (ang / (Math.PI * 2) + 1.0) * seedCount;
+        const sU = fract(sector) - 0.5;
+        const seedRingR = 0.43 + 0.025 * Math.sin(Math.floor(sector) * 2.3);
+        const sV = (normR - seedRingR) * 5.8;
+        const seedD = Math.hypot(sU * 2.1, sV * 1.15);
+        const axialMask = 1.0 - smoothstep(0.76, 0.90, Math.abs(dx));
+        const seedMask = (1.0 - smoothstep(0.22, 0.34, seedD)) * axialMask;
+
+        // Translucent glowing emerald flesh with delicate pale radial veins
+        const vein = Math.pow(0.5 + 0.5 * Math.cos(ang * 18.0 + Math.PI), 4.0) * 0.20 * (1.0 - normR * 0.45);
+        let r = lerp(0.32, 0.94, whiteCore) + vein * 0.45 + nFine * 0.02;
+        let g = lerp(0.78, 0.98, whiteCore) + vein * 0.22 + nFine * 0.02;
+        let b = lerp(0.11, 0.84, whiteCore) + vein * 0.35;
+
+        // Blend glossy jet-black seeds
+        r = lerp(r, 0.04, seedMask);
+        g = lerp(g, 0.04, seedMask);
+        b = lerp(b, 0.05, seedMask);
+
+        return {
+          r: clamp(r, 0, 1),
+          g: clamp(g, 0, 1),
+          b: clamp(b, 0, 1),
+          roughness: lerp(0.16, 0.06, seedMask),
+          metalness: 0.02,
+          emissive: lerp(0.03, 0.0, seedMask),
+        };
+      },
+      createOuterGeometry() {
+        const { w, h, d } = this.bounds;
+        const g = new THREE.SphereGeometry(0.5, 64, 48);
+        g.rotateZ(-Math.PI * 0.5);
+        const pos = g.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const ux = pos.getX(i);
+          const uy = pos.getY(i);
+          const uz = pos.getZ(i);
+          // Slight natural flat cheek on bottom so kiwi sits heavily on board
+          const nx = ux * 0.97;
+          let ny = 0.50 + uy * 0.99;
+          if (ny < 0.04) ny = 0.004 + (ny / 0.04) * 0.036;
+          const nz = uz * 0.97;
+          pos.setXYZ(i, nx * w, clamp(ny, 0.004, 0.996) * h, nz * d);
+        }
+        g.computeVertexNormals();
+        return g;
+      },
+    };
+  }
+
+  // 17. Glazed Pink Sprinkle Donut (20M+ view viral classic — true 3D Torus fried brioche dipped in glossy strawberry glaze & vibrant rainbow sprinkles!)
+  if (norm.includes('donut') || norm.includes('rosquinh')) {
+    const R_MAJOR = 0.315; // normalized major radius
+    const R_TUBE = 0.165;  // normalized minor tube radius (outer radius = 0.48, hole radius = 0.15)
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Glazed Pink Sprinkle Donut',
+      subtitle: 'Golden brioche donut dipped in glossy pink strawberry icing & vibrant rainbow sprinkles',
+      bounds: { w: 2.12, h: 0.78, d: 2.12 },
+      gridRes: { x: 106, y: 52, z: 106 },
+      physics: { restitution: 0.14, friction: 0.65, cohesion: 0.74, density: 0.78, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        if (ny < 0.005 || ny > 0.995) return false;
+        const rXZ = Math.hypot(nx, nz);
+        const dTube = Math.hypot(rXZ - R_MAJOR, (ny - 0.50) * (0.78 / 2.12));
+        return dTube <= R_TUBE;
+      },
+      sampleVolume(nx, ny, nz) {
+        const rXZ = Math.hypot(nx, nz);
+        const ang = Math.atan2(nz, nx);
+        const dyWorld = (ny - 0.50) * (0.78 / 2.12);
+        const dTube = Math.hypot(rXZ - R_MAJOR, dyWorld);
+        const normTube = dTube / R_TUBE;
+        const n = fbm3(nx * 26, ny * 26, nz * 26, 3);
+        const nCrumb = fbm3(nx * 62, ny * 62, nz * 62, 2);
+
+        // Wavy scalloped pink icing drip line around the upper crown
+        const dripWave = 0.50 + 0.095 * Math.sin(ang * 9.0 + 0.6) + 0.045 * Math.cos(ang * 15.0 - 0.3);
+        const isIcingZone = ny > dripWave && normTube > 0.78;
+
+        if (isIcingZone) {
+          // Crisp multicolor capsule rainbow sprinkles distributed across the top icing!
+          const ringBand = Math.hypot(rXZ - R_MAJOR, 0) < 0.135 && ny > dripWave + 0.08;
+          if (ringBand) {
+            const cellAng = Math.floor((ang / (Math.PI * 2) + 1.0) * 26.0);
+            const cellRad = Math.floor(((rXZ - (R_MAJOR - 0.14)) / 0.28) * 5.0);
+            const hCell = Math.abs(Math.sin(cellAng * 127.1 + cellRad * 311.7) * 43758.5453);
+            const fRand = fract(hCell);
+            if (fRand > 0.26) {
+              const u = fract((ang / (Math.PI * 2) + 1.0) * 26.0) - 0.5;
+              const v = fract(((rXZ - (R_MAJOR - 0.14)) / 0.28) * 5.0) - 0.5;
+              const rot = fRand * Math.PI;
+              const ru = u * Math.cos(rot) - v * Math.sin(rot);
+              const rv = u * Math.sin(rot) + v * Math.cos(rot);
+              // Capsule sprinkle shape
+              const capD = Math.hypot(Math.max(0, Math.abs(ru) - 0.18), rv);
+              if (capD < 0.125) {
+                const palette = [
+                  [0.98, 0.85, 0.12], // sunny yellow
+                  [0.14, 0.78, 0.96], // sky cyan
+                  [0.24, 0.84, 0.38], // bright lime
+                  [0.98, 0.97, 0.94], // crisp white
+                  [0.98, 0.42, 0.18], // tangerine orange
+                  [0.68, 0.34, 0.96], // vivid lavender
+                ];
+                const sp = palette[(cellAng + cellRad * 3) % palette.length];
+                return { r: sp[0], g: sp[1], b: sp[2], roughness: 0.16, metalness: 0.02, emissive: 0.02 };
+              }
+            }
+          }
+          // Glossy thick strawberry-pink glaze
+          return {
+            r: clamp(0.97 + n * 0.02, 0, 1),
+            g: clamp(0.36 + n * 0.04, 0, 1),
+            b: clamp(0.62 + n * 0.04, 0, 1),
+            roughness: 0.11,
+            metalness: 0.04,
+            emissive: 0.02,
+          };
+        }
+
+        // Golden fried donut exterior crust (with classic pale proofed-dough equator ring!)
+        if (normTube > 0.84) {
+          const midLine = Math.exp(-Math.pow((ny - 0.46) / 0.11, 2.0));
+          return {
+            r: clamp(lerp(0.78, 0.94, midLine) + n * 0.05, 0, 1),
+            g: clamp(lerp(0.49, 0.78, midLine) + n * 0.04, 0, 1),
+            b: clamp(lerp(0.20, 0.48, midLine) + n * 0.03, 0, 1),
+            roughness: 0.62,
+            metalness: 0.0,
+            emissive: 0,
+          };
+        }
+
+        // Fluffy warm golden-vanilla brioche interior crumb with fine baked air pores
+        const pore = smoothstep(0.64, 0.82, nCrumb) * 0.11;
+        return {
+          r: clamp(0.96 - pore + n * 0.03, 0, 1),
+          g: clamp(0.84 - pore * 1.1 + n * 0.03, 0, 1),
+          b: clamp(0.56 - pore * 1.2 + n * 0.02, 0, 1),
+          roughness: 0.80,
+          metalness: 0.0,
+          emissive: 0,
+        };
+      },
+      createOuterGeometry() {
+        const { w, h, d } = this.bounds;
+        const g = new THREE.TorusGeometry(R_MAJOR * w, R_TUBE * w, 48, 72);
+        g.rotateX(Math.PI * 0.5);
+        // Scale Y cleanly to exact bounds height and rest bottom strictly at y = 0
+        const pos = g.attributes.position;
+        let minY = Infinity, maxY = -Infinity;
+        for (let i = 0; i < pos.count; i++) {
+          const y = pos.getY(i);
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+        const spanY = Math.max(1e-5, maxY - minY);
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i);
+          const z = pos.getZ(i);
+          let ny = (pos.getY(i) - minY) / spanY;
+          if (ny < 0.03) ny = 0.004 + (ny / 0.03) * 0.026;
+          pos.setXYZ(i, x, clamp(ny, 0.004, 0.996) * h, z * (d / w));
+        }
+        g.computeVertexNormals();
+        return g;
+      },
+    };
+  }
+
+  // 18. Juicy Valencia Citrus Orange (bright dimpled tangerine skin + emerald leaf & stem -> 10 razor-crisp radial citrus wedges inside!)
+  if (norm.includes('laranj') || norm.includes('orange') || norm.includes('tangerin') || norm.includes('citrus')) {
+    const FRUIT_CY = 0.445;
+    const FRUIT_RY = 0.44;
+    const FRUIT_RXZ = 0.475;
+    return {
+      id: 'prompt-custom',
+      slug,
+      name: prompt,
+      englishName: 'Juicy Valencia Orange',
+      subtitle: 'Dimpled vibrant citrus peel + emerald leaf revealing 10 glistening radial orange segments',
+      bounds: { w: 1.88, h: 1.86, d: 1.88 },
+      gridRes: { x: 102, y: 100, z: 102 },
+      physics: { restitution: 0.16, friction: 0.58, cohesion: 0.72, density: 1.0, soundProfile: 'culinary' },
+      contains(nx, ny, nz) {
+        if (ny < 0.005 || ny > 0.995) return false;
+        // Main plump slightly oblate orange sphere
+        const rSphere = Math.hypot(nx / FRUIT_RXZ, (ny - FRUIT_CY) / FRUIT_RY, nz / FRUIT_RXZ);
+        if (rSphere <= 1.0) return true;
+        // Short woody stem + emerald calyx at top crown
+        if (ny >= 0.86 && ny <= 0.99 && Math.hypot(nx, nz) <= 0.065) return true;
+        // Side emerald citrus leaf curving gracefully from top stem
+        if (ny >= 0.82 && ny <= 0.98 && nx >= 0.02 && nx <= 0.42 && Math.abs(nz) <= 0.16) {
+          const s = (nx - 0.02) / 0.40;
+          const wMax = Math.sin(s * Math.PI) * 0.14;
+          const yLeaf = 0.92 + Math.sin(s * Math.PI) * 0.045 - s * 0.06;
+          if (Math.abs(nz) <= wMax && Math.abs(ny - yLeaf) <= 0.028) return true;
+        }
+        return false;
+      },
+      sampleVolume(nx, ny, nz) {
+        const n = fbm3(nx * 24, ny * 24, nz * 24, 3);
+        const nPore = fbm3(nx * 72, ny * 72, nz * 72, 2);
+        const dy = (ny - FRUIT_CY) / FRUIT_RY;
+        const dx = nx / FRUIT_RXZ;
+        const dz = nz / FRUIT_RXZ;
+        const r3d = Math.hypot(dx, dy, dz);
+
+        // Top stem & graceful emerald citrus leaf (strictly outside orange sphere!)
+        if (r3d > 1.005 && ny > 0.80) {
+          const isStem = Math.hypot(nx, nz) < 0.06 && nx < 0.045;
+          if (isStem) {
+            return { r: 0.34 + n * 0.05, g: 0.24 + n * 0.04, b: 0.12, roughness: 0.78, metalness: 0, emissive: 0 };
+          }
+          const midrib = Math.exp(-Math.pow(nz / 0.018, 2.0)) * 0.18;
+          return {
+            r: clamp(0.10 + midrib * 0.4 + n * 0.04, 0, 1),
+            g: clamp(0.56 + midrib * 0.5 + n * 0.08, 0, 1),
+            b: clamp(0.14 + midrib * 0.2 + n * 0.03, 0, 1),
+            roughness: 0.34,
+            metalness: 0.02,
+            emissive: 0,
+          };
+        }
+
+        // Dimpled glossy tangerine-orange peel (flavedo)
+        if (r3d > 0.905) {
+          const poreDimple = smoothstep(0.55, 0.85, nPore) * 0.16;
+          const poleShade = smoothstep(0.84, 0.99, Math.abs(dy)) * 0.10;
+          return {
+            r: clamp(0.98 - poreDimple * 0.45 - poleShade, 0, 1),
+            g: clamp(0.38 - poreDimple * 0.65 + n * 0.05, 0, 1),
+            b: clamp(0.02 + n * 0.015, 0, 1),
+            roughness: 0.24 + poreDimple * 0.45,
+            metalness: 0.02,
+            emissive: 0.01,
+          };
+        }
+
+        // Spongy creamy-white citrus pith (albedo rind)
+        if (r3d > 0.835) {
+          return {
+            r: clamp(0.98 + n * 0.02, 0, 1),
+            g: clamp(0.94 + n * 0.02, 0, 1),
+            b: clamp(0.84 + n * 0.02, 0, 1),
+            roughness: 0.74,
+            metalness: 0,
+            emissive: 0,
+          };
+        }
+
+        // 10 hyper-crisp radial citrus segments (visible on vertical YZ cuts AND horizontal XZ cuts!)
+        const rYZ = Math.hypot(dy, dz);
+        const rXZ = Math.hypot(dx, dz);
+        const angYZ = Math.atan2(dz, dy);
+        const angXZ = Math.atan2(dz, dx);
+        // Use primary citrus axis along X so standard vertical slices reveal the iconic 10-spoke citrus wheel!
+        const spokeWave = Math.abs(Math.sin(angYZ * 5.0)); // 10 spokes around 360 deg
+        const spokeLine = 1.0 - smoothstep(0.0, 0.09 / Math.max(0.22, rYZ), spokeWave);
+        const centerPith = 1.0 - smoothstep(0.06, 0.15, rYZ);
+        const outerMembrane = smoothstep(0.76, 0.84, r3d);
+        const whiteMask = Math.max(spokeLine * 0.88, centerPith, outerMembrane * 0.65);
+
+        // Glistening translucent amber-orange citrus pulp vesicles
+        const vesicle = 0.5 + 0.5 * Math.sin(rYZ * 48.0 + angYZ * 10.0 + n * 5.0);
+        let ir = lerp(0.99, 0.94, vesicle * 0.25);
+        let ig = lerp(0.56, 0.42, vesicle * 0.35);
+        let ib = lerp(0.04, 0.02, vesicle * 0.2);
+
+        ir = lerp(ir, 0.99, whiteMask);
+        ig = lerp(ig, 0.95, whiteMask);
+        ib = lerp(ib, 0.86, whiteMask);
+
+        return {
+          r: clamp(ir, 0, 1),
+          g: clamp(ig, 0, 1),
+          b: clamp(ib, 0, 1),
+          roughness: lerp(0.14, 0.68, whiteMask),
+          metalness: 0.01,
+          emissive: lerp(0.04, 0.0, whiteMask),
+        };
+      },
+      createOuterGeometry() {
+        const { w, h, d } = this.bounds;
+        // Group 0: Dimpled plump citrus sphere
+        const body = new THREE.SphereGeometry(0.5, 64, 48);
+        const bPos = body.attributes.position;
+        for (let i = 0; i < bPos.count; i++) {
+          const ux = bPos.getX(i);
+          const uy = bPos.getY(i);
+          const uz = bPos.getZ(i);
+          const nx = ux * (FRUIT_RXZ * 2.0);
+          let ny = FRUIT_CY + uy * (FRUIT_RY * 2.0);
+          const nz = uz * (FRUIT_RXZ * 2.0);
+          // Slight stem dimple at very top & flat natural resting bottom
+          const rTop = Math.hypot(ux, uz);
+          if (uy > 0.38) ny -= Math.exp(-Math.pow(rTop / 0.14, 2.0)) * 0.022;
+          if (ny < 0.03) ny = 0.004 + (ny / 0.03) * 0.026;
+          // Subtle citrus peel micro-pebble relief
+          const bump = 1.0 + (fbm3(ux * 22, uy * 22, uz * 22, 2) - 0.5) * 0.014;
+          bPos.setXYZ(i, nx * bump * w, clamp(ny, 0.004, 0.996) * h, nz * bump * d);
+        }
+        body.computeVertexNormals();
+
+        // Group 1: Curved emerald citrus leaf
+        const leaf = new THREE.BoxGeometry(1.0, 1.0, 1.0, 14, 1, 6);
+        const lPos = leaf.attributes.position;
+        for (let i = 0; i < lPos.count; i++) {
+          const s = lPos.getX(i) + 0.5;   // 0 at stem .. 1 at pointed tip
+          const vT = lPos.getY(i);        // thin leaf thickness
+          const vW = lPos.getZ(i) * 2.0;  // across leaf width
+          const widthEnv = Math.sin(Math.pow(s, 0.78) * Math.PI);
+          const nx = 0.02 + s * 0.39;
+          const ny = 0.91 + Math.sin(s * Math.PI) * 0.055 - s * 0.065 + Math.abs(vW) * 0.018 * widthEnv + vT * 0.016;
+          const nz = vW * 0.135 * widthEnv;
+          lPos.setXYZ(i, nx * w, clamp(ny, 0.05, 0.995) * h, nz * d);
+        }
+        leaf.computeVertexNormals();
+
+        // Group 2: Short woody stem on top crown
+        const stem = new THREE.CylinderGeometry(0.026 * w, 0.044 * w, 0.12 * h, 18, 4);
+        stem.translate(0, 0.915 * h, 0);
+
+        const parts = [body.toNonIndexed(), leaf.toNonIndexed(), stem.toNonIndexed()];
+        body.dispose(); leaf.dispose(); stem.dispose();
+        const totalVerts = parts.reduce((a, g) => a + g.attributes.position.count, 0);
+        const mPos = new Float32Array(totalVerts * 3);
+        const mNorm = new Float32Array(totalVerts * 3);
+        const mUv = new Float32Array(totalVerts * 2);
+        const out = new THREE.BufferGeometry();
+        let off = 0;
+        parts.forEach((p, idx) => {
+          const cnt = p.attributes.position.count;
+          mPos.set(p.attributes.position.array, off * 3);
+          mNorm.set(p.attributes.normal.array, off * 3);
+          mUv.set(p.attributes.uv.array, off * 2);
+          out.addGroup(off, cnt, idx);
+          off += cnt;
+          p.dispose();
+        });
+        out.setAttribute('position', new THREE.BufferAttribute(mPos, 3));
+        out.setAttribute('normal', new THREE.BufferAttribute(mNorm, 3));
+        out.setAttribute('uv', new THREE.BufferAttribute(mUv, 2));
+        return out;
       },
     };
   }

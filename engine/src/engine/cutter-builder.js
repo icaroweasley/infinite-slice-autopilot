@@ -31,6 +31,7 @@ function normalizeText(str) {
 
 function parseColorFromText(norm, fallbackHex) {
   if (norm.includes('vermelh') || norm.includes('red') || norm.includes('fogo') || norm.includes('1000')) return 0xff3b1f;
+  if (norm.includes('cobre') || norm.includes('copper') || norm.includes('bronze')) return 0xc86d3b;
   if (norm.includes('laranj') || norm.includes('orange') || norm.includes('lava')) return 0xff7b1a;
   if (norm.includes('ouro') || norm.includes('dourad') || norm.includes('gold')) return 0xf5c542;
   if (norm.includes('rox') || norm.includes('purple') || norm.includes('violet')) return 0xa855f7;
