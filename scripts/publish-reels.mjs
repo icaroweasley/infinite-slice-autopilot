@@ -124,43 +124,59 @@ async function publishViaMetaGraph(videoPath, manifest, caption) {
     }
     creationId = createJson.id;
   } else {
-    // 1B. Direct Resumable Binary Upload to Meta (no external CDN needed!)
-    console.log(`[publish] No Cloudinary/CDN configured — using direct Meta resumable binary upload on ${apiBase}...`);
-    const createParams = new URLSearchParams({
-      media_type: 'REELS',
-      upload_type: 'resumable',
-      caption,
-      share_to_feed: 'true',
-      access_token: token,
-    });
-    const createRes = await fetch(`${apiBase}/${igUserId}/media?${createParams}`, { method: 'POST' });
-    const createJson = await createRes.json();
-    if (!createRes.ok || !createJson.id || !createJson.uri) {
-      throw new Error(
-        `Meta resumable container init failed: ${JSON.stringify(createJson)}. ` +
-        `If your token does not support direct resumable upload, configure CLOUDINARY_CLOUD_NAME + CLOUDINARY_UPLOAD_PRESET.`
-      );
-    }
-    creationId = createJson.id;
-    const uploadUri = createJson.uri;
+    // 1B. Direct Resumable Binary Upload to Meta with automatic 3x transient retry (no external CDN needed!)
     const fileBuf = fs.readFileSync(videoPath);
-    console.log(`[publish] Streaming ${(fileBuf.length / (1024 * 1024)).toFixed(2)} MB binary directly to ${uploadUri}...`);
-    const upRes = await fetch(uploadUri, {
-      method: 'POST',
-      headers: {
-        Authorization: `OAuth ${token}`,
-        offset: '0',
-        file_size: String(fileBuf.length),
-        'Content-Type': 'application/octet-stream',
-      },
-      body: fileBuf,
-    });
-    const upText = await upRes.text();
-    if (!upRes.ok) {
-      throw new Error(`Meta binary rupload failed (${upRes.status}): ${upText.slice(0, 400)}`);
+    let lastUpErr = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      console.log(`[publish] No Cloudinary/CDN configured — using direct Meta resumable binary upload on ${apiBase} (attempt ${attempt}/3)...`);
+      const createParams = new URLSearchParams({
+        media_type: 'REELS',
+        upload_type: 'resumable',
+        caption,
+        share_to_feed: 'true',
+        access_token: token,
+      });
+      const createRes = await fetch(`${apiBase}/${igUserId}/media?${createParams}`, { method: 'POST' });
+      const createJson = await createRes.json();
+      if (!createRes.ok || !createJson.id || !createJson.uri) {
+        lastUpErr = new Error(
+          `Meta resumable container init failed: ${JSON.stringify(createJson)}. ` +
+          `If your token does not support direct resumable upload, configure CLOUDINARY_CLOUD_NAME + CLOUDINARY_UPLOAD_PRESET.`
+        );
+        if (attempt < 3) {
+          console.warn(`[publish] Container init warning (attempt ${attempt}/3): ${lastUpErr.message.slice(0, 200)} — retrying in 6s...`);
+          await new Promise((r) => setTimeout(r, 6000));
+          continue;
+        }
+        throw lastUpErr;
+      }
+      creationId = createJson.id;
+      const uploadUri = createJson.uri;
+      console.log(`[publish] Streaming ${(fileBuf.length / (1024 * 1024)).toFixed(2)} MB binary directly to ${uploadUri}...`);
+      const upRes = await fetch(uploadUri, {
+        method: 'POST',
+        headers: {
+          Authorization: `OAuth ${token}`,
+          offset: '0',
+          file_size: String(fileBuf.length),
+          'Content-Type': 'application/octet-stream',
+        },
+        body: fileBuf,
+      });
+      const upText = await upRes.text();
+      if (upRes.ok) {
+        console.log(`[publish] Binary upload accepted: ${upText.slice(0, 160)}`);
+        videoUrl = uploadUri;
+        lastUpErr = null;
+        break;
+      }
+      lastUpErr = new Error(`Meta binary rupload failed (${upRes.status}): ${upText.slice(0, 400)}`);
+      if (attempt < 3) {
+        console.warn(`[publish] Transient rupload error (attempt ${attempt}/3): ${lastUpErr.message} — retrying fresh container in 8s...`);
+        await new Promise((r) => setTimeout(r, 8000));
+      }
     }
-    console.log(`[publish] Binary upload accepted: ${upText.slice(0, 160)}`);
-    videoUrl = uploadUri;
+    if (lastUpErr) throw lastUpErr;
   }
 
   // 2. Poll container processing status until FINISHED (max ~4 minutes)
