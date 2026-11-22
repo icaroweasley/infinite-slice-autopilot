@@ -371,13 +371,35 @@ async function main() {
 
   let aiSucceeded = false;
   let conceptSummary = '';
+  const backups = Object.fromEntries(
+    Object.entries(SLOT_FILES).map(([k, p]) => [k, fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null])
+  );
+  const restoreSlotBackups = () => {
+    for (const [k, content] of Object.entries(backups)) {
+      if (content !== null) fs.writeFileSync(SLOT_FILES[k], content, 'utf8');
+    }
+  };
+  const buildFallbackOpts = (base) => {
+    const objPrompt = pickUnusedSuggestion(CLOUD_EN_OBJECTS, usedStrings);
+    const cutterPrompt = pickUnusedSuggestion(CLOUD_EN_CUTTERS, usedCutters);
+    const surfacePrompt = pickUnusedSuggestion(CLOUD_EN_SURFACES, usedSurfaces);
+    const envPrompt = pickUnusedSuggestion(CLOUD_EN_ENVS, usedEnvs);
+    conceptSummary = `${objPrompt} | blade=${cutterPrompt} | board=${surfacePrompt} | studio=${envPrompt}`;
+    console.log(`[autopilot] Concept:\n  Object:  ${objPrompt}\n  Cutter:  ${cutterPrompt}\n  Surface: ${surfacePrompt}\n  Env:     ${envPrompt}`);
+    return {
+      ...base,
+      objectId: 'prompt-custom',
+      objectPrompt: objPrompt,
+      cutterId: 'custom',
+      cutterPrompt,
+      surfaceId: 'custom',
+      surfacePrompt,
+      envId: 'custom',
+      envPrompt,
+    };
+  };
 
   if (provider === 'gemini' || provider === 'claude') {
-    // Backup current 4 AI slot files before generation
-    const backups = Object.fromEntries(
-      Object.entries(SLOT_FILES).map(([k, p]) => [k, fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null])
-    );
-
     let lastErr = '';
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
@@ -414,37 +436,34 @@ async function main() {
       } catch (err) {
         lastErr = err.message || String(err);
         console.warn(`[autopilot] Attempt ${attempt} failed: ${lastErr.slice(0, 260)}`);
-        // Restore backups before retry or fallback
-        for (const [k, content] of Object.entries(backups)) {
-          if (content !== null) fs.writeFileSync(SLOT_FILES[k], content, 'utf8');
-        }
+        restoreSlotBackups();
       }
     }
   }
 
   if (!aiSucceeded) {
     console.log('[autopilot] Using built-in zero-API semantic 3D composer (picking fresh non-repeated English concept)...');
-    const objPrompt = pickUnusedSuggestion(CLOUD_EN_OBJECTS, usedStrings);
-    const cutterPrompt = pickUnusedSuggestion(CLOUD_EN_CUTTERS, usedCutters);
-    const surfacePrompt = pickUnusedSuggestion(CLOUD_EN_SURFACES, usedSurfaces);
-    const envPrompt = pickUnusedSuggestion(CLOUD_EN_ENVS, usedEnvs);
-    conceptSummary = `${objPrompt} | blade=${cutterPrompt} | board=${surfacePrompt} | studio=${envPrompt}`;
-    console.log(`[autopilot] Concept:\n  Object:  ${objPrompt}\n  Cutter:  ${cutterPrompt}\n  Surface: ${surfacePrompt}\n  Env:     ${envPrompt}`);
-    renderOpts = {
-      ...renderOpts,
-      objectId: 'prompt-custom',
-      objectPrompt: objPrompt,
-      cutterId: 'custom',
-      cutterPrompt,
-      surfaceId: 'custom',
-      surfacePrompt,
-      envId: 'custom',
-      envPrompt,
-    };
+    renderOpts = buildFallbackOpts(renderOpts);
   }
 
-  // Render deterministic MP4 + synced 48kHz ASMR audio
-  const manifest = await renderHeadlessVideo(renderOpts);
+  // Render deterministic MP4 + synced 48kHz ASMR audio (auto-fallback if AI code crashes at WebGL runtime!)
+  let manifest;
+  try {
+    manifest = await renderHeadlessVideo(renderOpts);
+  } catch (renderErr) {
+    if (aiSucceeded) {
+      console.warn(`[autopilot] AI-generated 3D modules failed at WebGL runtime (${renderErr.message?.slice(0, 240)}) — falling back cleanly to procedural Ultra-HD composer!`);
+      restoreSlotBackups();
+      aiSucceeded = false;
+      renderOpts = buildFallbackOpts(renderOpts);
+      manifest = await renderHeadlessVideo(renderOpts);
+    } else {
+      throw renderErr;
+    }
+  } finally {
+    // Keep engine slot files clean in git working tree after render finishes
+    restoreSlotBackups();
+  }
   const caption = buildEnglishCaption(manifest, cfg);
 
   recordEntry({
