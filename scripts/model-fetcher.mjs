@@ -21,7 +21,6 @@ export const CURATED_3D_MODELS = [
   { source: 'polyhaven', assetId: 'lemon', slug: '3d-juicy-yellow-lemon', englishName: 'Juicy Yellow Lemon', interiorStyle: 'citrus-lemon', soundProfile: 'culinary', rotateZ: Math.PI / 2, priority: 10 },
   { source: 'polyhaven', assetId: 'treasure_chest', slug: '3d-pirate-treasure-chest', englishName: 'Pirate Treasure Chest', interiorStyle: 'treasure-gold', soundProfile: 'metal', priority: 10 },
   { source: 'polyhaven', assetId: 'Camera_01', slug: '3d-vintage-slr-camera', englishName: 'Vintage SLR Camera', interiorStyle: 'tech-pcb', soundProfile: 'tech', priority: 10 },
-  { source: 'polyhaven', assetId: 'gamepad', slug: '3d-pro-gaming-controller', englishName: 'Gaming Controller', interiorStyle: 'tech-pcb', soundProfile: 'tech', priority: 10 },
   { source: 'khronos', assetId: 'MaterialsVariantsShoe', slug: '3d-designer-sneaker', englishName: 'Designer Sneaker', interiorStyle: 'cake-rainbow', soundProfile: 'culinary', priority: 10 },
   { source: 'polyhaven', assetId: 'alarm_clock_01', slug: '3d-retro-alarm-clock', englishName: 'Retro Alarm Clock', interiorStyle: 'clockwork', soundProfile: 'metal', priority: 10 },
   { source: 'polyhaven', assetId: 'baseball_01', slug: '3d-pro-baseball', englishName: 'Pro Stitched Baseball', interiorStyle: 'baseball-core', soundProfile: 'culinary', priority: 10 },
@@ -81,7 +80,6 @@ export const CURATED_3D_MODELS = [
   { source: 'hf', repo: 'codepawl/scanned-objects-glb', glbPath: 'objects/BAGEL_WITH_CHEESE/BAGEL_WITH_CHEESE.glb', assetId: 'gso:BAGEL_WITH_CHEESE', slug: '3d-cheesy-bagel', englishName: 'Toasted Bagel with Cheese', interiorStyle: 'croissant-pastry', soundProfile: 'culinary', priority: 10 },
   { source: 'hf', repo: 'codepawl/scanned-objects-glb', glbPath: 'objects/BALANCING_CACTUS/BALANCING_CACTUS.glb', assetId: 'gso:BALANCING_CACTUS', slug: '3d-colorful-cactus', englishName: 'Wooden Balancing Cactus', interiorStyle: 'matcha-cream', soundProfile: 'culinary', priority: 9 },
   { source: 'hf', repo: 'codepawl/scanned-objects-glb', glbPath: 'objects/Avengers_Thor_PLlrpYniaeB/Avengers_Thor_PLlrpYniaeB.glb', assetId: 'gso:Avengers_Thor_PLlrpYniaeB', slug: '3d-thor-action-figure', englishName: 'Thor Action Figure', interiorStyle: 'galaxy-nebula', soundProfile: 'metal', priority: 9 },
-  { source: 'hf', repo: 'codepawl/scanned-objects-glb', glbPath: 'objects/Nickelodeon_Teenage_Mutant_Ninja_Turtles_Leonardo/Nickelodeon_Teenage_Mutant_Ninja_Turtles_Leonardo.glb', assetId: 'gso:TMNT_Leonardo', slug: '3d-ninja-turtle-figure', englishName: 'Ninja Turtle Figure', interiorStyle: 'matcha-cream', soundProfile: 'culinary', priority: 9 },
   { source: 'hf', repo: 'codepawl/scanned-objects-glb', glbPath: 'objects/Air_Hogs_Wind_Flyers_Set_Airplane_Red/Air_Hogs_Wind_Flyers_Set_Airplane_Red.glb', assetId: 'gso:Red_Stunt_Airplane', slug: '3d-red-stunt-airplane', englishName: 'Red Stunt Airplane', interiorStyle: 'tech-pcb', soundProfile: 'metal', priority: 9 },
   { source: 'hf', repo: 'codepawl/scanned-objects-glb', glbPath: 'objects/BUNNY_RACER/BUNNY_RACER.glb', assetId: 'gso:BUNNY_RACER', slug: '3d-wooden-bunny-racer', englishName: 'Wooden Bunny Racer', interiorStyle: 'cake-rainbow', soundProfile: 'culinary', priority: 9 },
   { source: 'hf', repo: 'codepawl/scanned-objects-glb', glbPath: 'objects/COAST_GUARD_BOAT/COAST_GUARD_BOAT.glb', assetId: 'gso:COAST_GUARD_BOAT', slug: '3d-rescue-boat', englishName: 'Coast Guard Rescue Boat', interiorStyle: 'cake-rainbow', soundProfile: 'culinary', priority: 9 },
@@ -109,8 +107,8 @@ export const CURATED_3D_MODELS = [
   { source: 'hf', repo: 'codepawl/objaverse-clean-glb', glbPath: 'objects/skull-downloadable-1a9db900/skull-downloadable-1a9db900.glb', assetId: 'obja:skull-downloadable-1a9db900', slug: '3d-anatomical-skull', englishName: 'Anatomical Crystal Skull', interiorStyle: 'amethyst-crystal', soundProfile: 'crystal', priority: 9 },
 ];
 
-// Global anti-boring architectural/flat/box/coral filters for dynamic 35,000+ catalog harvesting!
-const GLOBAL_SKIP_RE = /(wall|floor|ground|tile|road|street|path|fence|gate|door|window|roof|pillar|column|beam|stair|step|bridge|arch|tree|bush|grass|branch|shrub|vine|cliff|terrain|landscape|map\b|room|cubicle|curtain|rug|carpet|bed\b|mattress|sofa|couch|shelf|cabinet|desk|table|chair|bench|stool|frame|poster|wall art|print|sign|panel|banner|flag|wire|cable|pipe|pole|post|scaffold|trash|bag\b|carton|box\b|pack\b|kit\b|set\b|cartridge|ink\b|supplement|vitamin|pill|capsule|lotion|shampoo|detergent|bleach|cleaner|wipes|diaper|towel|washcloth|paper|binder|folder|shredder|puzzle|calendar|card|dvd|cd\b|acropora|montipora|porites|pocillopora|stylophora|coral|reef|excavation|specimen|holotype|paratype|fragment|sherd|vertebra|femur|tibia|humerus|jaw|mandible|tooth|molar|phalanx|rib\b|pelvis|scapula|nebula|debris|part\b|stud|corner|edge|border|platform|pedestal|sky|cloud|water|pond|river|lake)/i;
+// Global anti-boring architectural/flat/box/vitamin/coral filters for dynamic 35,000+ catalog harvesting!
+const GLOBAL_SKIP_RE = /(wall|floor|ground|tile|road|street|path|fence|gate|door|window|roof|pillar|column|beam|stair|step|bridge|arch|tree|bush|grass|branch|shrub|vine|cliff|terrain|landscape|map\b|room|cubicle|curtain|rug|carpet|bed\b|mattress|sofa|couch|shelf|cabinet|desk|table|chair|bench|stool|frame|poster|wall art|print|sign|panel|banner|flag|wire|cable|pipe|pole|post|scaffold|trash|bag\b|carton|box\b|pack\b|kit\b|set\b|cartridge|ink\b|supplement|vitamin|pill|capsule|softgel|tocopherol|borage|jarrow|omega|calcium|magnesium|zinc|protein|biotin|collagen|melatonin|turmeric|extract|complex|formula|probiotic|glucosamine|chondroitin|lutein|coq10|mastic|htp|soy\b|herb|dietary|relief|care\b|lotion|shampoo|detergent|bleach|cleaner|wipes|diaper|towel|washcloth|paper|binder|folder|shredder|puzzle|calendar|card|dvd|cd\b|acropora|montipora|porites|pocillopora|stylophora|coral|reef|excavation|specimen|holotype|paratype|fragment|sherd|vertebra|femur|tibia|humerus|jaw|mandible|tooth|molar|phalanx|rib\b|pelvis|scapula|nebula|debris|part\b|stud|corner|edge|border|platform|pedestal|sky|cloud|water|pond|river|lake|saucer|organizer|rack|antislip|assortment|pencil_case|lunch_box|memo|menu|blocks|construction|sorting_board)/i;
 
 const POLYHAVEN_SKIP_RE = new RegExp(GLOBAL_SKIP_RE.source + '|chandelier|aircon|stove|fridge|wheelchair|crutch|broom|ladder|hose|crate|barrel|pallet|plant|pot_0', 'i');
 
@@ -297,11 +295,11 @@ const DYNAMIC_MEGA_SOURCES = [
     fetch: (idx, limit) => fetchHfDataset('codepawl/objaverse-clean-glb', {
       tag: 'obja',
       limit,
-      priority: 9,
+      priority: 8,
       filterFn: (r) => {
         const t = `${r.title || ''} ${r.category || ''}`;
         if (GLOBAL_SKIP_RE.test(t)) return false;
-        if ((r.likes || 0) < 40 && (r.quality_score || 0) < 12) return false;
+        if ((r.likes || 0) < 60 && (r.quality_score || 0) < 15) return false;
         return !/architecture|scene|environment|interior|room|city|building|house|street/i.test(r.category || '');
       },
       sortFn: (a, b) => (b.likes || 0) - (a.likes || 0),
@@ -316,7 +314,7 @@ const DYNAMIC_MEGA_SOURCES = [
       filterFn: (r) => {
         const t = `${r.title || ''}`;
         if (GLOBAL_SKIP_RE.test(t)) return false;
-        if ((r.likes || 0) < 35 && !r.curated) return false;
+        if ((r.likes || 0) < 45 && !r.curated) return false;
         return /^(food|animals|objects|tech|transport|art|people)$/i.test(r.category || '');
       },
       sortFn: (a, b) => (b.likes || 0) - (a.likes || 0),
@@ -327,12 +325,12 @@ const DYNAMIC_MEGA_SOURCES = [
     fetch: (idx, limit) => fetchHfDataset('codepawl/scanned-objects-glb', {
       tag: 'gso',
       limit,
-      priority: 9,
+      priority: 8,
       filterFn: (r) => {
         const s = `${r.id || ''} ${r.name || ''}`;
         if (GLOBAL_SKIP_RE.test(s)) return false;
-        if (r.category === 'shoe' || r.category === 'board game' || r.category === 'media') return false;
-        return ['toy', 'kitchen', 'electronics', 'bottles and cups', 'food and drink', 'bag'].includes(r.category);
+        // Strictly sculpted iconic 3D shapes from GSO (NEVER vitamin jars, cardboard boxes, or flat pads!)
+        return /figure|mario|yoshi|luigi|turtle|dragon|dino|triceratops|avengers|thor|hulk|android|robot|truck|bus|train|plane|airplane|boat|car\b|racer|horse|lion|bear|panda|dog|cat|bunny|chicken|owl|cactus|bagel|toaster|teapot|kettle|mug|blender|coffeemaker|frother|pan\b|pot\b|headset|camera|instax|clock|backpack|doll|plush|rattle|smash_fists/i.test(s);
       },
     }, idx),
   },

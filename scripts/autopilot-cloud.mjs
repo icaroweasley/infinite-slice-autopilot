@@ -450,8 +450,8 @@ async function main() {
         if ((qa.meta.vertexCount || 0) < 300) {
           throw new Error(`Mesh too simple (${qa.meta.vertexCount} verts < 300)`);
         }
-        if ((qa.meta.solidRatio || 0) < 0.08) {
-          throw new Error(`Solid voxel ratio too thin (${qa.meta.solidRatio} < 0.08)`);
+        if ((qa.meta.solidRatio || 0) < 0.15) {
+          throw new Error(`Solid voxel ratio too thin/spindly (${qa.meta.solidRatio} < 0.15 — only chunky satisfying 3D shapes allowed!)`);
         }
 
         // Optional Gemini Vision QA Art-Director Check (when GEMINI_API_KEY is available)
