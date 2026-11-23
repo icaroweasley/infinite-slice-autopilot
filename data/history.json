@@ -1132,6 +1132,50 @@
         },
         "caption": "Cutting a Ruby Pomegranate packed with glossy red crystal seeds like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795429641144",
+      "createdAt": "2026-11-23T10:27:21.144Z",
+      "status": "published",
+      "source": "cloud-autopilot:fallback",
+      "objectId": "prompt-custom",
+      "slug": "mirror-pokeball-with-cyan-plasma-core",
+      "name": "Mirror Pokeball with cyan plasma core",
+      "englishName": "Pokeball with Crystal Core",
+      "cutterId": "custom",
+      "cutterPrompt": "Mirror-polished Japanese chef knife with dark walnut handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Deep navy indigo marble slab with silver veins",
+      "envId": "custom",
+      "envPrompt": "Dusty lavender architectural minimalist studio",
+      "conceptSummary": "Mirror Pokeball with cyan plasma core | blade=Mirror-polished Japanese chef knife with dark walnut handle | board=Deep navy indigo marble slab with silver veins | studio=Dusty lavender architectural minimalist studio",
+      "rounds": [
+        10,
+        100,
+        500,
+        1000
+      ],
+      "maxCubes": 19781721,
+      "durationSec": 34.317,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-mirror-pokeball-with-cyan-plasma-dusty-lavender-architectural-min-2026-11-23T10-09-56.mp4",
+      "caption": "10 → 1,000 cuts on a Pokeball with Crystal Core. Final count: 19,781,721 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-23T10:28:44.768Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17868946560684267",
+        "mediaId": "18101152880438099",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17868946560684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1810715317720740",
+          "postId": "122100499317557835"
+        },
+        "caption": "10 → 1,000 cuts on a Pokeball with Crystal Core. Final count: 19,781,721 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
