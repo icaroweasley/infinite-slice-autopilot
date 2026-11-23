@@ -52,6 +52,9 @@ const VALID_INTERIOR_STYLES = [
   'baseball-core',
   'amethyst-crystal',
   'marble-damascus',
+  'galaxy-nebula',
+  'magma-core',
+  'matcha-cream',
 ];
 
 const CLOUD_EN_CUTTERS = [
@@ -343,12 +346,18 @@ async function main() {
   }
   console.log(`[autopilot] Fresh NEVER-POSTED real 3D models available: ${freshPool.length} (top 5: ${freshPool.slice(0, 5).map((m) => m.assetId).join(', ')})`);
 
-  // Shuffle within top priority band for organic variety while keeping hero VIP assets first
-  const topPriority = freshPool[0].priority || 5;
-  const topBand = freshPool.filter((m) => (m.priority || 5) >= topPriority - 1);
-  const restBand = freshPool.filter((m) => (m.priority || 5) < topPriority - 1);
-  const shuffledTop = [...topBand].sort(() => Math.random() - 0.5);
-  const orderedPool = [...shuffledTop, ...restBand];
+  // Blend top-tier legends (priority >= 9) + rotating live Mega-Catalog gems (priority 8) so EVERY day mixes all 12 sources!
+  const tierS = freshPool.filter((m) => (m.priority || 5) >= 9).sort(() => Math.random() - 0.5);
+  const tierA = freshPool.filter((m) => (m.priority || 5) === 8).sort(() => Math.random() - 0.5);
+  const tierB = freshPool.filter((m) => (m.priority || 5) < 8).sort(() => Math.random() - 0.5);
+  const orderedPool = [];
+  let iS = 0, iA = 0;
+  while (iS < tierS.length || iA < tierA.length) {
+    if (iS < tierS.length) orderedPool.push(tierS[iS++]);
+    if (iS < tierS.length) orderedPool.push(tierS[iS++]);
+    if (iA < tierA.length) orderedPool.push(tierA[iA++]);
+  }
+  orderedPool.push(...tierB);
 
   // 3. Optional Gemini Creative Director (picks best unused 3D model + fresh blade/board/studio + hook)
   const apiKey = process.env.GEMINI_API_KEY || '';

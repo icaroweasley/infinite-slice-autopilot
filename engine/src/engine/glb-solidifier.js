@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { clamp, lerp, smoothstep, fract, hash3, fbm3 } from '../objects/noise.js';
 
 /**
@@ -649,6 +650,54 @@ export function evaluateInteriorStyle(style, nx, ny, nz, depth, skinRgb = [0.85,
       };
     }
 
+    case 'galaxy-nebula': {
+      // Cosmic swirling purple/indigo/cyan nebula + sparkling stardust (epic for NASA/UFO/Alien/Space!)
+      const swirl = fbm3(nx * 10 + 2.3, ny * 10 - 1.7, nz * 10 + 4.1, 4);
+      const ribbon = smoothstep(0.38, 0.72, 0.5 + 0.5 * Math.sin(depth * 18 + swirl * 6.0));
+      const star = hash3(Math.floor((nx + 0.5) * 42), Math.floor(ny * 42), Math.floor((nz + 0.5) * 42)) > 0.965 ? 1 : 0;
+      if (star) return { r: 1.0, g: 0.98, b: 0.92, roughness: 0.08, metalness: 0.1, emissive: 0.85 };
+      return {
+        r: lerp(0.14, 0.78, ribbon),
+        g: lerp(0.08, 0.22, ribbon) + smoothstep(0.55, 0.85, swirl) * 0.55,
+        b: lerp(0.42, 0.98, 0.4 + ribbon * 0.6),
+        roughness: 0.14,
+        metalness: 0.18,
+        emissive: 0.26 + ribbon * 0.22,
+      };
+    }
+
+    case 'magma-core': {
+      // Dark volcanic basalt veins cracked open with glowing 1000C molten lava rivers!
+      const crack = smoothstep(0.52, 0.78, Math.abs(Math.sin(nx * 18 + n1 * 6.5) * Math.cos(ny * 18 - n2 * 5.0)));
+      const hotCore = smoothstep(0.38, 0.80, depth);
+      const lava = clamp(crack * 0.85 + hotCore * 0.65, 0, 1);
+      return {
+        r: lerp(0.12, 1.0, smoothstep(0.15, 0.65, lava)),
+        g: lerp(0.10, 0.72, smoothstep(0.35, 0.95, lava)),
+        b: lerp(0.12, 0.14, smoothstep(0.65, 1.0, lava)),
+        roughness: lerp(0.75, 0.18, lava),
+        metalness: 0.08,
+        emissive: lava * 0.85,
+      };
+    }
+
+    case 'matcha-cream': {
+      // Japanese Uji matcha green crepe layers + rich white Hokkaido cream strata!
+      const band = fract(ny * 7.5);
+      const isCream = band > 0.58;
+      if (isCream) {
+        return { r: 0.98, g: 0.97, b: 0.91, roughness: 0.34, metalness: 0.0, emissive: 0.0 };
+      }
+      return {
+        r: clamp(0.32 + n2 * 0.08, 0, 1),
+        g: clamp(0.68 + n2 * 0.10, 0, 1),
+        b: clamp(0.24 + n2 * 0.06, 0, 1),
+        roughness: 0.58,
+        metalness: 0.0,
+        emissive: 0.02,
+      };
+    }
+
     case 'cake-rainbow':
     default: {
       // Iconic viral "WAIT — IS IT CAKE?!" 6-layer rainbow sponge + vanilla frosting!
@@ -680,6 +729,23 @@ export function evaluateInteriorStyle(style, nx, ny, nz, depth, skinRgb = [0.85,
   }
 }
 
+function dequantizeAttributeToFloat32(attr) {
+  if (!attr) return null;
+  if (attr.array instanceof Float32Array && !attr.normalized && !attr.isInterleavedBufferAttribute) {
+    return attr.clone();
+  }
+  const itemSize = attr.itemSize;
+  const out = new Float32Array(attr.count * itemSize);
+  for (let i = 0; i < attr.count; i++) {
+    const o = i * itemSize;
+    if (itemSize >= 1) out[o] = attr.getX(i);
+    if (itemSize >= 2) out[o + 1] = attr.getY(i);
+    if (itemSize >= 3) out[o + 2] = attr.getZ(i);
+    if (itemSize >= 4) out[o + 3] = attr.getW(i);
+  }
+  return new THREE.BufferAttribute(out, itemSize);
+}
+
 /**
  * Loads a .glb or .gltf URL, normalizes its geometry, bakes its authentic PBR textures into
  * a 1024x1024 surface atlas, voxelizes its interior 100% SOLID, and returns a full objDef
@@ -687,6 +753,7 @@ export function evaluateInteriorStyle(style, nx, ny, nz, depth, skinRgb = [0.85,
  */
 export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
   const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
   const gltf = await loader.loadAsync(modelUrl);
   gltf.scene.updateMatrixWorld(true);
 
@@ -699,8 +766,15 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
     const posAttr = rawGeo.attributes.position;
     if (!posAttr || posAttr.count < 3) return;
 
-    // Clone & bake world transform cleanly
-    const geo = rawGeo.index ? rawGeo.toNonIndexed() : rawGeo.clone();
+    // Expand indexed geometry AND de-quantize KHR_mesh_quantization (Int16/Uint16/Interleaved) to Float32 BEFORE applyMatrix4!
+    const expanded = rawGeo.index ? rawGeo.toNonIndexed() : rawGeo;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', dequantizeAttributeToFloat32(expanded.attributes.position));
+    if (expanded.attributes.normal) geo.setAttribute('normal', dequantizeAttributeToFloat32(expanded.attributes.normal));
+    if (expanded.attributes.uv) geo.setAttribute('uv', dequantizeAttributeToFloat32(expanded.attributes.uv));
+    if (expanded.attributes.color) geo.setAttribute('color', dequantizeAttributeToFloat32(expanded.attributes.color));
+    if (expanded !== rawGeo) expanded.dispose();
+
     geo.applyMatrix4(node.matrixWorld);
     if (!geo.attributes.normal) {
       geo.computeVertexNormals();
@@ -773,9 +847,11 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
   }
 
   // Fit hero bounding box into studio cutting board frame (sits flush at y = 0)
-  const maxW = meta.maxW || 2.24;
-  const maxH = meta.maxH || 1.48;
-  const maxD = meta.maxD || 1.62;
+  // Give tall upright figurines (Mario, Astronaut, Alien) slightly extra vertical presence so they fill the 9:16 frame heroically!
+  const isTallHero = size.y > Math.max(size.x, size.z) * 1.25;
+  const maxW = meta.maxW || 2.28;
+  const maxH = meta.maxH || (isTallHero ? 1.78 : 1.50);
+  const maxD = meta.maxD || 1.65;
   const scale = Math.min(
     maxW / Math.max(1e-4, size.x),
     maxH / Math.max(1e-4, size.y),
@@ -788,9 +864,15 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
     d: Math.max(0.45, size.z * scale),
   };
 
-  // Deduplicate unique materials -> atlas tiles
+  // Deduplicate unique materials -> atlas tiles (+ 1 dedicated 16x16 palette tile if vertex-colored meshes exist!)
   const uniqueMats = [];
+  let hasVertexColoredPart = false;
   const partTileIdx = parts.map((p) => {
+    const usesVCol = Boolean(p.geo.attributes.color && (!p.mat || !p.mat.map || !isValidImageSource(p.mat.map.image)));
+    if (usesVCol) {
+      hasVertexColoredPart = true;
+      return -1; // assigned to dedicated vertex-color palette tile below
+    }
     let idx = uniqueMats.indexOf(p.mat);
     if (idx < 0) {
       idx = uniqueMats.length;
@@ -799,7 +881,8 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
     return idx;
   });
 
-  const numTiles = Math.max(1, uniqueMats.length);
+  const vcolTileIdx = hasVertexColoredPart ? uniqueMats.length : -1;
+  const numTiles = Math.max(1, uniqueMats.length + (hasVertexColoredPart ? 1 : 0));
   const cols = Math.ceil(Math.sqrt(numTiles));
   const rows = Math.ceil(numTiles / cols);
   const ATLAS_SIZE = 1024;
@@ -896,12 +979,53 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
   const outNorm = new Float32Array(totalVerts * 3);
   const outUv = new Float32Array(totalVerts * 2);
 
+  // Vertex-color palette allocator (16x16 = 256 zero-bleed crisp swatches inside dedicated vcol tile!)
+  const vcolMap = new Map();
+  let vcolNextSlot = 0;
+  const VCOL_GRID = 16;
+  const vcolBaseCol = vcolTileIdx >= 0 ? (vcolTileIdx % cols) : 0;
+  const vcolBaseRow = vcolTileIdx >= 0 ? Math.floor(vcolTileIdx / cols) : 0;
+  const vcolTx = Math.floor(vcolBaseCol * tileW) + padPx;
+  const vcolTy = Math.floor(vcolBaseRow * tileH) + padPx;
+  const vcolInnerW = Math.max(16, Math.ceil(tileW) - padPx * 2);
+  const vcolInnerH = Math.max(16, Math.ceil(tileH) - padPx * 2);
+  const swatchW = vcolInnerW / VCOL_GRID;
+  const swatchH = vcolInnerH / VCOL_GRID;
+  const tmpColor = new THREE.Color();
+
+  const allocVColUv = (rLin, gLin, bLin, mat) => {
+    tmpColor.setRGB(rLin, gLin, bLin);
+    if (mat?.color?.isColor) tmpColor.multiply(mat.color);
+    tmpColor.convertLinearToSRGB();
+    const r = Math.round(clamp(tmpColor.r, 0, 1) * 255);
+    const g = Math.round(clamp(tmpColor.g, 0, 1) * 255);
+    const b = Math.round(clamp(tmpColor.b, 0, 1) * 255);
+    const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+    let slot = vcolMap.get(key);
+    if (slot === undefined) {
+      slot = vcolNextSlot < VCOL_GRID * VCOL_GRID ? vcolNextSlot++ : (key % (VCOL_GRID * VCOL_GRID));
+      vcolMap.set(key, slot);
+      const sc = slot % VCOL_GRID;
+      const sr = Math.floor(slot / VCOL_GRID);
+      cCtx.fillStyle = `rgb(${r},${g},${b})`;
+      cCtx.fillRect(Math.floor(vcolTx + sc * swatchW), Math.floor(vcolTy + sr * swatchH), Math.ceil(swatchW) + 1, Math.ceil(swatchH) + 1);
+      avgSkinR += r / 255; avgSkinG += g / 255; avgSkinB += b / 255; avgSkinCount++;
+    }
+    const sc = slot % VCOL_GRID;
+    const sr = Math.floor(slot / VCOL_GRID);
+    return [
+      (vcolTx + (sc + 0.5) * swatchW) / ATLAS_SIZE,
+      (vcolTy + (sr + 0.5) * swatchH) / ATLAS_SIZE,
+    ];
+  };
+
   let vCursor = 0;
   for (let pIdx = 0; pIdx < parts.length; pIdx++) {
-    const { geo } = parts[pIdx];
+    const { geo, mat } = parts[pIdx];
     const tileIdx = partTileIdx[pIdx];
-    const col = tileIdx % cols;
-    const row = Math.floor(tileIdx / cols);
+    const isVCol = tileIdx < 0;
+    const col = isVCol ? 0 : (tileIdx % cols);
+    const row = isVCol ? 0 : Math.floor(tileIdx / cols);
     const ox = (col * tileW + padPx) / ATLAS_SIZE;
     const oy = (row * tileH + padPx) / ATLAS_SIZE;
     const sw = Math.max(2, tileW - padPx * 2) / ATLAS_SIZE;
@@ -910,37 +1034,57 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
     const pAttr = geo.attributes.position;
     const nAttr = geo.attributes.normal;
     const uAttr = geo.attributes.uv;
+    const cAttr = geo.attributes.color;
     const count = Math.floor(pAttr.count / 3) * 3;
 
-    for (let i = 0; i < count; i++) {
-      const wx = (pAttr.getX(i) - center.x) * scale;
-      const wy = (pAttr.getY(i) - box.min.y) * scale;
-      const wz = (pAttr.getZ(i) - center.z) * scale;
-
-      const pOff = (vCursor + i) * 3;
-      outPos[pOff] = wx;
-      outPos[pOff + 1] = wy;
-      outPos[pOff + 2] = wz;
-
-      outNorm[pOff] = nAttr.getX(i);
-      outNorm[pOff + 1] = nAttr.getY(i);
-      outNorm[pOff + 2] = nAttr.getZ(i);
-
-      let u = 0.5, v = 0.5;
-      if (uAttr) {
-        u = uAttr.getX(i);
-        v = uAttr.getY(i);
-        // Handle tiled/wrapped UVs cleanly into [0, 1]
-        if (u < 0 || u > 1) u = ((u % 1) + 1) % 1;
-        if (v < 0 || v > 1) v = ((v % 1) + 1) % 1;
+    for (let i = 0; i < count; i += 3) {
+      let vcUv = null;
+      if (isVCol && cAttr) {
+        const rAvg = (cAttr.getX(i) + cAttr.getX(i + 1) + cAttr.getX(i + 2)) / 3;
+        const gAvg = (cAttr.getY(i) + cAttr.getY(i + 1) + cAttr.getY(i + 2)) / 3;
+        const bAvg = (cAttr.getZ(i) + cAttr.getZ(i + 1) + cAttr.getZ(i + 2)) / 3;
+        vcUv = allocVColUv(rAvg, gAvg, bAvg, mat);
       }
-      const uOff = (vCursor + i) * 2;
-      outUv[uOff] = ox + u * sw;
-      outUv[uOff + 1] = oy + v * sh;
+
+      for (let k = 0; k < 3; k++) {
+        const vi = i + k;
+        const wx = (pAttr.getX(vi) - center.x) * scale;
+        const wy = (pAttr.getY(vi) - box.min.y) * scale;
+        const wz = (pAttr.getZ(vi) - center.z) * scale;
+
+        const pOff = (vCursor + vi) * 3;
+        outPos[pOff] = wx;
+        outPos[pOff + 1] = wy;
+        outPos[pOff + 2] = wz;
+
+        outNorm[pOff] = nAttr.getX(vi);
+        outNorm[pOff + 1] = nAttr.getY(vi);
+        outNorm[pOff + 2] = nAttr.getZ(vi);
+
+        const uOff = (vCursor + vi) * 2;
+        if (vcUv) {
+          outUv[uOff] = vcUv[0];
+          outUv[uOff + 1] = vcUv[1];
+        } else {
+          let u = 0.5, v = 0.5;
+          if (uAttr) {
+            u = uAttr.getX(vi);
+            v = uAttr.getY(vi);
+            if (u < 0 || u > 1) u = ((u % 1) + 1) % 1;
+            if (v < 0 || v > 1) v = ((v % 1) + 1) % 1;
+          }
+          outUv[uOff] = ox + u * sw;
+          outUv[uOff + 1] = oy + v * sh;
+        }
+      }
     }
     vCursor += count;
     geo.dispose();
   }
+
+  const finalAvgSkinRgb = avgSkinCount > 0
+    ? [avgSkinR / avgSkinCount, avgSkinG / avgSkinCount, avgSkinB / avgSkinCount]
+    : avgSkinRgb;
 
   const mergedGeo = new THREE.BufferGeometry();
   mergedGeo.setAttribute('position', new THREE.BufferAttribute(outPos, 3));
@@ -984,7 +1128,7 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
       const factory = new Function('clamp', 'lerp', 'smoothstep', 'fract', 'hash3', 'fbm3', `return (${meta.customInteriorCode});`);
       const fn = factory(clamp, lerp, smoothstep, fract, hash3, fbm3);
       if (typeof fn === 'function') {
-        const probe = fn(0, 0.5, 0, 0.5, avgSkinRgb);
+        const probe = fn(0, 0.5, 0, 0.5, finalAvgSkinRgb);
         if (probe && Number.isFinite(probe.r) && Number.isFinite(probe.g) && Number.isFinite(probe.b)) {
           customInteriorFn = fn;
         }
@@ -1024,7 +1168,7 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
       const depth = voxel.depthAt(nx, ny, nz);
       if (customInteriorFn) {
         try {
-          const out = customInteriorFn(nx, ny, nz, depth, avgSkinRgb);
+          const out = customInteriorFn(nx, ny, nz, depth, finalAvgSkinRgb);
           if (out && Number.isFinite(out.r) && Number.isFinite(out.g) && Number.isFinite(out.b)) {
             return {
               r: clamp(out.r, 0, 1),
@@ -1039,7 +1183,7 @@ export async function loadSolidifiedModelObject(modelUrl, meta = {}) {
           // fall through to reliable recipe
         }
       }
-      return evaluateInteriorStyle(interiorStyle, nx, ny, nz, depth, avgSkinRgb);
+      return evaluateInteriorStyle(interiorStyle, nx, ny, nz, depth, finalAvgSkinRgb);
     },
     createOuterGeometry() {
       return mergedGeo.clone();
