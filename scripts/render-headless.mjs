@@ -107,6 +107,8 @@ function safeSlug(str) {
 export async function renderHeadlessVideo({
   objectId = 'salmon',
   objectPrompt = '',
+  modelUrl = '',
+  modelMeta = null,
   cutterId = 'chef-knife',
   cutterPrompt = '',
   surfaceId = '',
@@ -141,7 +143,7 @@ export async function renderHeadlessVideo({
 
   const executablePath = resolveChromiumExecutable();
   console.log(`[render] Browser: ${executablePath}`);
-  console.log(`[render] Target: object=${objectPrompt || objectId} | cutter=${cutterPrompt || cutterId} | surface=${surfacePrompt || surfaceId || 'default'} | env=${envPrompt || envId} | ${W}x${H} @ ${FPS}fps | rounds=[${ROUNDS.join(',')}]`);
+  console.log(`[render] Target: object=${modelMeta?.englishName || objectPrompt || objectId} | cutter=${cutterPrompt || cutterId} | surface=${surfacePrompt || surfaceId || 'default'} | env=${envPrompt || envId} | ${W}x${H} @ ${FPS}fps | rounds=[${ROUNDS.join(',')}]`);
 
   let viteServer = null;
   let url = '';
@@ -160,7 +162,7 @@ export async function renderHeadlessVideo({
 
   let browser = null;
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const objTag = safeSlug(objectPrompt || objectId);
+  const objTag = safeSlug(modelMeta?.slug || objectPrompt || objectId);
   const envTag = safeSlug(envPrompt || envId);
   const baseFile = outputName || `infinite-slice-${objTag}-${envTag}-${stamp}`;
   const tempVideoPath = path.join(outDir, `${baseFile}.video.tmp.mp4`);
@@ -217,6 +219,8 @@ export async function renderHeadlessVideo({
       {
         objectId,
         objectPrompt,
+        modelUrl,
+        modelMeta,
         cutterId,
         cutterPrompt,
         surfaceId,
@@ -346,6 +350,8 @@ export async function renderHeadlessVideo({
       rounds: ROUNDS,
       objectId: summary.object.id,
       objectPrompt: objectPrompt || '',
+      modelAssetId: modelMeta?.assetId || meta?.modelAssetId || '',
+      solidRatio: meta?.solidRatio ?? null,
       slug: summary.object.slug,
       name: summary.object.name,
       englishName: summary.object.englishName,
@@ -361,6 +367,91 @@ export async function renderHeadlessVideo({
   } finally {
     if (browser) await browser.close();
     if (viteServer) await viteServer.close();
+  }
+}
+
+/**
+ * Fast Pre-Flight Visual QA Capture (~3-5 seconds):
+ * Renders 2 snapshots of any scene (0 CUTS intact silhouette + 10 CUTS sliced open interior)
+ * plus solid voxel metrics so automated QA can reject ugly/broken/hollow scenes BEFORE rendering!
+ */
+export async function capturePreFlightFrames({
+  objectId = 'salmon',
+  objectPrompt = '',
+  modelUrl = '',
+  modelMeta = null,
+  cutterId = 'chef-knife',
+  cutterPrompt = '',
+  surfaceId = '',
+  surfacePrompt = '',
+  envId = 'classic-viral',
+  envPrompt = '',
+  handle = '@atomslice3d',
+  width = 360,
+  height = 640,
+} = {}) {
+  const executablePath = resolveChromiumExecutable();
+  const viteServer = await createServer({
+    configFile: path.join(ROOT, 'engine', 'vite.config.js'),
+    server: { port: 0, host: '127.0.0.1' },
+    logLevel: 'silent',
+  });
+  await viteServer.listen();
+  const addr = viteServer.httpServer.address();
+  const url = `http://127.0.0.1:${addr.port}/?headless=1`;
+
+  let browser = null;
+  try {
+    const isLinux = process.platform === 'linux';
+    const launchArgs = isLinux
+      ? ['--use-gl=angle', '--use-angle=swiftshader-webgl', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--no-sandbox', '--disable-dev-shm-usage']
+      : ['--use-gl=angle', '--enable-webgl', '--ignore-gpu-blocklist', '--no-sandbox', '--disable-dev-shm-usage'];
+    browser = await chromium.launch({ executablePath, headless: true, args: launchArgs });
+    const page = await browser.newPage({ viewport: { width, height } });
+    const consoleErrors = [];
+    page.on('pageerror', (e) => consoleErrors.push(e.message));
+
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => window.__HEADLESS_READY__ === true || Boolean(window.__HEADLESS_ERROR__), { timeout: 30000 });
+    const bootErr = await page.evaluate(() => window.__HEADLESS_ERROR__ || null);
+    if (bootErr) throw new Error(`Pre-flight boot failed: ${bootErr}`);
+
+    const meta = await page.evaluate(
+      (opts) => window.__HEADLESS_API__.configure(opts),
+      {
+        objectId, objectPrompt, modelUrl, modelMeta,
+        cutterId, cutterPrompt, surfaceId, surfacePrompt, envId, envPrompt,
+        handle, width, height,
+        rounds: [10],
+        durationScale: 1.0,
+        showHud: true,
+        ctaOutro: null,
+      }
+    );
+
+    // Frame 1: intact hero object at t = 0.08s
+    const intact = await page.evaluate(() => {
+      window.__HEADLESS_API__.stepAndCapture(0.04, 0.88);
+      return window.__HEADLESS_API__.stepAndCapture(0.04, 0.90);
+    });
+
+    // Step forward cleanly at 30fps to t ~ 7.7s (mid-Z-slice of 10-cut round) where front slices drop open showing the solid interior!
+    const sliced = await page.evaluate(() => {
+      for (let i = 0; i < 230; i++) {
+        window.__HEADLESS_API__.stepOnly(1 / 30);
+      }
+      return window.__HEADLESS_API__.stepAndCapture(1 / 30, 0.90);
+    });
+
+    return {
+      meta,
+      consoleErrors,
+      intactJpegB64: intact.base64,
+      slicedJpegB64: sliced.base64,
+    };
+  } finally {
+    if (browser) await browser.close();
+    await viteServer.close();
   }
 }
 

@@ -43,6 +43,10 @@ if (isHeadless) {
     configure(opts) {
       return engine.configureHeadless(opts);
     },
+    stepOnly(dt) {
+      engine.step(dt);
+      return { simTime: engine.simTime, cutsDone: engine.displayCuts, done: engine.sequenceCompleted };
+    },
     stepAndCapture(dt, quality = 0.94) {
       engine.step(dt);
       engine.renderFrame();

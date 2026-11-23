@@ -109,8 +109,6 @@ jobs:
         run: |
           git config user.name "Infinite Slice Bot"
           git config user.email "bot@infinite-slice.local"
+          rm -rf engine/public/runtime-model
           git checkout -- engine/ 2>/dev/null || true
-          git add data/history.json
-          git diff --cached --quiet || git commit -m "chore: log autonomous reel in history.json"
-          git pull --rebase origin main
-          git push
+          node scripts/merge-history.mjs

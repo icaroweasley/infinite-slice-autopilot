@@ -7,6 +7,7 @@ import { PhysicsTierEngine } from './physics-tiers.js';
 import { AsmrAudioEngine } from './audio-asmr.js';
 import { OBJECT_MAP, computeAxisCuts } from '../objects/registry.js';
 import { generateObjectFromPrompt } from '../objects/prompt-object-generator.js';
+import { loadSolidifiedModelObject } from './glb-solidifier.js';
 
 export const DEFAULT_ROUNDS = [
   { cuts: 10,   tier: 1, label: '10 CUTS',    duration: 8.4, settleWait: 1.35 },
@@ -186,9 +187,11 @@ export class InfiniteSliceEngine {
   /**
    * Configures a deterministic headless render job (called by scripts/render-headless.mjs).
    */
-  configureHeadless({
+  async configureHeadless({
     objectId = 'salmon',
     objectPrompt = '',
+    modelUrl = '',
+    modelMeta = null,
     cutterId = 'chef-knife',
     cutterPrompt = '',
     surfaceId = '',
@@ -233,8 +236,10 @@ export class InfiniteSliceEngine {
       this.setCutter(cutterId || 'chef-knife', '');
     }
 
-    // Volumetric Object (preset OR free-text prompt)
-    if (objectPrompt && objectPrompt.trim()) {
+    // Volumetric Object (real downloaded GLB/GLTF 3D model OR preset OR free-text prompt)
+    if (modelUrl && modelUrl.trim()) {
+      await this.setExternalModel(modelUrl.trim(), modelMeta || {}, false);
+    } else if (objectPrompt && objectPrompt.trim()) {
       this.setObjectFromPrompt(objectPrompt, false);
     } else {
       this.setObject(objectId, false);
@@ -251,6 +256,9 @@ export class InfiniteSliceEngine {
       slug: this.objDef.slug || this.objDef.id,
       name: this.objDef.name,
       englishName: this.objDef.englishName || this.objDef.name,
+      modelAssetId: this.objDef.modelAssetId || '',
+      solidRatio: typeof this.objDef.solidRatio === 'number' ? Number(this.objDef.solidRatio.toFixed(4)) : null,
+      vertexCount: this.objDef.vertexCount || null,
       cutterId: this.currentCutterId,
       surfaceId: this.currentSurfaceId,
       envId: this.currentEnvId,
@@ -319,6 +327,18 @@ export class InfiniteSliceEngine {
     const objDef = generateObjectFromPrompt(promptText);
     this.currentObjectId = 'prompt-custom';
     this.currentObjectPrompt = promptText;
+    this.objDef = objDef;
+    this.solid.loadObject(objDef);
+    if (restartCurrentRound) {
+      this.startRound(this.roundIndex, this.autoSequence);
+    }
+    return objDef;
+  }
+
+  async setExternalModel(modelUrl, modelMeta = {}, restartCurrentRound = true) {
+    const objDef = await loadSolidifiedModelObject(modelUrl, modelMeta);
+    this.currentObjectId = 'external-glb';
+    this.currentObjectPrompt = objDef.englishName || objDef.name || '';
     this.objDef = objDef;
     this.solid.loadObject(objDef);
     if (restartCurrentRound) {

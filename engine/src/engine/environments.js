@@ -637,11 +637,12 @@ export class EnvironmentManager {
   }
 
   update(dt) {
+    const safeDt = Math.min(dt, 0.025);
     const k = 260;
     const d = 28;
     const acc = -k * this.recoilOffset - d * this.recoilVel;
-    this.recoilVel += acc * dt;
-    this.recoilOffset += this.recoilVel * dt;
+    this.recoilVel = Math.max(-2.5, Math.min(2.5, this.recoilVel + acc * safeDt));
+    this.recoilOffset = Math.max(-0.06, Math.min(0.06, this.recoilOffset + this.recoilVel * safeDt));
     if (Math.abs(this.recoilOffset) < 0.0001 && Math.abs(this.recoilVel) < 0.0001) {
       this.recoilOffset = 0;
       this.recoilVel = 0;

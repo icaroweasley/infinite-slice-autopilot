@@ -7,6 +7,8 @@ data/studio-brief.json
 dist/
 dist-buyer/
 sales-site.zip
+sales-site (*.zip
+engine/public/runtime-model/
 autopilot.log
 .DS_Store
 Thumbs.db

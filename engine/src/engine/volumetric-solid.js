@@ -132,8 +132,8 @@ export class VolumetricSolid {
     this.propsTex.wrapR = THREE.ClampToEdgeWrapping;
     this.propsTex.needsUpdate = true;
 
-    // 2. Ultra-HD 1024x1024 Outer Surface Atlas (ZERO pixelation on skin/stripes/seeds/logos!)
-    const baked = bakeUltraHDSurface(objDef, 1024);
+    // 2. Ultra-HD 1024x1024 Outer Surface Atlas (use pre-baked authentic GLB/GLTF textures when provided!)
+    const baked = objDef.bakedSurface || bakeUltraHDSurface(objDef, 1024);
     this.bakedOuterGeo = baked.geometry;
     this.surfColorTex = baked.surfColorTex;
     this.surfPropsTex = baked.surfPropsTex;
