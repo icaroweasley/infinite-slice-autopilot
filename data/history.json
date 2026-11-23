@@ -1048,6 +1048,54 @@
         },
         "caption": "Slicing a Vintage SLR Camera 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795451164640",
+      "createdAt": "2026-11-23T16:26:04.640Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "alarm_clock_01",
+      "interiorStyle": "clockwork",
+      "solidRatio": 0.5178,
+      "slug": "3d-retro-alarm-clock",
+      "name": "Retro Alarm Clock",
+      "englishName": "Retro Alarm Clock",
+      "cutterId": "custom",
+      "cutterPrompt": "Glowing lava magma cleaver",
+      "surfaceId": "custom",
+      "surfacePrompt": "Natural green Japanese bamboo cutting board",
+      "envId": "custom",
+      "envPrompt": "Warm fluted wood Japanese minimalist studio",
+      "conceptSummary": "Retro Alarm Clock [polyhaven:alarm_clock_01 | interior=clockwork] | blade=Glowing lava magma cleaver | board=Natural green Japanese bamboo cutting board | studio=Warm fluted wood Japanese minimalist studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        1000
+      ],
+      "maxCubes": 16221405,
+      "durationSec": 34.033,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-retro-alarm-clock-warm-fluted-wood-japanese-minima-2026-11-23T16-11-26.mp4",
+      "caption": "10 → 1,000 cuts on a Retro Alarm Clock. Final count: 16,221,405 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-23T16:26:52.855Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869001901684267",
+        "mediaId": "18009818738792811",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869001901684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1426952056088643",
+          "postId": "122100743589557835"
+        },
+        "caption": "10 → 1,000 cuts on a Retro Alarm Clock. Final count: 16,221,405 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
