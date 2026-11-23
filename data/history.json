@@ -1096,6 +1096,54 @@
         },
         "caption": "10 → 1,000 cuts on a Retro Alarm Clock. Final count: 16,221,405 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795473542668",
+      "createdAt": "2026-11-23T22:39:02.668Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "food_lime_01",
+      "interiorStyle": "citrus-lime",
+      "solidRatio": 0.5109,
+      "slug": "3d-fresh-green-lime",
+      "name": "Fresh Green Lime",
+      "englishName": "Fresh Green Lime",
+      "cutterId": "custom",
+      "cutterPrompt": "Brushed titanium santoku knife with coral handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Sage green pastel Venetian terrazzo stone slab",
+      "envId": "custom",
+      "envPrompt": "Soft sky blue Scandinavian tile studio",
+      "conceptSummary": "Fresh Green Lime [polyhaven:food_lime_01 | interior=citrus-lime] | blade=Brushed titanium santoku knife with coral handle | board=Sage green pastel Venetian terrazzo stone slab | studio=Soft sky blue Scandinavian tile studio",
+      "rounds": [
+        10,
+        100,
+        500,
+        1000
+      ],
+      "maxCubes": 19785245,
+      "durationSec": 34.3,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-fresh-green-lime-soft-sky-blue-scandinavian-tile--2026-11-23T22-10-51.mp4",
+      "caption": "Slicing a Fresh Green Lime 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-23T22:39:52.084Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869049052684267",
+        "mediaId": "17913981018576253",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869049052684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "2024671261562975",
+          "postId": "122100972417557835"
+        },
+        "caption": "Slicing a Fresh Green Lime 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
