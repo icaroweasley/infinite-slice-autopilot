@@ -27,10 +27,10 @@ window.SITE_CONFIG = {
       badge: 'LAUNCH OFFER — 63% OFF',
     },
     pt: {
-      currency: 'R$ ',
-      price: '97',
-      compareAt: 'R$ 247',
-      badge: 'OFERTA DE LANÇAMENTO — 60% OFF',
+      currency: 'US$\u00A0',
+      price: '29',
+      compareAt: 'US$\u00A079',
+      badge: 'OFERTA DE LANÇAMENTO — 63% OFF',
     },
   },
 };

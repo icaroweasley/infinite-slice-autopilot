@@ -1,274 +1,368 @@
 const COPY = {
   en: {
-    navDemo: 'Live Demo',
-    navFeatures: 'Features',
+    navExamples: 'Watch Examples',
+    navCompare: 'Why It Works',
+    navDemo: 'Try Builder',
     navPricing: 'Pricing',
     navFaq: 'FAQ',
-    navCta: 'Get Access',
-    eyebrow: 'AS SEEN ON @ATOMSLICE3D • CLAUDE CODE & ANTIGRAVITY SKILL',
-    heroTitle1: 'Create Viral',
-    heroTitleGrad: '10 → 1,000 Cuts',
-    heroTitle2: '3D Slicing Videos in 1 Click.',
+    navCta: 'Start Creating →',
+
+    eyebrow: 'AS SEEN ON @ATOMSLICE3D • 60,000+ VIEWS IN 48 HOURS',
+    heroTitle1: 'Turn Any Crazy Idea Into Hypnotic',
+    heroTitleGrad: '3D Slicing Videos',
+    heroTitle2: '— In 60 Seconds.',
     heroLead:
-      'Type any impossible object, blade, cutting board & studio — or click AI Random. Export silky 60 FPS vertical 9:16 MP4 videos with synced 48kHz ASMR. Zero Blender, zero monthly credits.',
-    heroBtnPrimary: 'Get Instant Access — $29',
-    heroBtnSecondary: 'Try Interactive Builder ↓',
-    trust1: '⚡ Instant .zip Download',
-    trust2: '🎬 60 FPS MP4 + 48kHz ASMR',
-    trust3: '💰 Commercial Rights Included',
-    badgeLeftTop: '37,152,406',
-    badgeLeftSub: 'Micro-Cubes & Dust Physics',
-    badgeRightTop: '1-Click MP4',
+      'Create the ultra-satisfying 10 → 1,000 cuts videos people watch on repeat — with tingly ASMR sound already synced. No camera. No face on screen. No Blender. Zero monthly subscriptions.',
+    heroBtnSecondary: '▶ Watch Live Examples',
+    heroMicro: 'One-time payment • Instant download • Own it forever (zero monthly credits)',
+    trust1: '⚡ Ready in 3 Minutes',
+    trust2: '🔊 Built-In Tingly ASMR',
+    trust3: '🎭 100% Faceless Friendly',
+    trust4: '💰 Keep 100% of Ad Revenue',
+    badgeLeftTop: '15,818,224 CUBES',
+    badgeLeftSub: '"Wait... is it CAKE?!" 🌈',
+    badgeRightTop: '1-Click Export',
     badgeRightSub: 'Reels • TikTok • Shorts Ready',
 
-    shotsTag: 'REAL 3D ENGINE OUTPUT — ZERO BLENDER',
-    shotsTitle: 'True 3D Curved Slicing at 10 Cuts. Granular Avalanche at 1,000.',
-    shotsSub:
-      'Built from scratch in WebGL2 + Rapier3D WASM so low cuts preserve exact curved shapes and high cuts explode into realistic speckled powder.',
-    shot1Pill: 'TRUE 3D SILHOUETTE SLICING',
-    shot1Title: 'Curved Burger × Chef Knife',
-    shot1Desc: 'Round sesame buns, lettuce, tomato & patty keep exact curved 3D silhouettes at 10 cuts before exploding into 1,000-cut dust.',
-    shot2Pill: 'HOLLOW INTERIOR × 1000°C BLADE',
-    shot2Title: 'Amethyst Geode × Glowing Knife',
-    shot2Desc: 'True hollow crystal cavities sliced by a 1000°C molten red-hot blade on black & gold obsidian marble with softbox reflections.',
-    shot3Pill: 'LIGHTSABER × 37M+ MICRO-GRAINS',
-    shot3Title: 'Rubik\'s Cube × Plasma Lightsaber',
-    shot3Desc: 'Minimalist white glass lab, cyan plasma blade, 12-blade supersonic blur & speckled rainbow micro-cubes above the Reels Safe Zone.',
+    stat1: 'Organic views in our first 48h from 0 followers',
+    stat2: 'Ready-to-slice real 3D objects included',
+    stat3: 'From picking an idea to ready-to-post video',
+    stat4: 'Pay once — unlimited videos forever',
 
-    pgTag: 'INTERACTIVE CREATOR STUDIO PREVIEW',
-    pgTitle: 'Feel How Easy Your Workflow Becomes',
-    pgSub: 'Inside the included Creator Studio UI, pick your 4 ingredients (or hit AI Random) and click Render MP4.',
-    pgObj: '1. Object to Slice (or AI invents any object)',
-    pgCutter: '2. Blade / Cutting Tool',
-    pgSurface: '3. Cutting Surface',
-    pgEnv: '4. Studio Environment',
-    pgRounds: '5. Custom Cut Rounds',
-    pgRandomBtn: '🎲 AI Surprise Me',
-    pgOutHeader: '● READY TO RENDER 9:16 MP4',
+    shotsTag: 'REAL VIDEOS MADE WITH INFINITE SLICE 3D',
+    shotsTitle: 'People Literally Can’t Scroll Past These Reveals.',
+    shotsSub:
+      'Every object looks real on the outside — then splits open to reveal mind-blowing solid interiors before dissolving into millions of micro-cubes. Tap any video for sound!',
+    shot1Pill: '30M+ CUBES • GOLD & RUBIES',
+    shot1Title: 'Pirate Treasure Chest × 1,000°C Blade',
+    shot1Desc:
+      'Watch a wooden pirate chest split open into gleaming 24k gold coins, rubies & sapphires — then melt into 30 million sparkling grains.',
+    shot2Pill: 'FORBIDDEN TECH REVEAL',
+    shot2Title: 'Vintage Camera × Ice Lightsaber',
+    shot2Desc:
+      'Nothing stops thumbs faster than a classic luxury camera getting sliced clean open into glowing emerald circuit boards & gold micro-chips.',
+    shot3Pill: 'HYPNOTIC CRYSTAL ASMR',
+    shot3Title: 'Crystal Skull × Rose Katana',
+    shot3Desc:
+      'Crisp crystal slicing audio synced to every single cut keeps viewers rewatching 2–3× with headphones on — skyrocketing watch-time.',
+
+    cmpTag: 'WHY CREATORS ARE SWITCHING',
+    cmpTitle: 'Stop Paying $99/Month for Blurry 5-Second AI Clips.',
+    cmpSub:
+      'Other AI video tools melt your objects into weird soup, have zero ASMR audio, and drain your wallet every month. Here’s the difference:',
+    cmp1Title: 'Learning 3D (Blender)',
+    cmp1Cost: '6+ Months + $2,000 PC',
+    cmp1L1: '❌ Brutal learning curve for beginners',
+    cmp1L2: '❌ 6 to 10 hours to animate 1 video',
+    cmp1L3: '❌ Have to hunt & sync ASMR sounds manually',
+    cmp1L4: '❌ Crashes regular laptops',
+    cmp2Title: 'AI Video Subscriptions',
+    cmp2Cost: '$30 – $99 EVERY Month',
+    cmp2L1: '❌ Only 5–10 second blurry clips',
+    cmp2L2: '❌ Objects warp, morph & glitch mid-cut',
+    cmp2L3: '❌ Silent — no crisp real-time ASMR sound',
+    cmp2L4: '❌ Monthly credits vanish when you experiment',
+    cmpWinBadge: '★ SMARTEST CREATOR CHOICE',
+    cmp3Title: 'Infinite Slice 3D Studio',
+    cmp3L1: '✅ Ready in 3 minutes — zero 3D skills needed',
+    cmp3L2: '✅ Full 35-second silky 60 FPS vertical videos',
+    cmp3L3: '✅ Real solid 3D cuts + built-in tingly ASMR',
+    cmp3L4: '✅ 8,700+ sliceable objects + your own @handle',
+    cmp3L5: '✅ Zero subscriptions — render 10 or 10,000 videos',
+
+    whoTag: 'MADE FOR REAL CREATORS',
+    whoTitle: 'Who Is Using Infinite Slice 3D Right Now?',
+    who1T: 'Faceless Page Builders',
+    who1D: 'Grow Instagram Reels, TikTok & YouTube Shorts pages without ever showing your face or recording your voice.',
+    who2T: 'Side-Hustlers & Monetizers',
+    who2D: 'Build high-retention channels for TikTok Creativity, YouTube Shorts revenue, affiliate links & digital products.',
+    who3T: 'Viral Comment Engagement',
+    who3D: 'Ask followers “What should I slice next?” — then slice Mario, a Rubber Duck, or a Treasure Chest in 60 seconds.',
+    who4T: 'Freelancers & Agencies',
+    who4D: 'Create scroll-stopping 3D product hooks for brands & clients — a single client pays for this studio 10× over.',
+
+    pgTag: 'TRY IT RIGHT NOW',
+    pgTitle: 'Design Your Very First Viral Video Idea',
+    pgSub: 'Put your own @handle in, pick any crazy combo below, and see how effortless your new 60-second workflow feels.',
+    pgHandleLabel: 'Your Channel @Handle (appears on your video)',
+    pgObj: '1. Pick Any Object (8,700+ inside!)',
+    pgCutter: '2. Choose Your Blade',
+    pgSurface: '3. Choose Cutting Board',
+    pgEnv: '4. Choose Studio Vibe',
+    pgRandomBtn: '🎲 Surprise Me With a Viral Combo',
+    pgOutHeader: '● YOUR VIDEO PREVIEW',
     pgSumObj: 'Object',
-    pgSumCutter: 'Cutter',
+    pgSumCutter: 'Blade',
     pgSumSurface: 'Board',
     pgSumEnv: 'Studio',
-    pgSumRounds: 'Rounds',
-    pgEstLabel: 'Estimated Final Count',
-    pgBuyBtn: 'Unlock Full 3D Studio & Render Unlimited →',
+    pgSumAudio: 'Sound',
+    pgAudioVal: 'Crisp Synced ASMR 🔊',
+    pgEstLabel: 'Final Viral Cube Explosion',
+    pgBuyBtn: 'Make This Video Now — Unlock Studio →',
 
-    stepsTag: 'HOW IT WORKS',
-    stepsTitle: 'From Zero to Your First Viral Reel in 3 Minutes',
-    stepsSub: 'No 3D modeling, no keyframes, no video editor, no cloud rendering bills.',
-    step1Title: 'Install the Skill in 1 Command',
-    step1Desc: 'Unzip your download and run `npm install && npm run install-skill`. Auto-connects to Claude Code and Google Antigravity.',
-    step2Title: 'Type Any Idea or Hit AI Random',
-    step2Desc: 'Use 10 built-in volumetric objects or let your AI write bespoke 3D objects, custom knives, boards & studios on demand.',
-    step3Title: 'Click Render MP4 & Post',
-    step3Desc: 'Headless Playwright + FFmpeg exports a crisp H.264 MP4 with synced 48kHz stereo ASMR and your @handle ready for Reels, TikTok & Shorts.',
+    stepsTag: 'SO SIMPLE ANYONE CAN DO IT',
+    stepsTitle: 'From Download to Your First Posted Reel in 3 Steps',
+    stepsSub: 'If you can click a button, you can make studio-grade 3D slicing videos tonight.',
+    step1Title: 'Open Your Studio (2-Min Guide)',
+    step1Desc: 'Download your instant package and follow our illustrated step-by-step quick-start guide. Runs smoothly on any normal Windows or Mac laptop.',
+    step2Title: 'Pick Any Object or Type a Wild Idea',
+    step2Desc: 'Choose from 8,700+ ready-to-slice 3D objects — Rubber Duck, Treasure Chest, Mario, Vintage Camera, Croissant — or let the AI invent something brand new.',
+    step3Title: 'Click Export & Watch Views Roll In',
+    step3Desc: 'Get a silky 60 FPS vertical video with synced ASMR sound and your own @handle, ready to upload straight to Instagram Reels, TikTok & YouTube Shorts.',
 
-    featTag: 'WHAT IS INSIDE THE DOWNLOAD',
-    featTitle: 'A Complete Viral 3D Production Studio On Your Computer',
-    feat1T: 'True Silhouette + 3-Tier Physics',
-    feat1D: 'Exact 3D curved slices at 10–25 cuts, dynamic Rapier3D physics at 50 cuts, and 130,000-grain micro-sand avalanches at 1,000 cuts.',
-    feat2T: '48 kHz Procedural ASMR Synth',
-    feat2D: 'Every blade whoosh, crisp slice, wood/glass/stone/ice impact, and supersonic cascade is synthesized sample-accurately to the millisecond.',
-    feat3T: 'Reels / TikTok / Shorts Safe-Zone HUD',
-    feat3D: 'Dynamic CUTS & CUBES counters automatically positioned clear of platform captions and buttons, with your own custom @handle.',
-    feat4T: '4 Bespoke AI Codegen Slots',
-    feat4D: 'Your AI (Claude Code or Antigravity) can invent brand-new 3D objects, blades, cutting boards & studio rooms with anti-repetition memory.',
-    feat5T: '100% Local — Zero Subscriptions',
-    feat5D: 'Pay once, render unlimited HD 9:16 videos locally on Windows or Mac. No monthly SaaS credits, no watermarks from us.',
-    feat6T: 'Full Commercial License',
-    feat6D: 'Keep 100% of ad revenue, Creator Fund payouts, sponsorships, and client fees from every video you generate.',
+    priceTag: 'LIMITED LAUNCH OFFER',
+    priceTitle: 'Pay Once. Create Unlimited Viral Videos Forever.',
+    priceSub: 'Less than ONE month of an AI video subscription — except you own Infinite Slice 3D for life.',
+    priceName: 'Infinite Slice 3D — Complete Creator Studio',
+    priceOneTime: '✓ One-time payment • ✓ Lifetime access • ✓ Zero monthly fees',
+    chk1: '🎬 1-Click Visual 3D Slicing Studio (Windows & Mac)',
+    val1: '$99 value',
+    chk2: '🦆 8,700+ Ready-to-Slice 3D Objects + “Slice Anything” AI Mode',
+    val2: '$79 value',
+    chk3: '🔊 Built-In Tingly ASMR Sound Studio (Synced Automatically)',
+    val3: '$49 value',
+    chk4: '✨ Custom Blades, Epoxy Boards, Pastel Studios & Your Own @Handle',
+    val4: '$39 value',
+    chk5: '💰 100% Commercial & Monetization License (Keep All Earnings)',
+    val5: '$89 value',
+    chk6: '📖 Beginner-Friendly Illustrated Quick-Start Guide',
+    val6: 'FREE',
+    guarantee: '🔒 Safe encrypted checkout via Gumroad • Instant automatic download • Zero subscriptions, zero watermarks from us',
 
-    priceTag: 'SIMPLE ONE-TIME PRICING',
-    priceTitle: 'Own the Entire 3D Slicing Studio Forever',
-    priceSub: 'One viral video pays for this tool 50x over. Zero recurring fees.',
-    priceName: 'Infinite Slice 3D — Creator Edition',
-    priceOneTime: 'One-time payment • Lifetime access • Instant .zip download',
-    chk1: 'Visual Creator Studio 3D UI (Browser-based, 1-click MP4 export)',
-    chk2: 'Official Claude Code & Google Antigravity Skill (SKILL.md + 4 AI Slots)',
-    chk3: '10 Built-in Volumetric Objects + Free-Text Prompt 3D Generator',
-    chk4: '9 Cutters, 10 Cutting Surfaces & 8 Studio Environments + Custom AI Slots',
-    chk5: 'Deterministic 60 FPS H.264 MP4 + 48 kHz Stereo ASMR Audio Engine',
-    chk6: '4-Page Illustrated Quick-Start PDF Manual + Full Commercial Rights',
-    buyMainCta: 'Get Instant Access Now →',
-    guarantee: '🔒 Secure checkout • Instant automatic .zip delivery • Works on Windows & macOS',
+    faqTag: 'HONEST ANSWERS',
+    faqTitle: 'Questions Before You Start?',
+    faq1Q: 'I’ve never used 3D software in my life — can I really make these?',
+    faq1A: '100% yes! That’s the whole point. Zero Blender, zero modeling, zero video editing. You simply pick your object, blade, board & studio in a clean visual screen and click Export. Our illustrated starter guide walks you through everything in under 5 minutes.',
+    faq2Q: 'Do I need an expensive gaming PC or Mac Pro?',
+    faq2A: 'Nope! Any everyday Windows or Mac laptop works great. Because the studio exports each frame cleanly one by one, your finished video is ALWAYS silky smooth 60 FPS with zero lag or dropped frames.',
+    faq3Q: 'Will my videos look identical to everyone else’s?',
+    faq3A: 'Never! You get access to 8,700+ sliceable 3D models plus custom AI creation, dozens of blades, epoxy/marble/checkerboard boards, colorful studio rooms, custom surprise interiors (cake, gold coins, crystals, circuit boards) AND your own @handle watermark.',
+    faq4Q: 'Can I monetize these videos on TikTok, Instagram Reels & YouTube Shorts?',
+    faq4A: 'Yes! Full commercial rights are included. You keep 100% of ad revenue, Creator Fund payouts, sponsorships, affiliate sales, and client work — with zero watermarks from us.',
+    faq5Q: 'Is there ANY monthly subscription or hidden render credit?',
+    faq5A: 'Zero! You pay once and run everything right on your own computer. Make 5 videos or 5,000 videos — you will never pay us another dollar.',
+    faq6Q: 'How fast do I receive everything after buying?',
+    faq6A: 'Immediately! The second your checkout finishes, you receive your instant download link and illustrated starter guide by email and on screen.',
 
-    faqTag: 'QUESTIONS & ANSWERS',
-    faqTitle: 'Frequently Asked Questions',
-    faq1Q: 'Do I need Blender, Cinema 4D, or any 3D skills?',
-    faq1A: 'Zero 3D skills needed. Everything runs inside an interactive visual Creator Studio UI and connects directly to Claude Code or Google Antigravity.',
-    faq2Q: 'What computer specs do I need?',
-    faq2A: 'Any standard Windows or Mac computer with Node.js 18+ and FFmpeg installed. No expensive RTX GPU is required — rendering is deterministic frame-by-frame so exports never drop frames.',
-    faq3Q: 'Can I monetize the videos on TikTok, Instagram Reels & YouTube Shorts?',
-    faq3A: 'Yes! You receive 100% commercial rights to every video you render, including your own custom @handle watermark on screen.',
-    faq4Q: 'Is there any monthly subscription or render credit limit?',
-    faq4A: 'Never. It is a single one-time purchase. You run it locally on your own machine and render as many videos as you want forever.',
-    faq5Q: 'How do I receive the files after purchasing?',
-    faq5A: 'Immediately after payment confirmation, you get an instant download link for `infinite-slice-skill-buyer-edition.zip` plus the quick-start README.',
+    closeTitle: 'Your Next Viral Video Is 60 Seconds Away.',
+    closeSub: 'Stop watching other faceless pages rack up millions of views while you’re stuck overthinking. Grab Infinite Slice 3D once and start posting tonight.',
+
+    mobileStickySub: 'Unlimited 3D Videos • No Monthly Fee',
+    mobileStickyBtn: 'Get Access →',
 
     modalTitle: 'Checkout Link Setup Pending',
-    modalDesc: 'Owner note: Paste your Gumroad, Lemon Squeezy, Stripe, or Kiwify checkout link inside `sales-site/checkout-config.js` so this button sends buyers straight to instant payment + automatic .zip delivery!',
+    modalDesc: 'Owner note: Paste your Gumroad, Lemon Squeezy, Stripe, or Kiwify checkout link inside sales-site/checkout-config.js!',
     modalClose: 'Close',
   },
 
   pt: {
-    navDemo: 'Demonstração',
-    navFeatures: 'Recursos',
-    navPricing: 'Preço',
+    navExamples: 'Ver Exemplos',
+    navCompare: 'Por Que Funciona',
+    navDemo: 'Testar Studio',
+    navPricing: 'Oferta',
     navFaq: 'Dúvidas',
-    navCta: 'Garantir Acesso',
-    eyebrow: 'VISTO NO @ATOMSLICE3D • SKILL PARA CLAUDE CODE & ANTIGRAVITY',
-    heroTitle1: 'Crie Vídeos Virais de',
-    heroTitleGrad: '10 → 1.000 Cortes',
-    heroTitle2: 'em 3D com Apenas 1 Clique.',
+    navCta: 'Quero Criar →',
+
+    eyebrow: 'VISTO NO @ATOMSLICE3D • +60.000 VIEWS EM 48 HORAS',
+    heroTitle1: 'Transforme Qualquer Ideia em Vídeos Virais de',
+    heroTitleGrad: 'Corte 3D Hipnotizantes',
+    heroTitle2: '— Em 60 Segundos.',
     heroLead:
-      'Escreva qualquer objeto impossível, faca, tábua e ambiente — ou clique em Aleatório (IA). Exporte MP4 9:16 em 60 FPS com áudio ASMR 48kHz sincronizado. Sem Blender, sem mensalidade.',
-    heroBtnPrimary: 'Garantir Acesso Imediato — R$ 97',
-    heroBtnSecondary: 'Testar Simulador do Studio ↓',
-    trust1: '⚡ Download .zip Imediato',
-    trust2: '🎬 MP4 60 FPS + ASMR 48kHz',
-    trust3: '💰 Licença Comercial Inclusa',
-    badgeLeftTop: '37.152.406',
-    badgeLeftSub: 'Física Real de Micro-Cubos',
-    badgeRightTop: 'MP4 em 1 Clique',
-    badgeRightSub: 'Pronto p/ Reels, TikTok e Shorts',
+      'Crie aqueles vídeos super satisfatórios de 10 → 1.000 cortes que ninguém consegue parar de assistir — já com som ASMR relaxante sincronizado. Sem câmera. Sem aparecer. Sem Blender. Sem mensalidade.',
+    heroBtnSecondary: '▶ Assistir Exemplos Reais',
+    heroMicro: 'Pagamento único • Download imediato • Seu para sempre (zero créditos mensais)',
+    trust1: '⚡ Pronto em 3 Minutos',
+    trust2: '🔊 Som ASMR Incluso',
+    trust3: '🎭 100% Sem Aparecer (Dark)',
+    trust4: '💰 100% dos Lucros São Seus',
+    badgeLeftTop: '15.818.224 CUBOS',
+    badgeLeftSub: '"Pera... é BOLO?!" 🌈',
+    badgeRightTop: '1 Clique e Pronto',
+    badgeRightSub: 'Reels • TikTok • Shorts',
 
-    shotsTag: 'RESULTADO REAL DO MOTOR 3D — ZERO BLENDER',
-    shotsTitle: 'Silhueta Curva Real nos 10 Cortes. Avalanche Granular nos 1.000.',
+    stat1: 'Views orgânicas nas primeiras 48h saindo do zero',
+    stat2: 'Objetos 3D reais prontos para fatiar inclusos',
+    stat3: 'Da escolha da ideia ao vídeo pronto para postar',
+    stat4: 'Pague 1 vez — crie vídeos ilimitados para sempre',
+
+    shotsTag: 'VÍDEOS REAIS FEITOS COM O INFINITE SLICE 3D',
+    shotsTitle: 'É Impossível Rolar o Feed Sem Assistir Até o Final.',
     shotsSub:
-      'Desenvolvido em WebGL2 + Rapier3D WASM para manter o formato real dos objetos nos primeiros cortes e explodir em areia realista no clímax.',
-    shot1Pill: 'CORTE REAL EM SILHUETA 3D',
-    shot1Title: 'Objetos Redondos Continuam Redondos',
-    shot1Desc: 'Hambúrgueres, abacates, relógios e geodos mantêm bordas curvas reais e interior nítido pixel a pixel — nada de quadradão artificial.',
-    shot2Pill: 'ILUMINAÇÃO DE ESTÚDIO SOFTBOX',
-    shot2Title: 'Lâminas, Tábuas e Cenários Únicos',
-    shot2Desc: 'Katanas de damasco, facas a 1000°C, sabres de luz, tábuas de resina epóxi e reflexos metálicos realistas.',
-    shot3Pill: '30M+ MICRO-GRÃOS',
-    shot3Title: 'Final Supersônico de 1.000 Cortes',
-    shot3Desc: 'Efeito motion-blur de 12 lâminas + 130.000 grãos iluminados + HUD posicionado acima da legenda do Reels/TikTok.',
+      'Cada objeto parece real por fora — e se abre revelando interiores sólidos surpreendentes antes de virar milhões de micro-cubos. Clique no som para ouvir o ASMR!',
+    shot1Pill: '30M+ CUBOS • OURO & RUBIS',
+    shot1Title: 'Baú do Tesouro × Faca 1.000°C',
+    shot1Desc:
+      'Veja um baú pirata realista se abrir em moedas de ouro 24k, rubis e safiras — até derreter em 30 milhões de grãos brilhantes.',
+    shot2Pill: 'REVELAÇÃO TECH PROIBIDA',
+    shot2Title: 'Câmera Vintage × Sabre de Gelo',
+    shot2Desc:
+      'Nada trava mais o dedo no feed do que uma câmera clássica de luxo sendo fatiada ao meio revelando placas eletrônicas verdes e ouro.',
+    shot3Pill: 'ASMR DE CRISTAL HIPNÓTICO',
+    shot3Title: 'Crânio de Cristal × Katana Rosa',
+    shot3Desc:
+      'Cada som crocante de corte e avalanche de cristais é sincronizado automaticamente — fazendo as pessoas assistirem 2 a 3 vezes seguidas.',
 
-    pgTag: 'PRÉVIA INTERATIVA DO CREATOR STUDIO',
-    pgTitle: 'Veja Como é Simples Montar Seu Vídeo',
-    pgSub: 'Dentro da interface inclusa no pacote, escolha os 4 elementos (ou clique em Aleatório pela IA) e aperte Renderizar MP4.',
-    pgObj: '1. Objeto a ser cortado (ou a IA inventa)',
-    pgCutter: '2. Faca ou Objeto Cortador',
-    pgSurface: '3. Tábua / Superfície de Corte',
-    pgEnv: '4. Ambiente / Estúdio',
-    pgRounds: '5. Rodadas de Cortes',
-    pgRandomBtn: '🎲 Surpreender com IA',
-    pgOutHeader: '● PRONTO PARA RENDERIZAR MP4 9:16',
+    cmpTag: 'POR QUE CRIADORES ESTÃO MIGRANDO',
+    cmpTitle: 'Chega de Pagar Mensalidade Cara em Vídeos Borrados de 5 Segundos.',
+    cmpSub:
+      'Outros apps de IA derretem os objetos de forma estranha, vêm mudos sem ASMR e cobram mensalidade todo mês. Olha a diferença:',
+    cmp1Title: 'Aprender 3D (Blender)',
+    cmp1Cost: '6+ Meses + PC de R$ 10.000',
+    cmp1L1: '❌ Curva de aprendizado brutal para iniciantes',
+    cmp1L2: '❌ 6 a 10 horas para animar 1 único vídeo',
+    cmp1L3: '❌ Precisa caçar e editar sons ASMR na mão',
+    cmp1L4: '❌ Trava em notebooks comuns',
+    cmp2Title: 'Assinaturas de Vídeo IA',
+    cmp2Cost: 'R$ 150 – R$ 500 TODO Mês',
+    cmp2L1: '❌ Clipes curtos e borrados de só 5 segundos',
+    cmp2L2: '❌ Objetos derretem e bugam no meio do corte',
+    cmp2L3: '❌ Sem som ASMR real sincronizado',
+    cmp2L4: '❌ Seus créditos acabam na hora de testar',
+    cmpWinBadge: '★ MELHOR ESCOLHA PARA CRIADORES',
+    cmp3Title: 'Infinite Slice 3D Studio',
+    cmp3L1: '✅ Pronto em 3 minutos — zero experiência em 3D',
+    cmp3L2: '✅ Vídeos completos de 35s fluidos em 60 FPS',
+    cmp3L3: '✅ Cortes 3D sólidos + som ASMR relaxante incluso',
+    cmp3L4: '✅ +8.700 objetos fatiáveis + seu próprio @arroba',
+    cmp3L5: '✅ Zero mensalidade — faça 10 ou 10.000 vídeos',
+
+    whoTag: 'FEITO PARA QUEM QUER RESULTADO',
+    whoTitle: 'Quem Está Usando o Infinite Slice 3D Hoje?',
+    who1T: 'Canais Dark (Sem Aparecer)',
+    who1D: 'Cresça perfis no Instagram Reels, TikTok e YouTube Shorts sem nunca mostrar o rosto nem gravar voz.',
+    who2T: 'Renda Extra & Monetização',
+    who2D: 'Crie canais de altíssima retenção para monetização do TikTok, YouTube Shorts, afiliados e produtos digitais.',
+    who3T: 'Engajamento nos Comentários',
+    who3D: 'Pergunte "O que devo cortar agora?" — e fatie o Mario, um Pato de Borracha ou um Baú do Tesouro em 60 segundos.',
+    who4T: 'Freelancers & Agências',
+    who4D: 'Crie anúncios 3D impossíveis de ignorar para clientes e marcas — um único trabalho paga o estúdio 10×.',
+
+    pgTag: 'TESTE AGORA MESMO',
+    pgTitle: 'Monte a Ideia do Seu Primeiro Vídeo Viral',
+    pgSub: 'Coloque seu próprio @arroba, escolha qualquer combinação maluca abaixo e sinta como é fácil criar em 60 segundos.',
+    pgHandleLabel: 'Seu @Arroba (aparece no seu vídeo)',
+    pgObj: '1. Escolha Qualquer Objeto (+8.700 dentro!)',
+    pgCutter: '2. Escolha Sua Lâmina',
+    pgSurface: '3. Escolha a Tábua de Corte',
+    pgEnv: '4. Escolha o Estilo do Estúdio',
+    pgRandomBtn: '🎲 Me Surpreender Com Uma Combinação Viral',
+    pgOutHeader: '● PRÉVIA DO SEU VÍDEO',
     pgSumObj: 'Objeto',
-    pgSumCutter: 'Cortador',
+    pgSumCutter: 'Lâmina',
     pgSumSurface: 'Tábua',
-    pgSumEnv: 'Ambiente',
-    pgSumRounds: 'Cortes',
-    pgEstLabel: 'Contagem Final Estimada',
-    pgBuyBtn: 'Desbloquear Studio 3D Completo e Renderizar Ilimitado →',
+    pgSumEnv: 'Estúdio',
+    pgSumAudio: 'Áudio',
+    pgAudioVal: 'ASMR Sincronizado 🔊',
+    pgEstLabel: 'Explosão Final Estimada',
+    pgBuyBtn: 'Fazer Esse Vídeo Agora — Liberar Estúdio →',
 
-    stepsTag: 'COMO FUNCIONA',
-    stepsTitle: 'Do Zero ao Seu Primeiro Reel Viral em 3 Minutos',
-    stepsSub: 'Sem modelagem 3D, sem keyframes, sem editor de vídeo e sem pagar créditos de nuvem.',
-    step1Title: 'Instale a Skill em 1 Comando',
-    step1Desc: 'Descompacte o .zip e rode `npm install && npm run install-skill`. Instala automaticamente no Claude Code e no Google Antigravity.',
-    step2Title: 'Escreva Qualquer Ideia ou Use a IA',
-    step2Desc: 'Use 10 objetos volumétricos prontos ou peça para sua IA criar objetos, facas, tábuas e estúdios 100% inéditos sob demanda.',
-    step3Title: 'Clique em Renderizar MP4 e Poste',
-    step3Desc: 'Playwright + FFmpeg exportam um MP4 H.264 nítido com áudio ASMR 48kHz e o seu @arroba prontinho para Reels, TikTok e Shorts.',
+    stepsTag: 'TÃO SIMPLES QUE QUALQUER PESSOA FAZ',
+    stepsTitle: 'Do Download ao Seu Primeiro Reel Postado em 3 Passos',
+    stepsSub: 'Se você sabe clicar em um botão, você já consegue postar vídeos 3D nível estúdio hoje à noite.',
+    step1Title: 'Abra Seu Estúdio (Guia de 2 Min)',
+    step1Desc: 'Baixe seu pacote na hora e siga o manual ilustrado passo a passo. Funciona liso em qualquer notebook Windows ou Mac comum.',
+    step2Title: 'Escolha Qualquer Objeto ou Digite Uma Ideia',
+    step2Desc: 'Escolha entre +8.700 objetos 3D reais prontos — Pato de Borracha, Baú do Tesouro, Mario, Câmera Vintage, Croissant — ou deixe a IA inventar do zero.',
+    step3Title: 'Clique em Exportar e Poste em Todo Lugar',
+    step3Desc: 'Receba um vídeo vertical em 60 FPS com áudio ASMR sincronizado e seu próprio @arroba prontinho para Instagram Reels, TikTok e YouTube Shorts.',
 
-    featTag: 'TUDO O QUE VEM NO DOWNLOAD',
-    featTitle: 'Um Estúdio 3D Viral Completo Rodando no Seu PC',
-    feat1T: 'Silhueta Real + Física em 3 Níveis',
-    feat1D: 'Fatias curvas fiéis em 10–25 cortes, blocos físicos Rapier3D em 50 cortes e avalanches de 130.000 micro-grãos em 1.000 cortes.',
-    feat2T: 'Sintetizador ASMR 48 kHz',
-    feat2D: 'Cada corte, impacto na madeira/vidro/pedra/gelo e cascata supersônica é sintetizado com precisão de milissegundo.',
-    feat3T: 'HUD na Safe Zone do Reels e TikTok',
-    feat3D: 'Contadores CUTS e CUBES acima da legenda e longe dos botões laterais, com o seu próprio @arroba.',
-    feat4T: '4 Slots Exclusivos para a IA Criar',
-    feat4D: 'Sua IA (Claude Code ou Antigravity) cria objetos, lâminas, tábuas e estúdios infinitos com histórico anti-repetição.',
-    feat5T: '100% Local — Zero Mensalidades',
-    feat5D: 'Pague uma única vez e gere quantos vídeos HD 9:16 quiser no Windows ou Mac. Sem créditos mensais e sem marca d’água nossa.',
-    feat6T: 'Licença Comercial Completa',
-    feat6D: 'Fique com 100% da monetização de anúncios, TikTok Creativity, YouTube Shorts, publis e vendas.',
+    priceTag: 'OFERTA ESPECIAL DE LANÇAMENTO',
+    priceTitle: 'Pague Uma Única Vez. Crie Vídeos Virais Para Sempre.',
+    priceSub: 'Mais barato que 1 único mês de qualquer app de IA — só que o Infinite Slice 3D é seu para a vida toda.',
+    priceName: 'Infinite Slice 3D — Estúdio Criador Completo',
+    priceOneTime: '✓ Pagamento único • ✓ Acesso vitalício • ✓ Zero mensalidades',
+    chk1: '🎬 Estúdio Visual 3D em 1 Clique (Windows e Mac)',
+    val1: 'Valor R$ 297',
+    chk2: '🦆 +8.700 Objetos 3D Prontos + Modo IA "Fatie Qualquer Coisa"',
+    val2: 'Valor R$ 197',
+    chk3: '🔊 Estúdio de Áudio ASMR Incluso (Sincronizado na Hora)',
+    val3: 'Valor R$ 147',
+    chk4: '✨ Lâminas, Tábuas de Resina, Estúdios Coloridos e Seu @Arroba',
+    val4: 'Valor R$ 97',
+    chk5: '💰 Licença Comercial 100% Liberada (Fique com Todo Lucro)',
+    val5: 'Valor R$ 247',
+    chk6: '📖 Manual Ilustrado Passo a Passo para Iniciantes',
+    val6: 'GRÁTIS',
+    guarantee: '🔒 Compra 100% segura • Entrega automática na hora • Zero mensalidade e zero marca d’água nossa',
 
-    priceTag: 'PAGAMENTO ÚNICO — SEM MENSALIDADE',
-    priceTitle: 'Tenha o Estúdio 3D Completo Para Sempre',
-    priceSub: 'Um único vídeo viral paga essa ferramenta dezenas de vezes. Acesso vitalício.',
-    priceName: 'Infinite Slice 3D — Edição Criador',
-    priceOneTime: 'Pagamento único • Acesso vitalício • Download .zip imediato',
-    chk1: 'Interface Visual Creator Studio 3D (1 clique para gerar MP4)',
-    chk2: 'Skill Oficial para Claude Code e Google Antigravity (SKILL.md + 4 Slots IA)',
-    chk3: '10 Objetos Volumétricos Prontos + Gerador 3D por Texto Livre',
-    chk4: '9 Cortadores, 10 Tábuas e 8 Estúdios + Slots Customizados por IA',
-    chk5: 'Renderizador Determinístico 60 FPS H.264 + Áudio ASMR Estéreo 48 kHz',
-    chk6: 'Direito Comercial Completo para Monetizar no Instagram, TikTok e YouTube',
-    buyMainCta: 'Garantir Acesso Imediato Agora →',
-    guarantee: '🔒 Pagamento seguro • Entrega automática do .zip na hora • Windows e macOS',
+    faqTag: 'RESPOSTAS SEM ENROLAÇÃO',
+    faqTitle: 'Ficou Com Alguma Dúvida?',
+    faq1Q: 'Nunca mexi com 3D na vida — consigo usar mesmo assim?',
+    faq1A: 'Com certeza! Esse é exatamente o objetivo. Zero Blender, zero modelagem e zero edição de vídeo. Você só escolhe objeto, lâmina, tábua e estúdio numa tela simples e clica em Exportar. Nosso guia ilustrado mostra cada clique em menos de 5 minutos.',
+    faq2Q: 'Preciso de um computador gamer caro?',
+    faq2A: 'Não! Qualquer notebook Windows ou Mac comum funciona perfeitamente. Como o estúdio salva quadro por quadro com precisão, seu vídeo final SEMPRE sai super fluido em 60 FPS sem travar.',
+    faq3Q: 'Meus vídeos vão ficar iguais aos de todo mundo?',
+    faq3A: 'Nunca! Você tem acesso a +8.700 objetos 3D reais, criação com IA, dezenas de lâminas, tábuas de resina/mármore/xadrez, estúdios coloridos, interiores surpresa (bolo arco-íris, ouro, cristais, placas eletrônicas) E o seu próprio @arroba.',
+    faq4Q: 'Posso monetizar no TikTok, Instagram Reels e YouTube Shorts?',
+    faq4A: 'Sim! Você recebe licença comercial total para monetizar, ganhar com visualizações, fazer publis, vender produtos na bio ou criar vídeos para clientes — sem nenhuma marca d’água nossa.',
+    faq5Q: 'Tem alguma mensalidade ou limite de vídeos?',
+    faq5A: 'Zero! Pagamento único. Roda no seu computador e você pode fazer 5 ou 5.000 vídeos sem nunca mais pagar nada.',
+    faq6Q: 'Em quanto tempo recebo o acesso após pagar?',
+    faq6A: 'Na hora! Assim que o pagamento confirma, o download imediato e o guia ilustrado chegam direto na tela e no seu e-mail.',
 
-    faqTag: 'PERGUNTAS FREQUENTES',
-    faqTitle: 'Tire Suas Dúvidas',
-    faq1Q: 'Preciso saber usar Blender ou programar 3D?',
-    faq1A: 'Não! Tudo funciona por uma interface visual simples no navegador e integrado ao Claude Code ou Google Antigravity.',
-    faq2Q: 'Preciso de um computador gamer caríssimo?',
-    faq2A: 'Não. Qualquer PC Windows ou Mac com Node.js 18+ e FFmpeg roda perfeitamente — o render é quadro a quadro, então nunca trava nem cai FPS no vídeo final.',
-    faq3Q: 'Posso monetizar os vídeos no Instagram, TikTok e YouTube?',
-    faq3A: 'Sim! Você tem licença comercial completa para monetizar, colocar seu próprio @arroba na tela e criar quantos canais quiser.',
-    faq4Q: 'Tem mensalidade ou limite de vídeos por mês?',
-    faq4A: 'Zero mensalidade e zero limites. Você paga uma única vez e renderiza vídeos ilimitados localmente para sempre.',
-    faq5Q: 'Como recebo o programa após o pagamento?',
-    faq5A: 'Assim que o pagamento confirma, você recebe imediatamente o link de download do `infinite-slice-skill-buyer-edition.zip` com manual passo a passo.',
+    closeTitle: 'Seu Próximo Vídeo Viral Está a 60 Segundos de Distância.',
+    closeSub: 'Pare de assistir outras páginas dark acumulando milhões de views enquanto você fica adiando. Garanta o Infinite Slice 3D uma única vez e comece a postar hoje.',
+
+    mobileStickySub: 'Vídeos 3D Ilimitados • Pagamento Único',
+    mobileStickyBtn: 'Garantir →',
 
     modalTitle: 'Configure Seu Link de Checkout',
-    modalDesc: 'Aviso para o dono: cole seu link da Kiwify, Gumroad, Lemon Squeezy ou Stripe dentro de `sales-site/checkout-config.js` para este botão levar o cliente direto ao pagamento + entrega automática do .zip!',
+    modalDesc: 'Aviso para o dono: cole seu link de checkout dentro de sales-site/checkout-config.js!',
     modalClose: 'Fechar',
   },
 };
 
 const PG_DATA = {
   objects: [
-    'Ripe Avocado (Wooden Pit)',
-    'Gourmet Cheeseburger',
-    'Rolex Gold Skeleton Watch',
-    'Obsidian Magma Volcano',
-    'Amethyst Crystal Geode',
-    'Rainbow Layer Cake',
+    { label: 'Yellow Rubber Duck (Rainbow Cake Inside 🌈)', cubes: 15818224 },
+    { label: 'Pirate Treasure Chest (24k Gold & Rubies 💎)', cubes: 30171672 },
+    { label: 'Vintage Leica Camera (Gold Circuit Boards 💚)', cubes: 15360783 },
+    { label: 'Super Mario Figure (Rainbow Cake Inside 🍄)', cubes: 8008234 },
+    { label: 'Flaky Golden Croissant (Molten Chocolate 🥐)', cubes: 11538707 },
+    { label: 'Anatomical Skull (Amethyst Crystal Geode 💜)', cubes: 15827626 },
   ],
   cutters: [
-    'Damascus Gold Katana',
-    '1000°C Red-Hot Knife',
-    'Purple Plasma Lightsaber',
     '24k Solid Gold Cleaver',
-    'Metallic Black Card',
+    '1,000°C Red-Hot Knife',
+    'Cyan Ice Lightsaber',
+    'Rose Crystal Katana',
+    'Japanese Chef Knife',
   ],
   surfaces: [
-    'Walnut & Turquoise Resin',
-    'White Carrara Marble',
-    'Obsidian Gold Marble',
-    'Tempered Glass LED',
-    'Arctic Ice Block',
+    'Walnut & Turquoise Epoxy River',
+    'Emerald Jade Gold Marble',
+    'Sky Blue Ceramic Checkerboard',
+    'Natural Japanese Bamboo',
+    'Deep Indigo Silver Marble',
   ],
   envs: [
-    'Luxury Gold Studio',
-    'Viral Tile Kitchen',
-    'Cyberpunk Neon Night',
-    'Minimalist White Lab',
-    'Warm Terracotta Sunset',
+    'Parisian Blush Patisserie',
+    'Sunny Amalfi Lemon Studio',
+    'Peach Coral Summer Tiles',
+    'Warm Japanese Fluted Wood',
+    'Dusty Lavender Atelier',
   ],
-  rounds: [10, 50, 100, 250, 500, 1000],
 };
 
 const state = {
   lang: 'en',
-  object: PG_DATA.objects[0],
-  cutter: PG_DATA.cutters[0],
-  surface: PG_DATA.surfaces[0],
-  env: PG_DATA.envs[0],
-  rounds: new Set([10, 50, 250, 1000]),
+  object: PG_DATA.objects[1],
+  cutter: PG_DATA.cutters[1],
+  surface: PG_DATA.surfaces[1],
+  env: PG_DATA.envs[1],
+  handle: '@yourchannel',
 };
+
+function formatPrice(p) {
+  return `${p.currency}${p.price}`;
+}
 
 function applyLanguage(lang) {
   state.lang = lang;
   const dict = COPY[lang] || COPY.en;
   const cfg = window.SITE_CONFIG || {};
-  const p = (cfg.pricing && cfg.pricing[lang]) || { currency: '$', price: '29', compareAt: '$79', badge: 'LAUNCH OFFER' };
+  const p = (cfg.pricing && cfg.pricing[lang]) || { currency: '$', price: '29', compareAt: '$79', badge: 'LAUNCH OFFER — 63% OFF' };
+  const priceStr = formatPrice(p);
 
   document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
   document.querySelectorAll('[data-i18n]').forEach((el) => {
@@ -280,13 +374,45 @@ function applyLanguage(lang) {
   const priceOld = document.getElementById('priceOld');
   const priceBadge = document.getElementById('priceBadge');
   const heroBtn = document.getElementById('heroBuyBtn');
-  if (priceNow) priceNow.textContent = `${p.currency}${p.price}`;
+  const mainBuyBtn = document.getElementById('mainBuyBtn');
+  const closeBuyBtn = document.getElementById('closeBuyBtn');
+  const cmpWinnerCost = document.getElementById('compareWinnerCost');
+  const mobileStickyPrice = document.getElementById('mobileStickyPrice');
+  const stackTotal = document.querySelector('.stack-total');
+  const statPrice = document.getElementById('statPrice');
+
+  if (priceNow) priceNow.textContent = priceStr;
   if (priceOld) priceOld.textContent = p.compareAt;
   if (priceBadge) priceBadge.textContent = p.badge;
+  if (statPrice) statPrice.textContent = lang === 'pt' ? 'R$ 0 / mês' : '$0 / mo';
+
   if (heroBtn) {
     heroBtn.textContent = lang === 'pt'
-      ? `Garantir Acesso Imediato — ${p.currency}${p.price}`
-      : `Get Instant Access — ${p.currency}${p.price}`;
+      ? `Criar Meu Primeiro Vídeo Viral — ${priceStr} →`
+      : `Create My First Viral Video — ${priceStr} →`;
+  }
+  if (mainBuyBtn) {
+    mainBuyBtn.textContent = lang === 'pt'
+      ? `SIM! Quero Acesso Imediato — ${priceStr} →`
+      : `YES! Give Me Instant Access — ${priceStr} →`;
+  }
+  if (closeBuyBtn) {
+    closeBuyBtn.textContent = lang === 'pt'
+      ? `Começar a Criar Vídeos Virais — ${priceStr} →`
+      : `Start Creating Viral 3D Videos — ${priceStr} →`;
+  }
+  if (cmpWinnerCost) {
+    cmpWinnerCost.textContent = lang === 'pt'
+      ? `${priceStr} ÚNICO — Ilimitado Para Sempre`
+      : `${priceStr} ONCE — Unlimited Forever`;
+  }
+  if (mobileStickyPrice) {
+    mobileStickyPrice.textContent = lang === 'pt' ? `${priceStr} Único` : `${priceStr} Once`;
+  }
+  if (stackTotal) {
+    stackTotal.innerHTML = lang === 'pt'
+      ? `Valor total: <s>R$ 985</s> → <span>Hoje por apenas ${priceStr} (pagamento único)</span>`
+      : `Total value: <s>$355</s> → <span>Yours today for just ${priceStr} once</span>`;
   }
 
   document.querySelectorAll('.lang-btn').forEach((btn) => {
@@ -294,24 +420,18 @@ function applyLanguage(lang) {
   });
 }
 
-function estimateCubes(maxCut) {
-  const n = Math.max(3, maxCut);
-  const a = Math.max(1, Math.round(n * 0.36));
-  const b = Math.max(1, Math.round(n * 0.30));
-  const c = Math.max(1, n - a - b);
-  return Math.round((a + 1) * (b + 1) * (c + 1) * 0.88);
-}
-
 function renderPlayground() {
-  const bindGroup = (id, list, currentKey) => {
+  const bindGroup = (id, list, currentKey, isObjList = false) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.innerHTML = '';
     list.forEach((item) => {
+      const label = isObjList ? item.label : item;
+      const active = isObjList ? state[currentKey].label === label : state[currentKey] === item;
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = `chip ${state[currentKey] === item ? 'active' : ''}`;
-      btn.textContent = item;
+      btn.className = `chip ${active ? 'active' : ''}`;
+      btn.textContent = label;
       btn.addEventListener('click', () => {
         state[currentKey] = item;
         renderPlayground();
@@ -320,36 +440,21 @@ function renderPlayground() {
     });
   };
 
-  bindGroup('pgObjects', PG_DATA.objects, 'object');
+  bindGroup('pgObjects', PG_DATA.objects, 'object', true);
   bindGroup('pgCutters', PG_DATA.cutters, 'cutter');
   bindGroup('pgSurfaces', PG_DATA.surfaces, 'surface');
   bindGroup('pgEnvs', PG_DATA.envs, 'env');
 
-  const rEl = document.getElementById('pgRounds');
-  if (rEl) {
-    rEl.innerHTML = '';
-    PG_DATA.rounds.forEach((num) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = `chip ${state.rounds.has(num) ? 'active' : ''}`;
-      btn.textContent = `${num.toLocaleString('en-US')} CUTS`;
-      btn.addEventListener('click', () => {
-        if (state.rounds.has(num) && state.rounds.size > 1) state.rounds.delete(num);
-        else state.rounds.add(num);
-        renderPlayground();
-      });
-      rEl.appendChild(btn);
-    });
-  }
-
-  const sorted = [...state.rounds].sort((a, b) => a - b);
-  const maxCut = sorted[sorted.length - 1] || 1000;
-  document.getElementById('outObj').textContent = state.object;
+  document.getElementById('outObj').textContent = state.object.label;
   document.getElementById('outCutter').textContent = state.cutter;
   document.getElementById('outSurface').textContent = state.surface;
   document.getElementById('outEnv').textContent = state.env;
-  document.getElementById('outRounds').textContent = sorted.join(' → ');
-  document.getElementById('outCubes').textContent = `${estimateCubes(maxCut).toLocaleString('en-US')} CUBES`;
+  document.getElementById('outCubes').textContent = `${state.object.cubes.toLocaleString('en-US')} CUBES`;
+  const badge = document.getElementById('outHandleBadge');
+  if (badge) {
+    const clean = (state.handle || '@yourchannel').trim();
+    badge.textContent = clean.startsWith('@') ? clean : '@' + clean;
+  }
 }
 
 function triggerCheckout() {
@@ -366,12 +471,24 @@ function triggerCheckout() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  applyLanguage(state.lang);
+  // Smart language default: honor ?lang=pt|en, else browser Portuguese auto-detect -> PT, default EN
+  const qp = new URLSearchParams(window.location.search).get('lang');
+  const navLang = (navigator.language || '').toLowerCase();
+  const initialLang = qp === 'pt' || qp === 'en' ? qp : (navLang.startsWith('pt') ? 'pt' : 'en');
+  applyLanguage(initialLang);
   renderPlayground();
 
   document.querySelectorAll('.lang-btn').forEach((btn) => {
     btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
   });
+
+  const handleInput = document.getElementById('handlePreviewInput');
+  if (handleInput) {
+    handleInput.addEventListener('input', (e) => {
+      state.handle = e.target.value || '@yourchannel';
+      renderPlayground();
+    });
+  }
 
   document.getElementById('btnPgRandom')?.addEventListener('click', () => {
     const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -397,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.id === 'checkoutModal') e.currentTarget.classList.remove('open');
   });
 
-  // Coordinated ASMR sound toggle across Hero video + all Showcase demo videos (only 1 unmuted at a time)
+  // Coordinated ASMR sound toggle across Hero + Showcase demo videos (only 1 unmuted at a time)
   const heroVideo = document.getElementById('heroDemoVideo');
   const heroSoundBtn = document.getElementById('btnSoundToggle');
   const cardButtons = [...document.querySelectorAll('[data-card-sound]')];
@@ -405,13 +522,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function muteAllVideos(exceptVideo = null) {
     if (heroVideo && heroVideo !== exceptVideo) {
       heroVideo.muted = true;
-      if (heroSoundBtn) heroSoundBtn.textContent = '🔇 ASMR Off';
+      if (heroSoundBtn) {
+        heroSoundBtn.textContent = '🔊 Tap for ASMR';
+        heroSoundBtn.classList.remove('unmuted');
+      }
     }
     cardButtons.forEach((btn) => {
       const vid = btn.parentElement?.querySelector('video');
       if (vid && vid !== exceptVideo) {
         vid.muted = true;
-        btn.textContent = '🔇 ASMR';
+        btn.textContent = '🔊 ASMR';
         btn.classList.remove('unmuted');
       }
     });
@@ -423,7 +543,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (willUnmute) muteAllVideos(heroVideo);
       heroVideo.muted = !willUnmute;
       if (willUnmute) heroVideo.play().catch(() => {});
-      heroSoundBtn.textContent = heroVideo.muted ? '🔇 ASMR Off' : '🔊 ASMR On';
+      heroSoundBtn.textContent = heroVideo.muted ? '🔊 Tap for ASMR' : '🔊 ASMR Playing';
+      heroSoundBtn.classList.toggle('unmuted', !heroVideo.muted);
     });
   }
 
@@ -435,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (willUnmute) muteAllVideos(vid);
       vid.muted = !willUnmute;
       if (willUnmute) vid.play().catch(() => {});
-      btn.textContent = vid.muted ? '🔇 ASMR' : '🔊 ASMR On';
+      btn.textContent = vid.muted ? '🔊 ASMR' : '🔊 Playing';
       btn.classList.toggle('unmuted', !vid.muted);
     });
   });
