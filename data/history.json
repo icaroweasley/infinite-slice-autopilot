@@ -1348,6 +1348,54 @@
           "url": "https://www.youtube.com/shorts/FGm9qCx7b0Q"
         }
       }
+    },
+    {
+      "id": "slice-1795559664087",
+      "createdAt": "2026-11-24T22:34:24.087Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "marble_bust_01",
+      "interiorStyle": "amethyst-crystal",
+      "solidRatio": 0.3156,
+      "slug": "3d-roman-marble-bust",
+      "name": "Roman Marble Bust Statue",
+      "englishName": "Roman Marble Bust Statue",
+      "cutterId": "custom",
+      "cutterPrompt": "Translucent emerald green crystal santoku knife with gold leaf accents",
+      "surfaceId": "custom",
+      "surfacePrompt": "Lilac purple pastel Venetian terrazzo stone slab with mother-of-pearl flecks",
+      "envId": "custom",
+      "envPrompt": "Vibrant cobalt blue minimalist studio with fluted arches and warm rim lighting",
+      "conceptSummary": "Roman Marble Bust Statue [polyhaven:marble_bust_01 | interior=amethyst-crystal] | blade=Translucent emerald green crystal santoku knife with gold leaf accents | board=Lilac purple pastel Venetian terrazzo stone slab with mother-of-pearl flecks | studio=Vibrant cobalt blue minimalist studio with fluted arches and warm rim lighting",
+      "rounds": [
+        10,
+        50,
+        100,
+        1000
+      ],
+      "maxCubes": 11736720,
+      "durationSec": 34.017,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-roman-marble-bust-vibrant-cobalt-blue-minimalist-s-2026-11-24T22-10-11.mp4",
+      "caption": "Wait until you see what's inside this Roman Marble Bust at 1,000 cuts 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-24T22:35:04.762Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869223823684267",
+        "mediaId": "17967013137215766",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869223823684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1896038084727349",
+          "postId": "122101822077557835"
+        },
+        "caption": "Wait until you see what's inside this Roman Marble Bust at 1,000 cuts 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
