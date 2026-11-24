@@ -229,12 +229,13 @@ export async function publishYouTubeShort({ videoPath, manifest = {}, titleOverr
     return { provider: 'dry-run', meta };
   }
 
-  if (process.env.UPLOAD_POST_API_KEY && process.env.UPLOAD_POST_USER) {
-    return publishViaUploadPost(absVideo, meta);
-  }
-
+  // ALWAYS prefer Official Google YouTube Data API v3 (100% free & Google-approved!)
   if (process.env.YT_CLIENT_ID && process.env.YT_CLIENT_SECRET && process.env.YT_REFRESH_TOKEN) {
     return publishViaYouTubeDataApi(absVideo, meta, process.env.YT_PRIVACY_STATUS || 'public');
+  }
+
+  if (process.env.UPLOAD_POST_API_KEY && process.env.UPLOAD_POST_USER) {
+    return publishViaUploadPost(absVideo, meta);
   }
 
   return { provider: 'skipped', reason: 'No YouTube credentials configured' };

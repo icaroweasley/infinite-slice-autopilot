@@ -563,6 +563,15 @@ async function main() {
     });
 
     if (shouldPublish || dryRun) {
+      const ytMissing = ['YT_CLIENT_ID', 'YT_CLIENT_SECRET', 'YT_REFRESH_TOKEN'].filter((k) => !process.env[k]);
+      const ttMissing = ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET', 'TIKTOK_REFRESH_TOKEN'].filter((k) => !process.env[k]);
+      console.log(
+        `[autopilot] Channels configured -> IG:${Boolean(process.env.IG_ACCESS_TOKEN || process.env.N8N_WEBHOOK_URL)} ` +
+          `| FB:${Boolean(process.env.FB_PAGE_ID && (process.env.FB_PAGE_ACCESS_TOKEN || process.env.IG_ACCESS_TOKEN))} ` +
+          `| YouTube:${hasYouTubeCredentials()}${ytMissing.length ? ` (missing: ${ytMissing.join(',')})` : ''} ` +
+          `| TikTok:${hasTikTokCredentials()}${ttMissing.length ? ` (missing: ${ttMissing.join(',')})` : ''}`
+      );
+
       let pub = { provider: 'skipped' };
       if (dryRun || process.env.IG_ACCESS_TOKEN || process.env.N8N_WEBHOOK_URL) {
         pub = await publishReel({
@@ -589,6 +598,8 @@ async function main() {
         } catch (ytErr) {
           console.error('[autopilot] YouTube Shorts cross-post warning:', ytErr.message);
         }
+      } else {
+        console.warn(`[autopilot] YouTube Shorts SKIPPED — add GitHub Secrets: ${ytMissing.join(', ')}`);
       }
       if (dryRun || hasTikTokCredentials()) {
         try {
