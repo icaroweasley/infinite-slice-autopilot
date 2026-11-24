@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderHeadlessVideo, capturePreFlightFrames } from './render-headless.mjs';
-import { loadConfig, loadHistory, recordEntry } from './history-cli.mjs';
+import { loadConfig, loadHistory, saveHistory, recordEntry } from './history-cli.mjs';
 import { buildEnglishCaption, publishReel } from './publish-reels.mjs';
 import { hasYouTubeCredentials, publishYouTubeShort } from './publish-youtube.mjs';
 import {
@@ -535,7 +535,7 @@ async function main() {
     }
 
     // Record in anti-repetition data/history.json BEFORE publishing
-    recordEntry({
+    const entry = recordEntry({
       source: approved.sourceTag,
       objectId: 'external-glb',
       modelSource: approved.asset.source,
@@ -572,11 +572,19 @@ async function main() {
       }
       if (dryRun || hasYouTubeCredentials()) {
         try {
-          await publishYouTubeShort({
+          const ytRes = await publishYouTubeShort({
             videoPath: manifest.videoFile,
             manifest,
             dryRun,
           });
+          if (!dryRun && ytRes?.videoId) {
+            const hNow = loadHistory();
+            const target = hNow.entries.find((e) => e.id === entry.id);
+            if (target) {
+              target.publish = { ...(target.publish || {}), youtube: ytRes };
+              saveHistory(hNow);
+            }
+          }
         } catch (ytErr) {
           console.error('[autopilot] YouTube Shorts cross-post warning:', ytErr.message);
         }

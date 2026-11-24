@@ -1240,6 +1240,60 @@
         },
         "caption": "Is this Rubber Duck actually a RAINBOW CAKE? 🌈🦆 1,000 cuts to find out!\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795524764267",
+      "createdAt": "2026-11-24T12:52:44.267Z",
+      "status": "published",
+      "source": "manual-triplatform-3d",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "treasure_chest",
+      "interiorStyle": "treasure-gold",
+      "solidRatio": 0.875,
+      "slug": "3d-pirate-treasure-chest",
+      "name": "Pirate Treasure Chest",
+      "englishName": "Pirate Treasure Chest",
+      "cutterId": "custom",
+      "cutterPrompt": "1000C glowing red-hot chef knife",
+      "surfaceId": "custom",
+      "surfacePrompt": "Deep emerald jade stone slab with gold veins",
+      "envId": "custom",
+      "envPrompt": "Amalfi lemon yellow sunny Mediterranean studio",
+      "conceptSummary": "Pirate Treasure Chest [polyhaven:treasure_chest | interior=treasure-gold] | blade=1000C glowing red-hot chef knife | board=Deep emerald jade stone slab with gold veins | studio=Amalfi lemon yellow sunny Mediterranean studio",
+      "rounds": [
+        10,
+        100,
+        500,
+        1000
+      ],
+      "maxCubes": 30171672,
+      "durationSec": 34.317,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/preview-5/02-pirate-treasure-chest-60fps.mp4",
+      "caption": "Cutting a Pirate Treasure Chest like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-24T12:53:41.003Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869141818684267",
+        "mediaId": "18131559032480953",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869141818684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "4499284700385405",
+          "postId": "122101428105557835"
+        },
+        "caption": "Cutting a Pirate Treasure Chest like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "Mk5vLmsfjh4",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/Mk5vLmsfjh4"
+        }
+      }
     }
   ]
 }
