@@ -18,8 +18,8 @@
       .policy-card p, .policy-card li { font-size: 15px; margin-bottom: 10px; }
       .policy-card ul { padding-left: 20px; margin-bottom: 12px; }
       .policy-card a { color: #ffe047; text-decoration: underline; }
-      .back-link { display: inline-block; margin-bottom: 20px; color: #94a3b8; font-weight: 700; text-decoration: none; }
-      .back-link:hover { color: #ffe047; }
+      .back-link { display: inline-block; margin-bottom: 20px; color: #475569; font-weight: 700; text-decoration: none; }
+      .back-link:hover { color: #0f172a; }
     </style>
   </head>
   <body>
@@ -27,12 +27,12 @@
       <a href="/" class="back-link">← Back to Infinite Slice 3D</a>
       <article class="policy-card">
         <h1>Privacy Policy</h1>
-        <div class="policy-meta">AtomSlice3D Studio (@atomslice3d) • Last updated: November 21, 2026</div>
+        <div class="policy-meta">AtomSlice3D Studio (@atomslice3d) • Last updated: November 24, 2026</div>
 
         <p>
           This Privacy Policy explains how <strong>AtomSlice3D Studio</strong> ("we", "our", or the "Application")
           handles information in connection with our website (<code>https://atomslice3d.netlify.app</code>) and
-          our internal video publishing tool powered by YouTube API Services.
+          our internal creator video publishing tool powered by YouTube API Services and TikTok API Services.
         </p>
 
         <h2>1. Use of YouTube API Services</h2>
@@ -46,36 +46,49 @@
           <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.
         </p>
 
-        <h2>2. Data Accessed &amp; Purpose</h2>
-        <ul>
-          <li><strong>Scope requested:</strong> <code>youtube.upload</code> and <code>youtube.readonly</code>.</li>
-          <li><strong>Purpose:</strong> Used strictly to verify channel identity and upload 100% original procedural 3D animations rendered by AtomSlice3D Studio to our own single YouTube channel.</li>
-          <li><strong>Zero Third-Party User Data:</strong> AtomSlice3D Studio does not offer public OAuth sign-in, does not collect, access, store, aggregate, or share YouTube API data belonging to external end users, and does not sell or transfer data to any third parties.</li>
-        </ul>
-
-        <h2>3. Storage, Security &amp; Retention</h2>
+        <h2>2. Use of TikTok API Services (Login Kit &amp; Content Posting API)</h2>
         <p>
-          OAuth 2.0 credentials (<code>refresh_token</code>) belonging solely to the channel owner are stored
-          encrypted in private environment secrets and are never exposed publicly or shared with third parties.
-          No viewer personal data or YouTube API response payloads are stored in external databases.
+          AtomSlice3D Studio also integrates with <strong>TikTok API Services</strong> (Login Kit and Content Posting API)
+          exclusively as a private, single-owner creator publishing tool to upload original 3D animations to the creator's
+          own TikTok account (<code>@atomslice3d</code>), either as inbox drafts (<code>video.upload</code>) or direct posts
+          (<code>video.publish</code>). By using TikTok features connected to our Application, you agree to the
+          <a href="https://www.tiktok.com/legal/terms-of-service" target="_blank" rel="noopener">TikTok Terms of Service</a>
+          and acknowledge the
+          <a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener">TikTok Privacy Policy</a>.
         </p>
 
-        <h2>4. Revoking Access &amp; Data Deletion</h2>
+        <h2>3. Data Accessed &amp; Purpose</h2>
+        <ul>
+          <li><strong>YouTube scopes requested:</strong> <code>youtube.upload</code> and <code>youtube.readonly</code>.</li>
+          <li><strong>TikTok scopes requested:</strong> <code>user.info.basic</code>, <code>video.upload</code>, and <code>video.publish</code>.</li>
+          <li><strong>Purpose:</strong> Used strictly to verify creator account identity and upload 100% original 3D slicing animations rendered by AtomSlice3D Studio to our own creator channels.</li>
+          <li><strong>Zero Third-Party User Data:</strong> AtomSlice3D Studio does not offer public multi-user OAuth sign-in, does not collect, access, store, aggregate, or share API data belonging to external end users, and does not sell or transfer data to any third parties.</li>
+        </ul>
+
+        <h2>4. Storage, Security &amp; Retention</h2>
         <p>
-          In addition to our internal controls, Google account permissions granted to AtomSlice3D Studio can be
+          OAuth 2.0 credentials (<code>access_token</code> and <code>refresh_token</code>) belonging solely to the channel owner
+          are stored encrypted in private environment secrets and are never exposed publicly or shared with third parties.
+          No viewer personal data or platform API response payloads are stored in external databases.
+        </p>
+
+        <h2>5. Revoking Access &amp; Data Deletion</h2>
+        <p>
+          In addition to our internal controls, connected account permissions granted to AtomSlice3D Studio can be
           revoked at any time via the
-          <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Security Settings page</a>.
+          <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Security Settings page</a>
+          or via <strong>TikTok App Settings → Security and permissions → Manage app permissions</strong>.
           Upon revocation, all local or encrypted OAuth tokens are immediately invalidated and deleted.
         </p>
 
-        <h2>5. Google API Services User Data Policy Compliance</h2>
+        <h2>6. Google API Services User Data Policy Compliance</h2>
         <p>
           AtomSlice3D Studio's use and transfer of information received from Google APIs adheres strictly to the
           <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>,
           including the Limited Use requirements.
         </p>
 
-        <h2>6. Contact</h2>
+        <h2>7. Contact</h2>
         <p>
           For any privacy inquiries or data deletion requests, contact the developer directly at
           <a href="mailto:atomslice3d@gmail.com">atomslice3d@gmail.com</a>.

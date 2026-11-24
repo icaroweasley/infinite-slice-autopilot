@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TikTok Authorization — AtomSlice 3D Studio (@atomslice3d)</title>
+    <link rel="icon" href="assets/avatar.jpg" type="image/jpeg" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .cb-wrap { max-width: 680px; margin: 56px auto 80px; padding: 0 24px; }
+      .cb-card {
+        background: #101619; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+        padding: 36px 36px; line-height: 1.65; color: #cbd5e1;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
+      }
+      .cb-badge {
+        display: inline-block; padding: 5px 12px; border-radius: 999px;
+        background: rgba(255, 224, 71, 0.14); color: #ffe047;
+        font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .cb-card h1 { font-size: 28px; color: #f8fafc; margin: 0 0 10px; }
+      .cb-card p { font-size: 15px; margin: 0 0 14px; }
+      .cb-box {
+        background: #070b0d; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px;
+        padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px; color: #ffe047; word-break: break-all; margin: 14px 0;
+        user-select: all;
+      }
+      .cb-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 20px; }
+      .cb-btn {
+        appearance: none; border: 0; border-radius: 12px; padding: 12px 18px;
+        font-weight: 800; font-size: 14px; cursor: pointer;
+        background: #ffe047; color: #0f172a; transition: transform 0.12s ease, opacity 0.12s ease;
+      }
+      .cb-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+      .cb-btn-secondary {
+        background: rgba(255,255,255,0.10); color: #f8fafc; border: 1px solid rgba(255,255,255,0.16);
+      }
+      .cb-status { font-size: 13px; font-weight: 700; color: #4ade80; min-height: 20px; }
+      .cb-error {
+        background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35);
+        color: #fca5a5; border-radius: 12px; padding: 14px 16px; margin: 14px 0;
+      }
+      .cb-meta { font-size: 13px; color: #94a3b8; margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; }
+      .cb-meta a { color: #ffe047; text-decoration: underline; }
+      .back-link { display: inline-block; margin-bottom: 18px; color: #475569; font-weight: 700; text-decoration: none; }
+      .back-link:hover { color: #0f172a; }
+    </style>
+  </head>
+  <body>
+    <main class="cb-wrap">
+      <a href="/" class="back-link">← Back to AtomSlice 3D Studio</a>
+      <article class="cb-card">
+        <div class="cb-badge">TikTok OAuth 2.0 Redirect</div>
+        <h1 id="cb-title">AtomSlice 3D Studio — TikTok Callback</h1>
+        <p id="cb-desc">
+          Official OAuth 2.0 redirect endpoint for the private creator publishing tool
+          <strong>AtomSlice 3D Studio</strong> (<code>@atomslice3d</code>).
+        </p>
+
+        <div id="cb-content"></div>
+        <div id="cb-status" class="cb-status"></div>
+
+        <div class="cb-meta">
+          No OAuth codes or tokens are transmitted to third-party servers from this static page.
+          Review our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var code = params.get('code');
+        var state = params.get('state');
+        var scopes = params.get('scopes');
+        var error = params.get('error');
+        var errorDesc = params.get('error_description');
+
+        var titleEl = document.getElementById('cb-title');
+        var descEl = document.getElementById('cb-desc');
+        var contentEl = document.getElementById('cb-content');
+        var statusEl = document.getElementById('cb-status');
+
+        function copyText(text, label) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              statusEl.textContent = label + ' copied to clipboard!';
+            }).catch(function () {
+              statusEl.textContent = 'Select the box above and press Ctrl+C to copy.';
+            });
+          } else {
+            statusEl.textContent = 'Select the box above and press Ctrl+C to copy.';
+          }
+        }
+
+        if (error) {
+          titleEl.textContent = 'TikTok Authorization Cancelled or Failed';
+          descEl.textContent = 'TikTok returned an authorization error:';
+          var errBox = document.createElement('div');
+          errBox.className = 'cb-error';
+          errBox.textContent = error + (errorDesc ? ' — ' + errorDesc : '');
+          contentEl.appendChild(errBox);
+          return;
+        }
+
+        if (code) {
+          titleEl.textContent = 'TikTok Connected Successfully!';
+          descEl.textContent = 'Copy the authorization code below and paste it into your AtomSlice 3D Studio terminal setup script:';
+
+          var codeBox = document.createElement('div');
+          codeBox.className = 'cb-box';
+          codeBox.textContent = code;
+          contentEl.appendChild(codeBox);
+
+          var actions = document.createElement('div');
+          actions.className = 'cb-actions';
+
+          var btnCode = document.createElement('button');
+          btnCode.type = 'button';
+          btnCode.className = 'cb-btn';
+          btnCode.textContent = 'Copy Authorization Code';
+          btnCode.addEventListener('click', function () { copyText(code, 'Authorization code'); });
+
+          var btnUrl = document.createElement('button');
+          btnUrl.type = 'button';
+          btnUrl.className = 'cb-btn cb-btn-secondary';
+          btnUrl.textContent = 'Copy Full Callback URL';
+          btnUrl.addEventListener('click', function () { copyText(window.location.href, 'Full callback URL'); });
+
+          actions.appendChild(btnCode);
+          actions.appendChild(btnUrl);
+          contentEl.appendChild(actions);
+
+          if (scopes || state) {
+            var detail = document.createElement('p');
+            detail.style.fontSize = '13px';
+            detail.style.color = '#94a3b8';
+            detail.textContent =
+              (scopes ? 'Scopes: ' + scopes : '') +
+              (scopes && state ? ' • ' : '') +
+              (state ? 'State: ' + state : '');
+            contentEl.appendChild(detail);
+          }
+          return;
+        }
+
+        var idle = document.createElement('p');
+        idle.style.fontSize = '14px';
+        idle.style.color = '#94a3b8';
+        idle.textContent = 'Ready to receive TikTok OAuth 2.0 redirects. Start the authorization flow from AtomSlice 3D Studio to connect your creator account.';
+        contentEl.appendChild(idle);
+      })();
+    </script>
+  </body>
+</html>
