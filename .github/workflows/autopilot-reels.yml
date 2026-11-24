@@ -85,6 +85,12 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          # Optional Official TikTok Content Posting API (Inbox Draft or Direct Post)
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+          TIKTOK_MODE: ${{ secrets.TIKTOK_MODE || 'inbox' }}
+          TIKTOK_PRIVACY_LEVEL: ${{ secrets.TIKTOK_PRIVACY_LEVEL || 'PUBLIC_TO_EVERYONE' }}
         run: |
           FLAGS="--res 720x1280 --fps 60 --scale 0.72"
           if [ "${{ inputs.quick }}" = "true" ]; then

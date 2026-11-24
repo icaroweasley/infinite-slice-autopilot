@@ -5,6 +5,7 @@ import { renderHeadlessVideo, capturePreFlightFrames } from './render-headless.m
 import { loadConfig, loadHistory, saveHistory, recordEntry } from './history-cli.mjs';
 import { buildEnglishCaption, publishReel } from './publish-reels.mjs';
 import { hasYouTubeCredentials, publishYouTubeShort } from './publish-youtube.mjs';
+import { hasTikTokCredentials, publishTikTokVideo } from './publish-tiktok.mjs';
 import {
   buildAntiRepeatIndex,
   checkRepetition,
@@ -587,6 +588,25 @@ async function main() {
           }
         } catch (ytErr) {
           console.error('[autopilot] YouTube Shorts cross-post warning:', ytErr.message);
+        }
+      }
+      if (dryRun || hasTikTokCredentials()) {
+        try {
+          const ttRes = await publishTikTokVideo({
+            videoPath: manifest.videoFile,
+            manifest,
+            dryRun,
+          });
+          if (!dryRun && ttRes?.publishId) {
+            const hNow = loadHistory();
+            const target = hNow.entries.find((e) => e.id === entry.id);
+            if (target) {
+              target.publish = { ...(target.publish || {}), tiktok: ttRes };
+              saveHistory(hNow);
+            }
+          }
+        } catch (ttErr) {
+          console.error('[autopilot] TikTok cross-post warning:', ttErr.message);
         }
       }
       if (cleanup && shouldPublish && !dryRun && pub.provider !== 'dry-run') {
