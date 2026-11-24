@@ -1144,6 +1144,54 @@
         },
         "caption": "Slicing a Fresh Green Lime 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795494844159",
+      "createdAt": "2026-11-24T04:34:04.159Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "gso:Nintendo_Yoshi_Action_Figure",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.2225,
+      "slug": "3d-yoshi-action-figure",
+      "name": "Yoshi Dinosaur Figure",
+      "englishName": "Yoshi Dinosaur Figure",
+      "cutterId": "custom",
+      "cutterPrompt": "Iridescent rainbow titanium precision chef knife",
+      "surfaceId": "custom",
+      "surfacePrompt": "Lavender purple pastel ceramic tile cutting board",
+      "envId": "custom",
+      "envPrompt": "Bright electric lime green pop-art studio with soft neon lighting",
+      "conceptSummary": "Yoshi Dinosaur Figure [hf:gso:Nintendo_Yoshi_Action_Figure | interior=cake-rainbow] | blade=Iridescent rainbow titanium precision chef knife | board=Lavender purple pastel ceramic tile cutting board | studio=Bright electric lime green pop-art studio with soft neon lighting",
+      "rounds": [
+        10,
+        50,
+        250,
+        1000
+      ],
+      "maxCubes": 8385712,
+      "durationSec": 34.35,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-yoshi-action-figure-bright-electric-lime-green-pop-a-2026-11-24T04-14-40.mp4",
+      "caption": "You won't believe what's hidden inside this Yoshi figure at 1,000 cuts! 🦖\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-24T04:34:55.071Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869080975684267",
+        "mediaId": "18137099680759903",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869080975684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1889587382481778",
+          "postId": "122101127109557835"
+        },
+        "caption": "You won't believe what's hidden inside this Yoshi figure at 1,000 cuts! 🦖\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
