@@ -1294,6 +1294,54 @@
           "url": "https://www.youtube.com/shorts/Mk5vLmsfjh4"
         }
       }
+    },
+    {
+      "id": "slice-1795538209495",
+      "createdAt": "2026-11-24T16:36:49.495Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "lemon",
+      "interiorStyle": "citrus-lemon",
+      "solidRatio": 0.5116,
+      "slug": "3d-juicy-yellow-lemon",
+      "name": "Juicy Yellow Lemon",
+      "englishName": "Juicy Yellow Lemon",
+      "cutterId": "custom",
+      "cutterPrompt": "Luxury metallic black credit card with gold chip",
+      "surfaceId": "custom",
+      "surfacePrompt": "Frosted mint ice glass slab with glow edge",
+      "envId": "custom",
+      "envPrompt": "Cream travertine warm daylight Italian kitchen",
+      "conceptSummary": "Juicy Yellow Lemon [polyhaven:lemon | interior=citrus-lemon] | blade=Luxury metallic black credit card with gold chip | board=Frosted mint ice glass slab with glow edge | studio=Cream travertine warm daylight Italian kitchen",
+      "rounds": [
+        10,
+        50,
+        250,
+        1000
+      ],
+      "maxCubes": 19233377,
+      "durationSec": 34.35,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-juicy-yellow-lemon-cream-travertine-warm-daylight-i-2026-11-24T16-09-38.mp4",
+      "caption": "Cutting a Juicy Yellow Lemon like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-24T16:37:38.383Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869178478684267",
+        "mediaId": "18022302377950821",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869178478684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "3053537734992884",
+          "postId": "122101571793557835"
+        },
+        "caption": "Cutting a Juicy Yellow Lemon like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
