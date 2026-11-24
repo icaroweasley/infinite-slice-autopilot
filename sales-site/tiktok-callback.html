@@ -106,6 +106,12 @@
         }
 
         if (code) {
+          if (state && state.indexOf('studio_') === 0) {
+            titleEl.textContent = 'Returning to AtomSlice 3D Studio…';
+            descEl.textContent = 'TikTok authorization received! Redirecting back to the publishing studio automatically.';
+            window.location.replace('tiktok-studio.html?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state));
+            return;
+          }
           titleEl.textContent = 'TikTok Connected Successfully!';
           descEl.textContent = 'Copy the authorization code below and paste it into your AtomSlice 3D Studio terminal setup script:';
 
