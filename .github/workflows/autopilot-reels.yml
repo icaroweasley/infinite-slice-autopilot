@@ -1,8 +1,7 @@
 name: Infinite Slice 24/7 Reels Autopilot
 
 on:
-  # Triggered reliably every 6 hours (4 Reels/day) via Google Apps Script calling workflow_dispatch
-  # (GitHub Actions internal `schedule:` removed to avoid missed runs or accidental double-posts)
+  # Primary trigger: every 6 hours (:08) via Google Apps Script calling workflow_dispatch
   workflow_dispatch:
     inputs:
       dry_run:
@@ -13,6 +12,11 @@ on:
         description: 'Quick test render (540x960 @ 30fps, 3 rounds)'
         type: boolean
         default: false
+  # Smart backup trigger: 37 minutes after each 6-hour slot (04:45, 10:45, 16:45, 22:45 UTC).
+  # Automatically skips in 3 seconds if data/history.json already has a post within the last 4.5h,
+  # preventing BOTH missed posts (if Apps Script fails) AND duplicate posts!
+  schedule:
+    - cron: '45 4,10,16,22 * * *'
 
 permissions:
   contents: write
@@ -27,22 +31,48 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Check if scheduled run has publishing secrets configured
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Smart guard (secrets + 4.5h anti-duplicate check for backup schedule)
         id: guard
         env:
           N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "${{ github.event_name }}" = "schedule" ] && [ -z "$N8N_WEBHOOK_URL" ] && [ -z "$IG_ACCESS_TOKEN" ]; then
-            echo "No Instagram publishing secrets configured yet — skipping scheduled run so free Actions minutes are not wasted. Add IG_ACCESS_TOKEN (or N8N_WEBHOOK_URL) to activate 24/7 auto-posting."
+          if [ "$EVENT_NAME" = "schedule" ] && [ -z "$N8N_WEBHOOK_URL" ] && [ -z "$IG_ACCESS_TOKEN" ]; then
+            echo "No Instagram publishing secrets configured yet — skipping scheduled run."
             echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-
-      - name: Checkout repository
-        if: steps.guard.outputs.skip != 'true'
-        uses: actions/checkout@v4
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            SHOULD_SKIP=$(node -e '
+              const fs = require("fs");
+              try {
+                const h = JSON.parse(fs.readFileSync("data/history.json", "utf8"));
+                const times = (h.entries || [])
+                  .filter((e) => e.status === "published" || e.publishedAt || e.publish?.mediaId)
+                  .map((e) => Date.parse(e.publishedAt || e.createdAt))
+                  .filter((t) => Number.isFinite(t));
+                if (!times.length) { console.log("false"); process.exit(0); }
+                const latest = Math.max(...times);
+                const ageHours = (Date.now() - latest) / 3600000;
+                console.error(`[guard] Latest published post was ${ageHours.toFixed(2)}h ago (threshold: 4.50h).`);
+                console.log(ageHours < 4.5 ? "true" : "false");
+              } catch (err) {
+                console.error("[guard] Could not read history.json:", err.message);
+                console.log("false");
+              }
+            ')
+            if [ "$SHOULD_SKIP" = "true" ]; then
+              echo "Backup schedule skipped cleanly — a post was already published within the last 4.5 hours!"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Backup schedule activating — no post published in the last 4.5 hours!"
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js 22
         if: steps.guard.outputs.skip != 'true'
