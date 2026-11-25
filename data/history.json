@@ -1444,6 +1444,54 @@
         },
         "caption": "You won't believe what's hidden inside this 80s Retro Boombox at 1,000 cuts! 📻✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795604384134",
+      "createdAt": "2026-11-25T10:59:44.134Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "khronos",
+      "modelAssetId": "ChronographWatch",
+      "interiorStyle": "clockwork",
+      "solidRatio": 0.175,
+      "slug": "3d-luxury-chronograph-watch",
+      "name": "Luxury Chronograph Watch",
+      "englishName": "Luxury Chronograph Watch",
+      "cutterId": "custom",
+      "cutterPrompt": "Ruby red glowing plasma katana",
+      "surfaceId": "custom",
+      "surfacePrompt": "Walnut wood and coral sunset epoxy resin river board",
+      "envId": "custom",
+      "envPrompt": "Cyberpunk violet neon brushed metal studio",
+      "conceptSummary": "Luxury Chronograph Watch [khronos:ChronographWatch | interior=clockwork] | blade=Ruby red glowing plasma katana | board=Walnut wood and coral sunset epoxy resin river board | studio=Cyberpunk violet neon brushed metal studio",
+      "rounds": [
+        10,
+        100,
+        500,
+        1000
+      ],
+      "maxCubes": 7015189,
+      "durationSec": 34.317,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-luxury-chronograph-watch-cyberpunk-violet-neon-brushed-me-2026-11-25T10-14-56.mp4",
+      "caption": "Cutting a Luxury Chronograph Watch like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-25T11:00:38.397Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869299753684267",
+        "mediaId": "18252564223310223",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869299753684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1424227582841690",
+          "postId": "122102262507557835"
+        },
+        "caption": "Cutting a Luxury Chronograph Watch like butter until it turns to dust 🔪✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
