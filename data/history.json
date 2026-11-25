@@ -1396,6 +1396,54 @@
         },
         "caption": "Wait until you see what's inside this Roman Marble Bust at 1,000 cuts 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
       }
+    },
+    {
+      "id": "slice-1795581465287",
+      "createdAt": "2026-11-25T04:37:45.287Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "boombox",
+      "interiorStyle": "clockwork",
+      "solidRatio": 0.4845,
+      "slug": "3d-80s-retro-boombox",
+      "name": "80s Retro Boombox",
+      "englishName": "80s Retro Boombox",
+      "cutterId": "custom",
+      "cutterPrompt": "Polished rose gold Japanese nakiri knife with an opal marble handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Vibrant canary yellow and white geometric ceramic tile cutting board",
+      "envId": "custom",
+      "envPrompt": "Retro synthwave violet neon studio with fluted arched backdrop",
+      "conceptSummary": "80s Retro Boombox [polyhaven:boombox | interior=clockwork] | blade=Polished rose gold Japanese nakiri knife with an opal marble handle | board=Vibrant canary yellow and white geometric ceramic tile cutting board | studio=Retro synthwave violet neon studio with fluted arched backdrop",
+      "rounds": [
+        10,
+        50,
+        250,
+        1000
+      ],
+      "maxCubes": 12526410,
+      "durationSec": 34.35,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-80s-retro-boombox-retro-synthwave-violet-neon-stud-2026-11-25T04-09-36.mp4",
+      "caption": "You won't believe what's hidden inside this 80s Retro Boombox at 1,000 cuts! 📻✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-25T04:38:32.786Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869259631684267",
+        "mediaId": "17940720621403524",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869259631684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1681994196957681",
+          "postId": "122102018439557835"
+        },
+        "caption": "You won't believe what's hidden inside this 80s Retro Boombox at 1,000 cuts! 📻✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels"
+      }
     }
   ]
 }
