@@ -1510,6 +1510,60 @@
           "url": "https://www.youtube.com/shorts/Rva6gug_TL8"
         }
       }
+    },
+    {
+      "id": "slice-1795633641708",
+      "createdAt": "2026-11-25T19:07:21.708Z",
+      "status": "published",
+      "source": "manual-triplatform-3d",
+      "objectId": "external-glb",
+      "modelSource": "gso-scanned",
+      "modelAssetId": "Nintendo_Mario_Action_Figure",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.28,
+      "slug": "3d-super-mario-figure",
+      "name": "Super Mario Figure",
+      "englishName": "Super Mario Figure",
+      "cutterId": "custom",
+      "cutterPrompt": "Glowing cyan plasma lightsaber blade",
+      "surfaceId": "custom",
+      "surfacePrompt": "Peach and cream checkered ceramic cutting board",
+      "envId": "custom",
+      "envPrompt": "Bright Scandinavian sky-blue sunlit kitchen studio",
+      "conceptSummary": "Super Mario Figure [gso-scanned:Nintendo_Mario_Action_Figure | interior=cake-rainbow] | blade=Glowing cyan plasma lightsaber blade | board=Peach and cream checkered ceramic cutting board | studio=Bright Scandinavian sky-blue sunlit kitchen studio",
+      "rounds": [
+        10,
+        100,
+        500,
+        1000
+      ],
+      "maxCubes": 8008234,
+      "durationSec": 34.35,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/preview-5/03-super-mario-figure-60fps.mp4",
+      "caption": "10 → 1,000 cuts on a Super Mario Figure. Final count: 8,008,234 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-25T19:08:14.553Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869374006684267",
+        "mediaId": "18457394929126156",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869374006684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1812678373177248",
+          "postId": "122102605869557835"
+        },
+        "caption": "10 → 1,000 cuts on a Super Mario Figure. Final count: 8,008,234 cubes 🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "hcrygQS9bFo",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/hcrygQS9bFo"
+        }
+      }
     }
   ]
 }
