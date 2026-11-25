@@ -1,0 +1,76 @@
+name: Check YouTube OAuth Secrets
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-youtube-auth.yml'
+
+jobs:
+  verify-youtube-secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify YouTube OAuth Refresh Token & Channel Identity
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          node -e '
+            const clean = (k) => {
+              let v = String(process.env[k] || "").trim();
+              if (v.startsWith(k + "=")) v = v.slice(k.length + 1).trim();
+              return v.replace(/^["'\'']|["'\'']$/g, "").trim();
+            };
+            const clientId = clean("YT_CLIENT_ID");
+            const clientSecret = clean("YT_CLIENT_SECRET");
+            const refreshToken = clean("YT_REFRESH_TOKEN");
+            console.log("Format check:", {
+              hasClientId: Boolean(clientId),
+              clientIdEndsGoogle: clientId.endsWith(".apps.googleusercontent.com"),
+              hasSecret: Boolean(clientSecret),
+              secretStartsGOCSPX: clientSecret.startsWith("GOCSPX-"),
+              hasRefresh: Boolean(refreshToken),
+              refreshStarts1: refreshToken.startsWith("1//"),
+            });
+            if (!clientId || !clientSecret || !refreshToken) {
+              console.error("FAIL: Missing one or more YT_* GitHub Secrets.");
+              process.exit(1);
+            }
+            (async () => {
+              const r = await fetch("https://oauth2.googleapis.com/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                  client_id: clientId,
+                  client_secret: clientSecret,
+                  refresh_token: refreshToken,
+                  grant_type: "refresh_token",
+                }),
+              });
+              const j = await r.json();
+              if (!r.ok || !j.access_token) {
+                console.error("FAIL: OAuth refresh error:", JSON.stringify({ error: j.error, error_description: j.error_description }));
+                process.exit(1);
+              }
+              const chRes = await fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", {
+                headers: { Authorization: "Bearer " + j.access_token },
+              });
+              const ch = await chRes.json();
+              const item = ch.items && ch.items[0];
+              if (!chRes.ok || !item) {
+                console.error("FAIL: Channel check error:", chRes.status);
+                process.exit(1);
+              }
+              console.log("SUCCESS! YouTube OAuth working on GitHub Actions! Channel:", item.snippet?.title, "| ID:", item.id);
+            })().catch((e) => { console.error(e.message); process.exit(1); });
+          '
