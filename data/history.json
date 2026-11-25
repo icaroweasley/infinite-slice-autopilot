@@ -1564,6 +1564,60 @@
           "url": "https://www.youtube.com/shorts/hcrygQS9bFo"
         }
       }
+    },
+    {
+      "id": "slice-1795647746901",
+      "createdAt": "2026-11-25T23:02:26.901Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "khronos",
+      "modelAssetId": "ScatteringSkull",
+      "interiorStyle": "galaxy-nebula",
+      "solidRatio": 0.4449,
+      "slug": "3d-crystal-skull",
+      "name": "Crystal Glass Skull",
+      "englishName": "Crystal Glass Skull",
+      "cutterId": "custom",
+      "cutterPrompt": "Mirror-polished chrome heavy cleaver with a glowing violet core",
+      "surfaceId": "custom",
+      "surfacePrompt": "Vivid electric pink and white marble slab with neon-lit veins",
+      "envId": "custom",
+      "envPrompt": "Vibrant magenta-lit futuristic laboratory with arched white ceramic walls",
+      "conceptSummary": "Crystal Glass Skull [khronos:ScatteringSkull | interior=galaxy-nebula] | blade=Mirror-polished chrome heavy cleaver with a glowing violet core | board=Vivid electric pink and white marble slab with neon-lit veins | studio=Vibrant magenta-lit futuristic laboratory with arched white ceramic walls",
+      "rounds": [
+        10,
+        100,
+        500,
+        1000
+      ],
+      "maxCubes": 16493506,
+      "durationSec": 34.333,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-crystal-skull-vibrant-magenta-lit-futuristic-l-2026-11-25T22-13-46.mp4",
+      "caption": "The cosmic secret inside this Crystal Skull at 1,000 cuts is out of this world! 🌌\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-25T23:03:14.471Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869397574684267",
+        "mediaId": "18101618150410036",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869397574684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1648748437026601",
+          "postId": "122102745117557835"
+        },
+        "caption": "The cosmic secret inside this Crystal Skull at 1,000 cuts is out of this world! 🌌\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "pZ-g_4xXJNQ",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/pZ-g_4xXJNQ"
+        }
+      }
     }
   ]
 }
