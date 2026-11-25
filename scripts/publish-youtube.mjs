@@ -115,10 +115,17 @@ async function publishViaUploadPost(videoPath, meta) {
  * Note: New Google Cloud projects require submitting Google's free YouTube API Compliance Audit
  * (https://support.google.com/youtube/contact/yt_api_form) before uploads can be set to PUBLIC.
  */
+function cleanEnvSecret(key) {
+  let val = String(process.env[key] || '').trim();
+  if (!val) return '';
+  if (val.startsWith(`${key}=`)) val = val.slice(key.length + 1).trim();
+  return val.replace(/^["']|["']$/g, '').trim();
+}
+
 async function getGoogleAccessToken() {
-  const clientId = process.env.YT_CLIENT_ID;
-  const clientSecret = process.env.YT_CLIENT_SECRET;
-  const refreshToken = process.env.YT_REFRESH_TOKEN;
+  const clientId = cleanEnvSecret('YT_CLIENT_ID');
+  const clientSecret = cleanEnvSecret('YT_CLIENT_SECRET');
+  const refreshToken = cleanEnvSecret('YT_REFRESH_TOKEN');
   if (!clientId || !clientSecret || !refreshToken) return null;
 
   const body = new URLSearchParams({
@@ -135,7 +142,8 @@ async function getGoogleAccessToken() {
   });
   const json = await res.json();
   if (!res.ok || !json.access_token) {
-    throw new Error(`YouTube OAuth token refresh failed: ${JSON.stringify(json)}`);
+    const hints = `clientIdLen=${clientId.length}, endsWithGoogle=${clientId.endsWith('.apps.googleusercontent.com')}, secretStartsGOCSPX=${clientSecret.startsWith('GOCSPX-')}, refreshStarts1=${refreshToken.startsWith('1//')}`;
+    throw new Error(`YouTube OAuth token refresh failed (${hints}): ${JSON.stringify(json)}`);
   }
   return json.access_token;
 }

@@ -75,10 +75,17 @@ export function hasTikTokCredentials() {
   );
 }
 
+function cleanEnvSecret(key) {
+  let val = String(process.env[key] || '').trim();
+  if (!val) return '';
+  if (val.startsWith(`${key}=`)) val = val.slice(key.length + 1).trim();
+  return val.replace(/^["']|["']$/g, '').trim();
+}
+
 async function getTikTokAccessToken() {
-  const clientKey = process.env.TIKTOK_CLIENT_KEY;
-  const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-  const refreshToken = process.env.TIKTOK_REFRESH_TOKEN;
+  const clientKey = cleanEnvSecret('TIKTOK_CLIENT_KEY');
+  const clientSecret = cleanEnvSecret('TIKTOK_CLIENT_SECRET');
+  const refreshToken = cleanEnvSecret('TIKTOK_REFRESH_TOKEN');
   if (!clientKey || !clientSecret || !refreshToken) return null;
 
   const body = new URLSearchParams({
