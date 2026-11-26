@@ -133,6 +133,7 @@ export class InfiniteSliceEngine {
     this.currentEnvId = 'classic-viral';
     this.currentEnvPrompt = '';
     this.handleText = '@atomslice3d';
+    this.chapterLabel = '';
     this.showHud = true;
     this.ctaOutro = null;
     this.ctaActive = false;
@@ -199,6 +200,7 @@ export class InfiniteSliceEngine {
     envId = 'classic-viral',
     envPrompt = '',
     handle = '@cubiccutlab',
+    chapterLabel = '',
     width = 1080,
     height = 1920,
     rounds = [10, 50, 100, 250, 500, 1000],
@@ -208,6 +210,7 @@ export class InfiniteSliceEngine {
   } = {}) {
     this.setResolution(width, height);
     this.setHandle(handle);
+    this.chapterLabel = (chapterLabel || '').trim();
     this.showHud = showHud;
     this.ctaOutro = (ctaOutro && ctaOutro.enabled) ? ctaOutro : null;
     this.ctaActive = false;
@@ -272,6 +275,20 @@ export class InfiniteSliceEngine {
     this.outputCanvas.width = width;
     this.outputCanvas.height = height;
     this.renderer.setSize(width, height, false);
+    const aspect = width / Math.max(1, height);
+    this.camera.aspect = aspect;
+    if (aspect > 1.1) {
+      // Native 16:9 widescreen cinema framing (closer, fuller hero 3D object & cutting board)
+      this.camera.fov = 30;
+      this.camera.position.set(4.15, 5.15, 5.65);
+      this.camera.lookAt(0.0, 0.42, 0.08);
+    } else {
+      // Locked 9:16 vertical Reels/Shorts/TikTok composition
+      this.camera.fov = 34;
+      this.camera.position.set(5.85, 7.55, 8.10);
+      this.camera.lookAt(0.0, 0.34, 0.14);
+    }
+    this.camera.updateProjectionMatrix();
   }
 
   setHandle(text) {
@@ -590,6 +607,10 @@ export class InfiniteSliceEngine {
   }
 
   _drawHud(ctx, W, H) {
+    if (W > H) {
+      this._drawWidescreenHud(ctx, W, H);
+      return;
+    }
     const s = W / 540;
     ctx.save();
     ctx.textAlign = 'center';
@@ -684,6 +705,149 @@ export class InfiniteSliceEngine {
 
     if (this.ctaActive && this.ctaOutro?.enabled) {
       this._drawCtaOutro(ctx, W, H, s);
+    }
+
+    ctx.restore();
+  }
+
+  _drawWidescreenHud(ctx, W, H) {
+    const s = H / 720;
+    ctx.save();
+    ctx.textBaseline = 'middle';
+
+    // Subtle top & bottom cinema gradients keeping center 3D stage 100% vibrant
+    const topGrad = ctx.createLinearGradient(0, 0, 0, 120 * s);
+    topGrad.addColorStop(0, 'rgba(0,0,0,0.42)');
+    topGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGrad;
+    ctx.fillRect(0, 0, W, 120 * s);
+
+    const botGrad = ctx.createLinearGradient(0, H - 115 * s, 0, H);
+    botGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    botGrad.addColorStop(1, 'rgba(0,0,0,0.34)');
+    ctx.fillStyle = botGrad;
+    ctx.fillRect(0, H - 115 * s, W, 115 * s);
+
+    // Top-left chapter badge (e.g. "01 / 12 • PIRATE TREASURE CHEST")
+    if (this.chapterLabel) {
+      ctx.save();
+      const parts = this.chapterLabel.split('|').map((p) => p.trim());
+      const badgeTag = parts.length > 1 ? parts[0] : '';
+      const badgeTitle = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
+      ctx.font = `800 ${Math.round(16 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+      const titleW = ctx.measureText(badgeTitle).width;
+      ctx.font = `900 ${Math.round(15 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+      const tagW = badgeTag ? ctx.measureText(badgeTag).width + 22 * s : 0;
+      const pillW = Math.min(W * 0.44, tagW + titleW + 34 * s);
+      const pillH = 40 * s;
+      const px = 26 * s;
+      const py = 24 * s;
+
+      this._drawRoundedRect(ctx, px, py, pillW, pillH, 20 * s);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+      ctx.fill();
+      ctx.lineWidth = 1.5 * s;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.stroke();
+
+      let tx = px + 14 * s;
+      if (badgeTag) {
+        const innerW = tagW - 6 * s;
+        this._drawRoundedRect(ctx, px + 5 * s, py + 5 * s, innerW, pillH - 10 * s, 15 * s);
+        ctx.fillStyle = '#ffe047';
+        ctx.fill();
+        ctx.textAlign = 'center';
+        ctx.font = `900 ${Math.round(14 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(badgeTag, px + 5 * s + innerW * 0.5, py + pillH * 0.5 + 0.5 * s);
+        tx = px + 5 * s + innerW + 12 * s;
+      }
+
+      ctx.textAlign = 'left';
+      ctx.font = `800 ${Math.round(16 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(badgeTitle, tx, py + pillH * 0.5 + 0.5 * s, pillW - (tx - px) - 14 * s);
+      ctx.restore();
+    }
+
+    // Top-center compact progress dots + CUTS headline
+    ctx.textAlign = 'center';
+    const dotY = 22 * s;
+    const dotGap = 15 * s;
+    const startX = W * 0.5 - ((this.rounds.length - 1) * dotGap) * 0.5;
+    for (let i = 0; i < this.rounds.length; i++) {
+      ctx.beginPath();
+      const active = i === this.roundIndex;
+      const passed = i < this.roundIndex;
+      ctx.arc(startX + i * dotGap, dotY, (active ? 4.2 : 2.8) * s, 0, Math.PI * 2);
+      ctx.fillStyle = active ? '#ffffff' : passed ? 'rgba(255,255,255,0.68)' : 'rgba(255,255,255,0.24)';
+      ctx.fill();
+    }
+
+    const cutScale = 1.0 + this.cutPulse * 0.045 + this.roundFlash * 0.09;
+    ctx.save();
+    ctx.translate(W * 0.5, 58 * s);
+    ctx.scale(cutScale, cutScale);
+    const headline = this.displayCuts === 0 ? `${formatNumber(this.targetCuts)} CUTS` : `${formatNumber(this.displayCuts)} CUTS`;
+    ctx.font = `900 ${Math.round(38 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 6 * s;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.72)';
+    ctx.strokeText(headline, 0, 0);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(headline, 0, 0);
+    ctx.restore();
+
+    if (this.displayCuts > 0 && this.displayCuts < this.targetCuts) {
+      ctx.font = `700 ${Math.round(13 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+      ctx.fillStyle = 'rgba(255,255,255,0.78)';
+      ctx.fillText(`GOAL: ${formatNumber(this.targetCuts)} CUTS`, W * 0.5, 89 * s);
+    }
+
+    // Top-right channel handle
+    if (this.handleText) {
+      ctx.save();
+      ctx.textAlign = 'right';
+      ctx.font = `800 ${Math.round(17 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+      ctx.lineWidth = 4 * s;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.58)';
+      ctx.strokeText(this.handleText, W - 28 * s, 42 * s);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.90)';
+      ctx.fillText(this.handleText, W - 28 * s, 42 * s);
+      ctx.restore();
+    }
+
+    // Bottom-right sleek yellow CUBES counter (leaves center 3D stage 100% open!)
+    const cubesVal = Math.round(this.displayCubes);
+    if (cubesVal > 0) {
+      const cubeScale = 1.0 + this.cubePulse * 0.05;
+      ctx.save();
+      ctx.translate(W - 34 * s, H - 56 * s);
+      ctx.scale(cubeScale, cubeScale);
+      ctx.textAlign = 'right';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.58)';
+      ctx.shadowBlur = 12 * s;
+      ctx.shadowOffsetY = 2 * s;
+
+      const numStr = formatNumber(cubesVal);
+      ctx.font = `900 ${Math.round(38 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 6.5 * s;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.82)';
+      ctx.strokeText(numStr, 0, -8 * s);
+      ctx.fillStyle = '#ffe169';
+      ctx.fillText(numStr, 0, -8 * s);
+
+      ctx.font = `800 ${Math.round(14 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+      ctx.lineWidth = 4 * s;
+      ctx.strokeText('CUBES', 0, 21 * s);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillText('CUBES', 0, 21 * s);
+      ctx.restore();
+    }
+
+    if (this.ctaActive && this.ctaOutro?.enabled) {
+      this._drawCtaOutro(ctx, W, H, (H / 540) * 0.84);
     }
 
     ctx.restore();
@@ -858,8 +1022,11 @@ export class InfiniteSliceEngine {
     ctx.fillText(suffix, startX2 + wAcc, y0 + 108 * s);
     ctx.restore();
 
-    // 6. Super juicy 3D glossy candy CTA button ("LINK IN BIO ↗") with animated pulse & shine!
-    const pillW = 292 * s;
+    // 6. Super juicy 3D glossy candy CTA button ("LINK IN BIO ↗" or "LINK IN DESCRIPTION ↗") with dynamic width!
+    const pillLabel = (this.ctaOutro.pill || 'LINK IN BIO').toUpperCase();
+    ctx.font = `900 ${Math.round(22 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    const labelW = ctx.measureText(pillLabel).width;
+    const pillW = Math.min(cardW - 36 * s, Math.max(292 * s, labelW + 78 * s));
     const pillH = 58 * s;
     const pillX = -pillW * 0.5;
     const pillY = y0 + 136 * s;
@@ -908,16 +1075,17 @@ export class InfiniteSliceEngine {
       ctx.restore();
     }
 
-    // Crisp white CTA label + bouncing vector arrow
-    const pillLabel = (this.ctaOutro.pill || 'LINK IN BIO').toUpperCase();
-    ctx.font = `900 ${Math.round(23 * s)}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    // Crisp white CTA label + bouncing vector arrow (dynamically positioned right after text!)
+    const fontSz = labelW > cardW - 110 * s ? Math.round(18.5 * s) : Math.round(22 * s);
+    ctx.font = `900 ${fontSz}px "Inter", "Segoe UI", system-ui, sans-serif`;
+    const finalLabelW = ctx.measureText(pillLabel).width;
     ctx.fillStyle = '#ffffff';
     ctx.shadowColor = 'rgba(130, 10, 35, 0.38)';
     ctx.shadowBlur = 4 * s;
     ctx.fillText(pillLabel, -14 * s, 1 * s);
     ctx.shadowBlur = 0;
 
-    const ax = 82 * s + Math.sin(t * 9.5) * 4.0 * s;
+    const ax = Math.min(pillW * 0.5 - 22 * s, finalLabelW * 0.5 + 2 * s) + Math.sin(t * 9.5) * 3.5 * s;
     const ay = 0;
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 3.6 * s;

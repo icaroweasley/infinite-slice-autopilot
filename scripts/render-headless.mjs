@@ -116,6 +116,7 @@ export async function renderHeadlessVideo({
   envId = 'classic-viral',
   envPrompt = '',
   handle,
+  chapterLabel = '',
   width,
   height,
   fps,
@@ -125,6 +126,7 @@ export async function renderHeadlessVideo({
   showHud,
   ctaOutro,
   outputName,
+  heroFramePath = '',
   serverUrl,
   onProgress,
 } = {}) {
@@ -228,6 +230,7 @@ export async function renderHeadlessVideo({
         envId,
         envPrompt,
         handle: HANDLE,
+        chapterLabel,
         width: W,
         height: H,
         rounds: ROUNDS,
@@ -263,9 +266,11 @@ export async function renderHeadlessVideo({
     ffmpegVideo.stderr.on('data', (d) => { ffmpegErr += d.toString(); });
 
     const dt = 1.0 / FPS;
-    const maxFrames = Math.ceil(FPS * 160);
+    const maxFrames = Math.ceil(FPS * 240);
     let frameCount = 0;
     const t0 = Date.now();
+    let heroSaved = false;
+    let round0DoneAt = -1;
 
     while (frameCount < maxFrames) {
       const frame = await page.evaluate(
@@ -274,6 +279,18 @@ export async function renderHeadlessVideo({
       );
 
       const jpgBuf = Buffer.from(frame.base64, 'base64');
+      if (heroFramePath && !heroSaved) {
+        if (frame.roundIndex === 0 && frame.cutsDone >= frame.cutsTarget) {
+          if (round0DoneAt < 0) round0DoneAt = frame.simTime;
+          // Capture clean HUD-free 3D WebGL frame ~0.35s after Round 1 slices finish & fall open revealing the solid colorful interior!
+          if (frame.simTime - round0DoneAt >= 0.35) {
+            const cleanB64 = await page.evaluate((q) => window.__HEADLESS_API__.captureClean3D(q), 0.94);
+            fs.mkdirSync(path.dirname(heroFramePath), { recursive: true });
+            fs.writeFileSync(heroFramePath, Buffer.from(cleanB64, 'base64'));
+            heroSaved = true;
+          }
+        }
+      }
       await writePipe(ffmpegVideo.stdin, jpgBuf);
       frameCount++;
 
@@ -286,6 +303,12 @@ export async function renderHeadlessVideo({
       }
 
       if (frame.done) break;
+    }
+    if (heroFramePath && !heroSaved) {
+      const cleanB64 = await page.evaluate((q) => window.__HEADLESS_API__.captureClean3D(q), 0.94);
+      fs.mkdirSync(path.dirname(heroFramePath), { recursive: true });
+      fs.writeFileSync(heroFramePath, Buffer.from(cleanB64, 'base64'));
+      heroSaved = true;
     }
     process.stdout.write('\n');
 
@@ -358,6 +381,7 @@ export async function renderHeadlessVideo({
       subtitle: summary.object.subtitle,
       maxCubes: summary.maxCubes,
       audioEventCount: summary.audioEvents.length,
+      heroFramePath: heroSaved ? heroFramePath : null,
     };
 
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');

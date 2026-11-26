@@ -1,0 +1,210 @@
+name: Daily 10+ Min YouTube Long-Form (16:9 60fps)
+
+on:
+  # Runs once every day at 18:00 UTC (14:00 local UTC-4, peak afternoon YouTube traffic)
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run only (render & stitch 10+ min MP4 + thumbnail, do NOT upload to YouTube)'
+        type: boolean
+        default: false
+      slots:
+        description: 'Number of 3D objects to slice (default 12 = ~11 min)'
+        type: string
+        default: '12'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: infinite-slice-longform-daily
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan 12 Fresh 3D Objects
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      slot_matrix: ${{ steps.plan.outputs.slot_matrix }}
+      skip: ${{ steps.guard.outputs.skip }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Guard (check YouTube secrets & daily anti-duplicate)
+        id: guard
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "schedule" ] && { [ -z "$YT_CLIENT_ID" ] || [ -z "$YT_CLIENT_SECRET" ] || [ -z "$YT_REFRESH_TOKEN" ]; }; then
+            echo "YouTube OAuth secrets not configured — skipping daily long-form schedule."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            git fetch origin main && git reset --hard origin/main
+            SKIP_DUP=$(node -e '
+              const fs = require("fs");
+              try {
+                const h = JSON.parse(fs.readFileSync("data/history.json", "utf8"));
+                const times = (h.entries || [])
+                  .filter((e) => e.format === "youtube-longform" && e.status === "published")
+                  .map((e) => Date.parse(e.publishedAt || e.createdAt))
+                  .filter((t) => Number.isFinite(t));
+                if (!times.length) { console.log("false"); process.exit(0); }
+                const ageH = (Date.now() - Math.max(...times)) / 3600000;
+                console.error(`[longform-guard] Latest 10-min episode was ${ageH.toFixed(2)}h ago.`);
+                console.log(ageH < 20 ? "true" : "false");
+              } catch { console.log("false"); }
+            ')
+            if [ "$SKIP_DUP" = "true" ]; then
+              echo "Daily 10+ min episode already published within the last 20h — skipping duplicate."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node.js 22
+        if: steps.guard.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        if: steps.guard.outputs.skip != 'true'
+        run: npm ci || npm install
+
+      - name: Plan 12 Non-Repeated 3D Objects + Backup Candidates
+        id: plan
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          SLOTS="${{ inputs.slots || '12' }}"
+          node scripts/longform-plan.mjs --slots "$SLOTS" --backups 2 --width 1280 --height 720 --fps 60 --rounds 10,50,100,250,500,1000 --scale 0.85 --out output/longform/plan.json
+          MATRIX=$(node -e "const n = Math.max(1, Math.min(20, Number('$SLOTS') || 12)); console.log(JSON.stringify(Array.from({length:n},(_,i)=>i+1)));")
+          echo "slot_matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+      - name: Upload episode plan artifact
+        if: steps.guard.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: longform-plan
+          path: output/longform/plan.json
+          retention-days: 1
+
+  render-slot:
+    name: Render 16:9 Object #${{ matrix.slot }}
+    needs: plan
+    if: needs.plan.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        slot: ${{ fromJson(needs.plan.outputs.slot_matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download episode plan
+        uses: actions/download-artifact@v4
+        with:
+          name: longform-plan
+          path: output/longform
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install FFmpeg & Playwright Chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          npm ci || npm install
+          npx playwright-core install chromium --with-deps
+
+      - name: Render 16:9 60fps 3D Clip (Slot #${{ matrix.slot }})
+        run: |
+          node scripts/longform-render-slot.mjs --plan output/longform/plan.json --slot ${{ matrix.slot }} --outDir output/longform
+
+      - name: Upload rendered slot clip & hero frame
+        uses: actions/upload-artifact@v4
+        with:
+          name: longform-slot-${{ matrix.slot }}
+          path: output/longform/slot-*
+          retention-days: 1
+
+  stitch-and-publish:
+    name: Stitch 10+ Min Movie, Thumbnail & Publish to YouTube
+    needs: [plan, render-slot]
+    if: always() && needs.plan.outputs.skip != 'true' && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download plan & all rendered clips
+        uses: actions/download-artifact@v4
+        with:
+          pattern: longform-*
+          path: output/longform
+          merge-multiple: true
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install FFmpeg & Chromium (for 1280x720 Thumbnail)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          npm ci || npm install
+          npx playwright-core install chromium --with-deps
+
+      - name: Stitch 10+ Min 16:9 MP4, Generate Thumbnail & Publish to YouTube
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            node scripts/longform-stitch-publish.mjs --dir output/longform --dry-run
+          else
+            node scripts/longform-stitch-publish.mjs --dir output/longform --publish
+          fi
+
+      - name: Upload Thumbnail & Manifest Preview Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: longform-episode-summary
+          path: |
+            output/longform/episode-*-thumbnail.jpg
+            output/longform/episode-*-manifest.json
+          retention-days: 3
+
+      - name: Commit updated anti-repetition history.json
+        if: inputs.dry_run != true
+        run: |
+          git config user.name "Infinite Slice Bot"
+          git config user.email "bot@infinite-slice.local"
+          rm -rf engine/public/runtime-model
+          git checkout -- engine/ 2>/dev/null || true
+          node scripts/merge-history.mjs

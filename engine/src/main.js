@@ -61,6 +61,10 @@ if (isHeadless) {
         cubes: Math.round(engine.targetCubes),
       };
     },
+    captureClean3D(quality = 0.94) {
+      const dataUrl = engine.renderer.domElement.toDataURL('image/jpeg', quality);
+      return dataUrl.slice(dataUrl.indexOf(',') + 1);
+    },
     getSummary() {
       return {
         durationSec: Number(engine.simTime.toFixed(3)),

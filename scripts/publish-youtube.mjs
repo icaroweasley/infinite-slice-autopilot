@@ -210,6 +210,192 @@ async function publishViaYouTubeDataApi(videoPath, meta, privacyStatus = 'public
   return { provider: 'youtube-api', videoId: upJson.id, privacyStatus: upJson.status?.privacyStatus, url };
 }
 
+/**
+ * Sets a custom 1280x720 JPEG thumbnail on an uploaded YouTube video (non-fatal if channel lacks custom-thumb verification).
+ */
+export async function setYouTubeThumbnail(videoId, thumbnailPath, accessTokenOverride = null) {
+  if (!thumbnailPath || !fs.existsSync(thumbnailPath)) return { set: false, reason: 'no thumbnail file' };
+  const accessToken = accessTokenOverride || (await getGoogleAccessToken());
+  if (!accessToken) return { set: false, reason: 'no access token' };
+
+  const thumbBuf = fs.readFileSync(thumbnailPath);
+  const res = await fetch(
+    `https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${encodeURIComponent(videoId)}&uploadType=media`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'image/jpeg',
+        'Content-Length': String(thumbBuf.length),
+      },
+      body: thumbBuf,
+    }
+  );
+  if (!res.ok) {
+    const errText = await res.text();
+    console.warn(`[youtube] Custom thumbnail warning (${res.status}): ${errText.slice(0, 260)}`);
+    return { set: false, status: res.status, error: errText.slice(0, 260) };
+  }
+  const json = await res.json();
+  console.log(`[youtube] Custom 16:9 thumbnail applied to ${videoId}!`);
+  return { set: true, items: json.items || [] };
+}
+
+/**
+ * Chunked Resumable Upload for YouTube Long-Form Videos (10+ min, 150-500 MB MP4) + Custom Thumbnail.
+ * Uses 16 MB chunks (multiple of 256 KB required by Google Resumable Upload API) with per-chunk retry.
+ */
+export async function publishYouTubeLongForm({
+  videoPath,
+  thumbnailPath = '',
+  title,
+  description,
+  tags = [],
+  privacyStatus = null,
+  dryRun = false,
+}) {
+  loadDotEnv();
+  const absVideo = path.isAbsolute(videoPath) ? videoPath : path.resolve(ROOT, videoPath);
+  if (!fs.existsSync(absVideo)) {
+    throw new Error(`Long-form video not found: ${absVideo}`);
+  }
+
+  const stat = fs.statSync(absVideo);
+  const totalBytes = stat.size;
+  const effectivePrivacy = privacyStatus || process.env.YT_PRIVACY_STATUS || 'public';
+  const cleanTitle = String(title || '10 Minutes of Oddly Satisfying 3D Slicing ASMR').slice(0, 100);
+  const cleanDesc = String(description || '').slice(0, 4950);
+  const cleanTags = (Array.isArray(tags) ? tags : []).slice(0, 30);
+
+  if (dryRun) {
+    console.log(`\n[youtube-longform DRY-RUN] Would upload ${(totalBytes / 1048576).toFixed(1)} MB -> ${absVideo}`);
+    console.log('Title:', cleanTitle);
+    console.log('Thumbnail:', thumbnailPath || '(none)');
+    console.log('Description:\n' + cleanDesc);
+    return { provider: 'dry-run', title: cleanTitle, totalBytes };
+  }
+
+  const accessToken = await getGoogleAccessToken();
+  if (!accessToken) {
+    return { provider: 'skipped', reason: 'No YouTube OAuth credentials configured' };
+  }
+
+  console.log(
+    `[youtube-longform] Initializing chunked resumable upload (${(totalBytes / 1048576).toFixed(1)} MB, privacy=${effectivePrivacy})...`
+  );
+
+  const initRes = await fetch(
+    'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json; charset=UTF-8',
+        'X-Upload-Content-Length': String(totalBytes),
+        'X-Upload-Content-Type': 'video/mp4',
+      },
+      body: JSON.stringify({
+        snippet: {
+          title: cleanTitle,
+          description: cleanDesc,
+          tags: cleanTags,
+          categoryId: '24', // Entertainment
+          defaultLanguage: 'en',
+        },
+        status: {
+          privacyStatus: effectivePrivacy,
+          selfDeclaredMadeForKids: false,
+        },
+      }),
+    }
+  );
+
+  if (!initRes.ok) {
+    throw new Error(`YouTube long-form init failed (${initRes.status}): ${await initRes.text()}`);
+  }
+  const uploadUrl = initRes.headers.get('location');
+  if (!uploadUrl) {
+    throw new Error('YouTube long-form init returned no upload location header');
+  }
+
+  const CHUNK_SIZE = 16 * 1024 * 1024; // 16 MB (exact multiple of 256 KB)
+  const fd = fs.openSync(absVideo, 'r');
+  let offset = 0;
+  let uploadedJson = null;
+
+  try {
+    let chunkIdx = 0;
+    const totalChunks = Math.ceil(totalBytes / CHUNK_SIZE);
+    while (offset < totalBytes) {
+      chunkIdx++;
+      const len = Math.min(CHUNK_SIZE, totalBytes - offset);
+      const buf = Buffer.allocUnsafe(len);
+      fs.readSync(fd, buf, 0, len, offset);
+      const end = offset + len - 1;
+
+      let ok = false;
+      let lastErr = '';
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const res = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'video/mp4',
+            'Content-Length': String(len),
+            'Content-Range': `bytes ${offset}-${end}/${totalBytes}`,
+          },
+          body: buf,
+        });
+
+        if (res.status === 308) {
+          console.log(`[youtube-longform] Chunk ${chunkIdx}/${totalChunks} accepted (${Math.round(((end + 1) / totalBytes) * 100)}%)`);
+          ok = true;
+          break;
+        }
+        if (res.status === 200 || res.status === 201) {
+          uploadedJson = await res.json();
+          console.log(`[youtube-longform] Final chunk ${chunkIdx}/${totalChunks} completed (100%)!`);
+          ok = true;
+          break;
+        }
+        lastErr = `HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`;
+        console.warn(`[youtube-longform] Chunk ${chunkIdx} retry ${attempt}/3 after ${lastErr}`);
+        await new Promise((r) => setTimeout(r, 4000 * attempt));
+      }
+      if (!ok) {
+        throw new Error(`YouTube long-form chunk ${chunkIdx} failed after 3 retries: ${lastErr}`);
+      }
+      offset += len;
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+
+  if (!uploadedJson?.id) {
+    throw new Error('YouTube long-form upload finished without returning a video ID');
+  }
+
+  const videoId = uploadedJson.id;
+  const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  console.log(`[youtube-longform] PUBLISHED! Video ID: ${videoId} | Status: ${uploadedJson.status?.privacyStatus} | URL: ${watchUrl}`);
+
+  let thumbResult = { set: false };
+  if (thumbnailPath && fs.existsSync(thumbnailPath)) {
+    try {
+      thumbResult = await setYouTubeThumbnail(videoId, thumbnailPath, accessToken);
+    } catch (tErr) {
+      console.warn('[youtube-longform] Thumbnail upload warning:', tErr.message);
+    }
+  }
+
+  return {
+    provider: 'youtube-api-longform',
+    videoId,
+    privacyStatus: uploadedJson.status?.privacyStatus,
+    url: watchUrl,
+    thumbnailSet: Boolean(thumbResult.set),
+  };
+}
+
 export function hasYouTubeCredentials() {
   loadDotEnv();
   return Boolean(

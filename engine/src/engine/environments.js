@@ -608,21 +608,21 @@ export class EnvironmentManager {
     this.leafMesh.visible = false;
     this.boardGroup.add(this.leafMesh);
 
-    const counterGeo = new THREE.BoxGeometry(24, 0.8, 20);
+    const counterGeo = new THREE.BoxGeometry(36, 0.8, 30);
     this.counterMat = new THREE.MeshStandardMaterial({ color: 0x161b1c, roughness: 0.62, metalness: 0.12 });
     this.counterMesh = new THREE.Mesh(counterGeo, this.counterMat);
     this.counterMesh.position.set(0, -BOARD_H - 0.4, 0.5);
     this.counterMesh.receiveShadow = true;
     this.group.add(this.counterMesh);
 
-    const backWallGeo = new THREE.PlaneGeometry(24, 14);
+    const backWallGeo = new THREE.PlaneGeometry(36, 18);
     this.wallMat = new THREE.MeshStandardMaterial({ roughness: 0.32, metalness: 0.08 });
     this.backWall = new THREE.Mesh(backWallGeo, this.wallMat);
     this.backWall.position.set(0, 6.2, -3.55);
     this.backWall.receiveShadow = true;
     this.group.add(this.backWall);
 
-    const sideWallGeo = new THREE.PlaneGeometry(20, 14);
+    const sideWallGeo = new THREE.PlaneGeometry(30, 18);
     this.sideWall = new THREE.Mesh(sideWallGeo, this.wallMat);
     this.sideWall.rotation.y = Math.PI * 0.5;
     this.sideWall.position.set(-4.35, 6.2, 2.0);

@@ -33,6 +33,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Smart guard (secrets + 4.5h anti-duplicate check for backup schedule)
         id: guard
@@ -47,11 +49,13 @@ jobs:
             exit 0
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
+            git fetch origin main && git reset --hard origin/main
             SHOULD_SKIP=$(node -e '
               const fs = require("fs");
               try {
                 const h = JSON.parse(fs.readFileSync("data/history.json", "utf8"));
                 const times = (h.entries || [])
+                  .filter((e) => !String(e.format || "").startsWith("youtube-longform"))
                   .filter((e) => e.status === "published" || e.publishedAt || e.publish?.mediaId)
                   .map((e) => Date.parse(e.publishedAt || e.createdAt))
                   .filter((t) => Number.isFinite(t));
