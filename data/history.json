@@ -1672,6 +1672,60 @@
           "url": "https://www.youtube.com/shorts/JGh1Gtjcx28"
         }
       }
+    },
+    {
+      "id": "slice-1795668754421",
+      "createdAt": "2026-11-26T04:52:34.421Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "food_lychee_01",
+      "interiorStyle": "lychee-core",
+      "solidRatio": 0.4466,
+      "slug": "3d-exotic-lychee-fruit",
+      "name": "Exotic Lychee Fruit",
+      "englishName": "Exotic Lychee Fruit",
+      "cutterId": "custom",
+      "cutterPrompt": "Mirror-polished Japanese chef knife with dark walnut handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Brushed copper metallic Michelin slab",
+      "envId": "custom",
+      "envPrompt": "Warm terracotta sunset plaster atelier",
+      "conceptSummary": "Exotic Lychee Fruit [polyhaven:food_lychee_01 | interior=lychee-core] | blade=Mirror-polished Japanese chef knife with dark walnut handle | board=Brushed copper metallic Michelin slab | studio=Warm terracotta sunset plaster atelier",
+      "rounds": [
+        10,
+        50,
+        250,
+        1000
+      ],
+      "maxCubes": 17543715,
+      "durationSec": 34.35,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-exotic-lychee-fruit-warm-terracotta-sunset-plaster-a-2026-11-26T04-39-26.mp4",
+      "caption": "Slicing a Exotic Lychee Fruit 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-26T04:53:31.221Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869432878684267",
+        "mediaId": "18031082741698469",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869432878684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "2683886488711312",
+          "postId": "122102915265557835"
+        },
+        "caption": "Slicing a Exotic Lychee Fruit 1,000 times… wait for the inside 😳🔪\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "nCm5DQ71weA",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/nCm5DQ71weA"
+        }
+      }
     }
   ]
 }
