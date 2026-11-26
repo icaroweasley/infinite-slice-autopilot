@@ -1780,6 +1780,546 @@
           "url": "https://www.youtube.com/shorts/_QyvMVI9ay0"
         }
       }
+    },
+    {
+      "id": "slice-1795699666644",
+      "createdAt": "2026-11-26T13:27:46.644Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "croissant",
+      "interiorStyle": "croissant-pastry",
+      "solidRatio": 0.4373,
+      "slug": "3d-flaky-golden-croissant",
+      "name": "Flaky Golden Croissant",
+      "englishName": "Flaky Golden Croissant",
+      "cutterId": "custom",
+      "cutterPrompt": "Mirror-polished Japanese chef knife with dark walnut handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Black volcanic stone with glowing orange magma veins",
+      "envId": "custom",
+      "envPrompt": "Warm terracotta sunset plaster atelier",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 11544499,
+      "durationSec": 57.283333,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.625Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666647",
+      "createdAt": "2026-11-26T13:27:46.647Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "garden_gnome",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.2677,
+      "slug": "3d-ceramic-garden-gnome",
+      "name": "Ceramic Garden Gnome",
+      "englishName": "Ceramic Garden Gnome",
+      "cutterId": "custom",
+      "cutterPrompt": "Neon purple plasma lightsaber",
+      "surfaceId": "custom",
+      "surfacePrompt": "Coral peach ceramic checkerboard tile cutting board",
+      "envId": "custom",
+      "envPrompt": "Warm fluted wood Japanese minimalist studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 8122968,
+      "durationSec": 57.283333,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.646Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666649",
+      "createdAt": "2026-11-26T13:27:46.649Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "baseball_01",
+      "interiorStyle": "baseball-core",
+      "solidRatio": 0.5574,
+      "slug": "3d-pro-baseball",
+      "name": "Pro Stitched Baseball",
+      "englishName": "Pro Stitched Baseball",
+      "cutterId": "custom",
+      "cutterPrompt": "Blue Damascus steel samurai katana with gold guard",
+      "surfaceId": "custom",
+      "surfacePrompt": "Maple wood and amethyst purple epoxy resin river board",
+      "envId": "custom",
+      "envPrompt": "Turquoise coastal spa hex mosaic studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 21779517,
+      "durationSec": 57.316667,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.648Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666650",
+      "createdAt": "2026-11-26T13:27:46.650Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "american_football",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.4723,
+      "slug": "3d-american-football",
+      "name": "Leather American Football",
+      "englishName": "Leather American Football",
+      "cutterId": "custom",
+      "cutterPrompt": "Chrome steel pastry scraper blade",
+      "surfaceId": "custom",
+      "surfacePrompt": "Natural green Japanese bamboo cutting board",
+      "envId": "custom",
+      "envPrompt": "Cyberpunk violet neon brushed metal studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 16621767,
+      "durationSec": 57.3,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.650Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666652",
+      "createdAt": "2026-11-26T13:27:46.652Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "food_pears_asian_01",
+      "interiorStyle": "pear-flesh",
+      "solidRatio": 0.1626,
+      "slug": "3d-asian-golden-pear",
+      "name": "Golden Asian Pear",
+      "englishName": "Golden Asian Pear",
+      "cutterId": "custom",
+      "cutterPrompt": "Brushed titanium santoku knife with coral handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Brushed copper metallic Michelin slab",
+      "envId": "custom",
+      "envPrompt": "Mint sage Nordic daylight ceramic tile studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 5819374,
+      "durationSec": 57.283333,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.651Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666653",
+      "createdAt": "2026-11-26T13:27:46.653Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "yellow_onion",
+      "interiorStyle": "onion-rings",
+      "solidRatio": 0.4064,
+      "slug": "3d-golden-yellow-onion",
+      "name": "Golden Yellow Onion",
+      "englishName": "Golden Yellow Onion",
+      "cutterId": "custom",
+      "cutterPrompt": "Luxury metallic black credit card with gold chip",
+      "surfaceId": "custom",
+      "surfacePrompt": "White Carrara marble slab with gold veins",
+      "envId": "custom",
+      "envPrompt": "Peach coral warm summer tile studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 15692864,
+      "durationSec": 57.333333,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.653Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666655",
+      "createdAt": "2026-11-26T13:27:46.655Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "sweet_potato",
+      "interiorStyle": "sweet-potato",
+      "solidRatio": 0.5273,
+      "slug": "3d-sweet-potato",
+      "name": "Sweet Potato",
+      "englishName": "Sweet Potato",
+      "cutterId": "custom",
+      "cutterPrompt": "Mint frosted crystal butcher cleaver",
+      "surfaceId": "custom",
+      "surfacePrompt": "Frosted mint ice glass slab with glow edge",
+      "envId": "custom",
+      "envPrompt": "Amalfi lemon yellow sunny Mediterranean studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 18934451,
+      "durationSec": 57.3,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.654Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666656",
+      "createdAt": "2026-11-26T13:27:46.656Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "food_ginger_01",
+      "interiorStyle": "ginger-root",
+      "solidRatio": 0.2946,
+      "slug": "3d-fresh-ginger-root",
+      "name": "Fresh Ginger Root",
+      "englishName": "Fresh Ginger Root",
+      "cutterId": "custom",
+      "cutterPrompt": "Rose pink crystal katana sword",
+      "surfaceId": "custom",
+      "surfacePrompt": "Rose pink marble slab with gold veins",
+      "envId": "custom",
+      "envPrompt": "Espresso bronze industrial copper kitchen",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 7598956,
+      "durationSec": 57.283333,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.656Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666658",
+      "createdAt": "2026-11-26T13:27:46.658Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "khronos",
+      "modelAssetId": "DamagedHelmet",
+      "interiorStyle": "tech-pcb",
+      "solidRatio": 0.3271,
+      "slug": "3d-scifi-cyber-helmet",
+      "name": "Sci-Fi Cyber Helmet",
+      "englishName": "Sci-Fi Cyber Helmet",
+      "cutterId": "custom",
+      "cutterPrompt": "Copper-forged serrated precision saw",
+      "surfaceId": "custom",
+      "surfacePrompt": "Deep emerald jade stone slab with gold veins",
+      "envId": "custom",
+      "envPrompt": "Cream travertine warm daylight Italian kitchen",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 13177226,
+      "durationSec": 57.333333,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.657Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666659",
+      "createdAt": "2026-11-26T13:27:46.659Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "khronos",
+      "modelAssetId": "MosquitoInAmber",
+      "interiorStyle": "amethyst-crystal",
+      "solidRatio": 0.4853,
+      "slug": "3d-jurassic-amber-fossil",
+      "name": "Jurassic Amber Fossil",
+      "englishName": "Jurassic Amber Fossil",
+      "cutterId": "custom",
+      "cutterPrompt": "Cyan ice plasma lightsaber",
+      "surfaceId": "custom",
+      "surfacePrompt": "Frosted lavender glass slab with glow edge",
+      "envId": "custom",
+      "envPrompt": "Pastel blush pink Parisian patisserie tile kitchen",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 19156436,
+      "durationSec": 57.35,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.659Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666661",
+      "createdAt": "2026-11-26T13:27:46.661Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "khronos",
+      "modelAssetId": "ToyCar",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.2187,
+      "slug": "3d-vintage-toy-car",
+      "name": "Vintage Toy Race Car",
+      "englishName": "Vintage Toy Race Car",
+      "cutterId": "custom",
+      "cutterPrompt": "Glowing lava magma cleaver",
+      "surfaceId": "custom",
+      "surfacePrompt": "Sky blue pastel ceramic checkerboard tile cutting board",
+      "envId": "custom",
+      "envPrompt": "Soft sky blue Scandinavian tile studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 7353733,
+      "durationSec": 57.366667,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.660Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "slice-1795699666663",
+      "createdAt": "2026-11-26T13:27:46.663Z",
+      "status": "published",
+      "format": "youtube-longform-slot",
+      "source": "cloud-longform-ep1",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "vintage_lighter",
+      "interiorStyle": "magma-core",
+      "solidRatio": 0.7119,
+      "slug": "3d-chrome-zippo-lighter",
+      "name": "Vintage Metal Lighter",
+      "englishName": "Vintage Metal Lighter",
+      "cutterId": "custom",
+      "cutterPrompt": "Solid 24k gold Chinese cleaver",
+      "surfaceId": "custom",
+      "surfacePrompt": "Warm honey oak wood butcher block",
+      "envId": "custom",
+      "envPrompt": "Deep midnight navy luxury hex mosaic boutique studio",
+      "rounds": [
+        10,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "maxCubes": 17453657,
+      "durationSec": 58.616667,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publishedAt": "2026-11-26T13:27:46.662Z",
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
+    },
+    {
+      "id": "longform-ep1-1795699666664",
+      "createdAt": "2026-11-26T13:27:46.664Z",
+      "publishedAt": "2026-11-26T13:27:46.664Z",
+      "status": "published",
+      "format": "youtube-longform",
+      "episodeNumber": 1,
+      "englishName": "11+ Minutes of Oddly Satisfying 3D Slicing ASMR — 12 Impossible Objects (60 FPS) #1",
+      "objectCount": 12,
+      "durationSec": 692.1,
+      "durationFormatted": "11:32",
+      "totalCubes": 163255448,
+      "resolution": "1280x720",
+      "fps": 60,
+      "publish": {
+        "youtube": {
+          "provider": "youtube-api-longform",
+          "videoId": "cPqI3MBX4pk",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/watch?v=cPqI3MBX4pk",
+          "thumbnailSet": true
+        }
+      }
     }
   ]
 }
