@@ -1726,6 +1726,60 @@
           "url": "https://www.youtube.com/shorts/nCm5DQ71weA"
         }
       }
+    },
+    {
+      "id": "slice-1795689218667",
+      "createdAt": "2026-11-26T10:33:38.667Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "khronos",
+      "modelAssetId": "MaterialsVariantsShoe",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.237,
+      "slug": "3d-designer-sneaker",
+      "name": "Designer Sneaker",
+      "englishName": "Designer Sneaker",
+      "cutterId": "custom",
+      "cutterPrompt": "Rose pink crystal katana sword",
+      "surfaceId": "custom",
+      "surfacePrompt": "Black volcanic stone with glowing orange magma veins",
+      "envId": "custom",
+      "envPrompt": "Emerald botanical ceramic fluted wall studio",
+      "conceptSummary": "Designer Sneaker [khronos:MaterialsVariantsShoe | interior=cake-rainbow] | blade=Rose pink crystal katana sword | board=Black volcanic stone with glowing orange magma veins | studio=Emerald botanical ceramic fluted wall studio",
+      "rounds": [
+        10,
+        50,
+        250,
+        1000
+      ],
+      "maxCubes": 7653597,
+      "durationSec": 34.383,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-designer-sneaker-emerald-botanical-ceramic-fluted-2026-11-26T10-11-37.mp4",
+      "caption": "Watch what happens to a Designer Sneaker at 1,000 cuts 🔊✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-26T10:34:28.909Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869475589684267",
+        "mediaId": "18648061777025042",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869475589684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1493173639401268",
+          "postId": "122103129561557835"
+        },
+        "caption": "Watch what happens to a Designer Sneaker at 1,000 cuts 🔊✨\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "_QyvMVI9ay0",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/_QyvMVI9ay0"
+        }
+      }
     }
   ]
 }
