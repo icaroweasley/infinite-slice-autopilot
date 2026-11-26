@@ -486,11 +486,12 @@ async function main() {
       throw new Error('ALL 3D model candidates failed Pre-Flight QA — aborting safely without publishing!');
     }
 
-    // 5. Render Full Production 60 FPS MP4 + Lossless 48 kHz ASMR Audio + Cheerful "LINK IN BIO" Plim Outro!
+    // 5. Render High-Retention ~23-25s 60 FPS MP4 (3 punchy rounds -> 70-85%+ Reels/Shorts watch-time & loops!)
+    //    (Daily 11+ min YouTube Long-Form uses 6 slow ASMR rounds separately in daily-youtube-longform.yml)
     const roundPresets = [
-      [10, 50, 250, 1000],
-      [10, 100, 500, 1000],
-      [10, 50, 100, 1000],
+      [10, 100, 1000],
+      [10, 150, 1000],
+      [10, 250, 1000],
     ];
     const roundsArg = getFlag('rounds', quick ? '10,100,1000' : null);
     const rounds = roundsArg
@@ -500,7 +501,7 @@ async function main() {
     const resStr = getFlag('res', quick ? '540x960' : `${cfg.render.width || 720}x${cfg.render.height || 1280}`);
     const [width, height] = resStr.split('x').map(Number);
     const fps = Number(getFlag('fps', quick ? '30' : String(cfg.render.fps || 60)));
-    const durationScale = quick ? 0.55 : Number(getFlag('scale', '0.72'));
+    const durationScale = quick ? 0.55 : Number(getFlag('scale', '0.70'));
 
     const conceptSummary =
       `${approved.asset.englishName} [${approved.asset.source}:${approved.asset.assetId} | interior=${approved.asset.interiorStyle}] ` +

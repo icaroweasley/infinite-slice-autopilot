@@ -21,23 +21,63 @@ function loadDotEnv() {
   }
 }
 
+function articleFor(phrase) {
+  const clean = String(phrase || '').trim();
+  return /^[aeiou8]/i.test(clean) ? 'an' : 'a';
+}
+
+function formatCompactCubes(n) {
+  const num = Number(n || 0);
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `${Math.round(num / 1_000)}K`;
+  return String(num);
+}
+
 export function buildEnglishCaption(manifest, config) {
   const objName = manifest.englishName || manifest.name || 'this object';
+  const aAn = articleFor(objName);
   const maxCuts = Math.max(...(manifest.rounds || [1000])).toLocaleString('en-US');
-  const maxCubes = (manifest.maxCubes || 0).toLocaleString('en-US');
+  const compactCubes = formatCompactCubes(manifest.maxCubes);
   const handle = manifest.handle || config.brand?.handle || '@atomslice3d';
-  const hashtags = (config.publishing?.hashtags || ['#satisfying', '#3dart', '#asmr', '#reels']).join(' ');
+  const hashtags = (config.publishing?.hashtags || [
+    '#oddlysatisfying',
+    '#asmr',
+    '#3dart',
+    '#satisfying',
+    '#3danimation',
+  ])
+    .slice(0, 5)
+    .join(' ');
 
-  const hooks = [
-    `Slicing a ${objName} ${maxCuts} times… wait for the inside 😳🔪`,
-    `10 → ${maxCuts} cuts on a ${objName}. Final count: ${maxCubes} cubes 🤯`,
-    `Watch what happens to a ${objName} at ${maxCuts} cuts 🔊✨`,
-    `Cutting a ${objName} like butter until it turns to dust 🔪✨`,
-  ];
   const hash = [...objName].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const hooks = [
+    `Wait until you see what's inside this ${objName} at ${maxCuts} cuts 😳🔪`,
+    `10 → ${maxCuts} cuts on ${aAn} ${objName} = ${compactCubes} micro-cubes 🤯🔊`,
+    `Headphones ON 🎧 Slicing ${aAn} ${objName} ${maxCuts} times into dust 🔪✨`,
+    `Is this ${objName} real or CAKE? Wait for 0:06 👀✨`,
+  ];
   const hook = hooks[hash % hooks.length];
 
-  return `${hook}\n\nWhat impossible object should ${handle} slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment "SLICE" or tap the link in bio 🔗\n\n${hashtags}`;
+  const ctas = [
+    `Rate that final 1,000-cut crunch 1–10 👇`,
+    `Drop 1 object below — top comment gets sliced tomorrow 👇`,
+    `Send this to someone who needs 20 seconds of pure stress relief 😌↗️`,
+    `Did you guess what was inside before 0:06? Comment YES or NO 👇`,
+  ];
+  const cta = ctas[(hash + 1) % ctas.length];
+
+  return `${hook}\n\n${cta}\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (${handle}) • Create your own via link in bio 🔗\n\n${hashtags}`;
+}
+
+export function buildInstagramFirstComment(manifest) {
+  const objName = manifest.englishName || manifest.name || 'this';
+  const hash = [...objName].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const prompts = [
+    `Be honest — did you expect what was inside this ${objName}? 😳 What impossible object should I slice next? 👇`,
+    `Rate that 1,000-cut ASMR crunch from 1 to 10 🎧👇 Top comment gets sliced tomorrow!`,
+    `Most people don't make it to the 1,000-cut reveal 🤯 Drop the next object you want to see sliced 👇`,
+  ];
+  return prompts[hash % prompts.length];
 }
 
 async function uploadToCloudinary(videoPath) {
@@ -107,14 +147,20 @@ async function publishViaMetaGraph(videoPath, manifest, caption) {
 
   let creationId = null;
 
+  // Pick a vibrant mid-slice cover frame (~5.8s, right when Round 1 opens the colorful solid interior!)
+  const thumbOffsetMs = Math.round(
+    Math.min(6200, Math.max(4200, Number(manifest.durationSec || 24) * 235))
+  );
+
   if (videoUrl) {
     // 1A. Create Reels media container from public HTTPS video URL (Cloudinary or custom CDN)
-    console.log(`[publish] Creating Reels container on ${apiBase} via public video_url...`);
+    console.log(`[publish] Creating Reels container on ${apiBase} via public video_url (cover=${thumbOffsetMs}ms)...`);
     const createParams = new URLSearchParams({
       media_type: 'REELS',
       video_url: videoUrl,
       caption,
       share_to_feed: 'true',
+      thumb_offset: String(thumbOffsetMs),
       access_token: token,
     });
     const createRes = await fetch(`${apiBase}/${igUserId}/media?${createParams}`, { method: 'POST' });
@@ -128,12 +174,13 @@ async function publishViaMetaGraph(videoPath, manifest, caption) {
     const fileBuf = fs.readFileSync(videoPath);
     let lastUpErr = null;
     for (let attempt = 1; attempt <= 3; attempt++) {
-      console.log(`[publish] No Cloudinary/CDN configured — using direct Meta resumable binary upload on ${apiBase} (attempt ${attempt}/3)...`);
+      console.log(`[publish] No Cloudinary/CDN configured — using direct Meta resumable binary upload on ${apiBase} (cover=${thumbOffsetMs}ms, attempt ${attempt}/3)...`);
       const createParams = new URLSearchParams({
         media_type: 'REELS',
         upload_type: 'resumable',
         caption,
         share_to_feed: 'true',
+        thumb_offset: String(thumbOffsetMs),
         access_token: token,
       });
       const createRes = await fetch(`${apiBase}/${igUserId}/media?${createParams}`, { method: 'POST' });
@@ -208,7 +255,31 @@ async function publishViaMetaGraph(videoPath, manifest, caption) {
   if (!pubRes.ok || !pubJson.id) {
     throw new Error(`Meta Graph media_publish error: ${JSON.stringify(pubJson)}`);
   }
-  return { provider: isIgLogin ? 'instagram-api' : 'meta-graph', creationId, mediaId: pubJson.id, videoUrl };
+
+  // 4. Auto-post an engaging conversation-starter 1st comment (breaks the "0 comments" dead-zone!)
+  let firstCommentId = null;
+  try {
+    const commentText = buildInstagramFirstComment(manifest);
+    const cRes = await fetch(`${apiBase}/${pubJson.id}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        message: commentText,
+        access_token: token,
+      }),
+    });
+    const cJson = await cRes.json();
+    if (cRes.ok && cJson.id) {
+      firstCommentId = cJson.id;
+      console.log(`[publish] Auto-posted 1st engagement comment on Reel ${pubJson.id} (commentId=${firstCommentId})`);
+    } else {
+      console.warn(`[publish] 1st comment warning: ${JSON.stringify(cJson).slice(0, 200)}`);
+    }
+  } catch (cErr) {
+    console.warn(`[publish] 1st comment skipped: ${cErr.message}`);
+  }
+
+  return { provider: isIgLogin ? 'instagram-api' : 'meta-graph', creationId, mediaId: pubJson.id, videoUrl, firstCommentId };
 }
 
 /**

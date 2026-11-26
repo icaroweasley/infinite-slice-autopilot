@@ -21,44 +21,76 @@ function loadDotEnv() {
   }
 }
 
+function articleFor(phrase) {
+  const clean = String(phrase || '').trim();
+  return /^[aeiou8]/i.test(clean) ? 'an' : 'a';
+}
+
+function formatCompactCubes(n) {
+  const num = Number(n || 0);
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `${Math.round(num / 1_000)}K`;
+  return '';
+}
+
 export function buildYouTubeMetadata(manifest, config) {
   const objName = manifest.englishName || manifest.name || 'Impossible Object';
+  const aAn = articleFor(objName);
   const maxCuts = Math.max(...(manifest.rounds || [1000])).toLocaleString('en-US');
   const maxCubes = (manifest.maxCubes || 0).toLocaleString('en-US');
+  const compactCubes = formatCompactCubes(manifest.maxCubes);
   const handle = manifest.handle || config.brand?.handle || '@atomslice3d';
+  const cubesTag = compactCubes ? `${compactCubes} Cubes! ` : '';
 
+  // Data-backed viral Shorts title formulas (top channel performers: 2,000 - 3,500+ views!)
   const titles = [
-    `${objName} vs ${maxCuts} Cuts 🤯 #shorts`,
-    `Slicing a ${objName} ${maxCuts} Times! 🔪 #shorts`,
-    `10 → ${maxCuts} Cuts on a ${objName} 😳 #shorts`,
+    `10 → ${maxCuts} Cuts on ${aAn} ${objName}! ${cubesTag}🤯 #shorts #asmr #satisfying`,
+    `Wait for the inside of this ${objName} 😳🔪 ${maxCuts} Cuts #shorts #asmr #satisfying`,
+    `Slicing ${aAn} ${objName} ${maxCuts} Times! ${cubesTag}🔊 #shorts #asmr #satisfying`,
   ];
   const hash = [...objName].reduce((a, c) => a + c.charCodeAt(0), 0);
-  const title = titles[hash % titles.length].slice(0, 100);
+  let title = titles[hash % titles.length];
+  if (title.length > 100) {
+    title = `10 → ${maxCuts} Cuts on ${aAn} ${objName}! 🤯 #shorts #asmr #satisfying`.slice(0, 100);
+  }
 
   const description = [
-    `10 → ${maxCuts} cuts on a ${objName}${maxCubes && maxCubes !== '0' ? ` — final count: ${maxCubes} micro-cubes` : ''}! 🔪✨`,
+    `Headphones ON 🎧 Watch ${aAn} ${objName} get sliced from 10 → ${maxCuts} cuts${maxCubes && maxCubes !== '0' ? ` into ${maxCubes} micro-cubes` : ''}! 🔪✨`,
     ``,
-    `What impossible object should ${handle} slice next? Comment below 👇`,
+    `👇 Rate that final 1,000-cut crunch from 1–10! Comment the next impossible object ${handle} should slice tomorrow!`,
     ``,
-    `Create your own 60 FPS 3D slicing videos with Infinite Slice 3D:`,
+    `🎬 Want 11+ MINUTES of non-stop 60 FPS 3D Slicing ASMR? Watch our daily long-form marathons right here on @atomslice3d!`,
+    ``,
+    `🎨 Create your own 60 FPS 3D slicing videos:`,
     `https://atomslice3d.netlify.app`,
     ``,
-    `#shorts #satisfying #asmr #3dart #oddlysatisfying #slicing #infiniteslice #3danimation`,
+    `#shorts #oddlysatisfying #asmr #satisfying #3dart #slicing #infiniteslice #3danimation #1000cuts #notalking`,
   ].join('\n');
 
   const tags = [
     'shorts',
-    'satisfying',
+    'youtube shorts',
     'oddly satisfying',
+    'satisfying',
+    'satisfying video',
     'asmr',
+    'asmr slicing',
+    'no talking asmr',
     '3d animation',
+    '3d art',
+    '3d slicing',
     'slicing',
     '1000 cuts',
+    'infinite slice',
+    'kinetic sand',
+    'is it cake',
+    'relaxing',
+    'stress relief',
     objName.toLowerCase(),
     'atomslice3d',
   ];
 
-  const tiktokCaption = `${title.replace(/\s*#shorts/i, '').trim()} — ${maxCubes && maxCubes !== '0' ? `${maxCubes} cubes ` : ''}#satisfying #asmr #3dart #oddlysatisfying #fyp #infiniteslice`;
+  const tiktokCaption = `Wait for the inside of this ${objName} 😳🔪 ${maxCuts} cuts${compactCubes ? ` = ${compactCubes} cubes` : ''} #oddlysatisfying #asmr #3dart #satisfying #fyp`;
 
   return { title, description, tags, tiktokCaption };
 }

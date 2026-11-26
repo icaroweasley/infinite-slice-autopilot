@@ -264,27 +264,28 @@ function buildLongFormMetadata({ episodeNumber, slots, chapters, totalDurationSe
     .filter(Boolean);
 
   const titleCandidates = [
-    `${mins}+ Minutes of Oddly Satisfying 3D Slicing ASMR — ${count} Impossible Objects (60 FPS) #${episodeNumber}`,
-    `Slicing ${featured[0] || 'Impossible Objects'}, ${featured[1] || '3D Icons'} & ${Math.max(1, count - 2)} More! (${mins} Min 3D ASMR)`,
-    `${mins} Minutes of 1,000 Cuts 3D ASMR — ${count} Solid Objects Sliced Into Millions of Cubes #${episodeNumber}`,
+    `${mins}+ Minutes of Oddly Satisfying 3D Slicing ASMR — ${count} Objects (No Talking, 60 FPS) #${episodeNumber}`,
+    `Slicing ${featured[0] || 'Impossible Objects'}, ${featured[1] || '3D Icons'} & ${Math.max(1, count - 2)} More! (${mins} Min ASMR 60 FPS)`,
+    `Oddly Satisfying 3D Slicing ASMR for Sleep & Stress Relief (${mins} Min • ${count} Objects) #${episodeNumber}`,
   ];
   const title = titleCandidates[(episodeNumber - 1) % titleCandidates.length].slice(0, 100);
 
   const chapterLines = chapters.map((c) => `${fmtTimestamp(c.startSec)} ${c.label}`);
   const description = [
-    `Sit back, relax, and enjoy ${mins}+ minutes of pure 60 FPS 3D slicing ASMR — zero talking, ${count} brand-new impossible objects, each sliced from 10 → 1,000 cuts into ${totalCubes.toLocaleString('en-US')}+ total micro-cubes! 🔪✨`,
+    `🎧 Headphones ON! Relax, unwind, and enjoy ${mins}+ minutes of pure 60 FPS 3D slicing ASMR for sleep & stress relief — ZERO talking, ${count} brand-new impossible objects sliced from 10 → 1,000 cuts into ${totalCubes.toLocaleString('en-US')}+ total micro-cubes! 🔪✨`,
     ``,
-    `Every object features a unique 100% solid volumetric interior (rainbow cake, gold treasure, crystal geode, circuit boards, pastry layers & more) paired with custom studio acoustics.`,
+    `Every object hides a surprising 100% solid 3D interior (rainbow cake, gold treasure, amethyst geode, circuit boards, flaky pastry, magma core & more) paired with crisp 48 kHz studio ASMR acoustics.`,
     ``,
     `⏱️ CHAPTERS:`,
     ...chapterLines,
     ``,
-    `💬 Which of the ${count} objects was the most satisfying? Tell us the timestamp below!`,
+    `💬 Which of the ${count} objects gave you the best tingles? Drop the timestamp below — top suggestion gets sliced in Episode #${episodeNumber + 1}!`,
+    `🔔 Subscribe to @atomslice3d for a BRAND-NEW 10+ minute 60 FPS 3D ASMR marathon EVERY DAY!`,
     ``,
-    `🎨 Want to generate your own 60 FPS Infinite Slice 3D videos?`,
+    `🎨 Want to create your own 60 FPS Infinite Slice 3D videos?`,
     `https://atomslice3d.netlify.app`,
     ``,
-    `#oddlysatisfying #asmr #3dart #slicing #infiniteslice #3danimation #relaxing #notalking #satisfyingvideo #1000cuts #atomslice3d`,
+    `#oddlysatisfying #asmr #notalking #3dart #slicing #infiniteslice #3danimation #relaxing #sleepasmr #stressrelief #1000cuts #atomslice3d`,
   ].join('\n');
 
   const objTags = slots
@@ -294,16 +295,21 @@ function buildLongFormMetadata({ episodeNumber, slots, chapters, totalDurationSe
 
   const tags = [
     'oddly satisfying',
+    'oddly satisfying video',
+    'oddly satisfying compilation',
     'asmr',
+    'asmr no talking',
+    'asmr slicing',
     '3d slicing',
-    'satisfying video',
+    'satisfying video for sleep',
+    'stress relief asmr',
     '10 minutes oddly satisfying',
-    'no talking asmr',
     '3d animation',
     '1000 cuts',
+    'is it cake 3d',
     'kinetic sand',
     'relaxing video',
-    'sleep asmr',
+    '60fps asmr',
     'atomslice3d',
     ...objTags,
   ].slice(0, 28);
