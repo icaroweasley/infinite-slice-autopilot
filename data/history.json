@@ -2374,6 +2374,60 @@
           "url": "https://www.youtube.com/shorts/fDucY_YJRoI"
         }
       }
+    },
+    {
+      "id": "slice-1795732340768",
+      "createdAt": "2026-11-26T22:32:20.768Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "Television_01",
+      "interiorStyle": "tech-pcb",
+      "solidRatio": 0.7992,
+      "slug": "3d-retro-crt-television",
+      "name": "Retro CRT Television",
+      "englishName": "Retro CRT Television",
+      "cutterId": "custom",
+      "cutterPrompt": "Translucent sapphire diamond crystal blade",
+      "surfaceId": "custom",
+      "surfacePrompt": "Walnut wood and turquoise epoxy resin river board",
+      "envId": "custom",
+      "envPrompt": "Dusty lavender architectural minimalist studio",
+      "conceptSummary": "Retro CRT Television [polyhaven:Television_01 | interior=tech-pcb] | blade=Translucent sapphire diamond crystal blade | board=Walnut wood and turquoise epoxy resin river board | studio=Dusty lavender architectural minimalist studio",
+      "rounds": [
+        10,
+        250,
+        1000
+      ],
+      "maxCubes": 30504342,
+      "durationSec": 25.733,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-retro-crt-television-dusty-lavender-architectural-min-2026-11-26T22-20-14.mp4",
+      "caption": "Is this Retro CRT Television real or CAKE? Wait for 0:06 👀✨\n\nRate that final 1,000-cut crunch 1–10 👇\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-26T22:33:09.271Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869593801684267",
+        "mediaId": "18125867620919880",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869593801684267",
+        "firstCommentId": "17965272806998704",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1909983233302911",
+          "postId": "122103626967557835"
+        },
+        "caption": "Is this Retro CRT Television real or CAKE? Wait for 0:06 👀✨\n\nRate that final 1,000-cut crunch 1–10 👇\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "h1Expk4iqjg",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/h1Expk4iqjg"
+        }
+      }
     }
   ]
 }
