@@ -2320,6 +2320,60 @@
           "thumbnailSet": true
         }
       }
+    },
+    {
+      "id": "slice-1795710171911",
+      "createdAt": "2026-11-26T16:22:51.911Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "gso:BUNNY_RACER",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.2955,
+      "slug": "3d-wooden-bunny-racer",
+      "name": "Wooden Bunny Racer",
+      "englishName": "Wooden Bunny Racer",
+      "cutterId": "custom",
+      "cutterPrompt": "Electric violet carbon fiber chef knife with a glowing lime green edge",
+      "surfaceId": "custom",
+      "surfacePrompt": "Sun-soaked yellow terrazzo stone slab with chunky white and orange chips",
+      "envId": "custom",
+      "envPrompt": "Vibrant bubblegum pink geometric minimalist studio with soft sunlight",
+      "conceptSummary": "Wooden Bunny Racer [hf:gso:BUNNY_RACER | interior=cake-rainbow] | blade=Electric violet carbon fiber chef knife with a glowing lime green edge | board=Sun-soaked yellow terrazzo stone slab with chunky white and orange chips | studio=Vibrant bubblegum pink geometric minimalist studio with soft sunlight",
+      "rounds": [
+        10,
+        150,
+        1000
+      ],
+      "maxCubes": 11521233,
+      "durationSec": 25.567,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-wooden-bunny-racer-vibrant-bubblegum-pink-geometric-2026-11-26T16-11-47.mp4",
+      "caption": "This Wooden Bunny Racer is hiding a RAINBOW surprise at 1,000 cuts! 🐰🌈\n\nSend this to someone who needs 20 seconds of pure stress relief 😌↗️\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-26T16:23:39.593Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869530003684267",
+        "mediaId": "18340529806274016",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869530003684267",
+        "firstCommentId": "17979470433157231",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1867545324261217",
+          "postId": "122103403185557835"
+        },
+        "caption": "This Wooden Bunny Racer is hiding a RAINBOW surprise at 1,000 cuts! 🐰🌈\n\nSend this to someone who needs 20 seconds of pure stress relief 😌↗️\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "fDucY_YJRoI",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/fDucY_YJRoI"
+        }
+      }
     }
   ]
 }
