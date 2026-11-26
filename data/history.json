@@ -1618,6 +1618,60 @@
           "url": "https://www.youtube.com/shorts/pZ-g_4xXJNQ"
         }
       }
+    },
+    {
+      "id": "slice-1795667284587",
+      "createdAt": "2026-11-26T04:28:04.587Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "nasa:astronaut",
+      "interiorStyle": "galaxy-nebula",
+      "solidRatio": 0.1764,
+      "slug": "3d-nasa-astronaut",
+      "name": "NASA Space Astronaut",
+      "englishName": "NASA Space Astronaut",
+      "cutterId": "custom",
+      "cutterPrompt": "Solid 24k forged gold nakiri knife with an ivory and abalone handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Polished honey onyx stone slab with translucent golden edges",
+      "envId": "custom",
+      "envPrompt": "Warm pistachio pastel studio with curved architectural alcoves and soft morning daylight",
+      "conceptSummary": "NASA Space Astronaut [hf:nasa:astronaut | interior=galaxy-nebula] | blade=Solid 24k forged gold nakiri knife with an ivory and abalone handle | board=Polished honey onyx stone slab with translucent golden edges | studio=Warm pistachio pastel studio with curved architectural alcoves and soft morning daylight",
+      "rounds": [
+        10,
+        50,
+        250,
+        1000
+      ],
+      "maxCubes": 5468198,
+      "durationSec": 34.333,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-nasa-astronaut-warm-pistachio-pastel-studio-wit-2026-11-26T04-10-37.mp4",
+      "caption": "Wait until you see what's inside this NASA Astronaut at 1,000 cuts! 🌌🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+      "publishedAt": "2026-11-26T04:28:48.990Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869428186684267",
+        "mediaId": "18118918151028118",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869428186684267",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "2399330110602886",
+          "postId": "122102900163557835"
+        },
+        "caption": "Wait until you see what's inside this NASA Astronaut at 1,000 cuts! 🌌🤯\n\nWhat impossible object should @atomslice3d slice next? Comment below 👇\n\nWant to create your own 10 → 1,000 cuts 3D videos? Comment \"SLICE\" or tap the link in bio 🔗\n\n#satisfying #3dart #asmr #slicing #oddlysatisfying #kineticsand #3danimation #reels",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "JGh1Gtjcx28",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/JGh1Gtjcx28"
+        }
+      }
     }
   ]
 }
