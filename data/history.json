@@ -2482,6 +2482,60 @@
           "url": "https://www.youtube.com/shorts/PTRzeCzqPzo"
         }
       }
+    },
+    {
+      "id": "slice-1795774977881",
+      "createdAt": "2026-11-27T10:22:57.881Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "gso:CAR_CARRIER_TRAIN",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.3485,
+      "slug": "3d-wooden-toy-train",
+      "name": "Wooden Toy Train",
+      "englishName": "Wooden Toy Train",
+      "cutterId": "custom",
+      "cutterPrompt": "Emerald green plasma lightsaber",
+      "surfaceId": "custom",
+      "surfacePrompt": "Deep navy indigo marble slab with silver veins",
+      "envId": "custom",
+      "envPrompt": "Emerald botanical ceramic fluted wall studio",
+      "conceptSummary": "Wooden Toy Train [hf:gso:CAR_CARRIER_TRAIN | interior=cake-rainbow] | blade=Emerald green plasma lightsaber | board=Deep navy indigo marble slab with silver veins | studio=Emerald botanical ceramic fluted wall studio",
+      "rounds": [
+        10,
+        150,
+        1000
+      ],
+      "maxCubes": 6392425,
+      "durationSec": 25.55,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-wooden-toy-train-emerald-botanical-ceramic-fluted-2026-11-27T10-13-06.mp4",
+      "caption": "Headphones ON 🎧 Slicing a Wooden Toy Train 1,000 times into dust 🔪✨\n\nDid you guess what was inside before 0:06? Comment YES or NO 👇\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-27T10:23:56.241Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869669629684267",
+        "mediaId": "18081848453768842",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869669629684267",
+        "firstCommentId": "18448227463178804",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "2128686314678406",
+          "postId": "122104049565557835"
+        },
+        "caption": "Headphones ON 🎧 Slicing a Wooden Toy Train 1,000 times into dust 🔪✨\n\nDid you guess what was inside before 0:06? Comment YES or NO 👇\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "I-1OR0f-y2U",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/I-1OR0f-y2U"
+        }
+      }
     }
   ]
 }
