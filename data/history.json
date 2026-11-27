@@ -2590,6 +2590,60 @@
           "url": "https://www.youtube.com/shorts/pKLUNhp1P7s"
         }
       }
+    },
+    {
+      "id": "slice-1795821190126",
+      "createdAt": "2026-11-27T23:13:10.126Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "poly:vending-machine-0cx6wj64swu",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.6569,
+      "slug": "3d-poly-vending-machine-0cx6wj64swu",
+      "name": "Retro Vending Machine",
+      "englishName": "Retro Vending Machine",
+      "cutterId": "custom",
+      "cutterPrompt": "Iridescent rainbow titanium heavy cleaver with polished white resin handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Matte lilac purple terrazzo slab with speckled confetti marble chips",
+      "envId": "custom",
+      "envPrompt": "Sunlit mint and apricot art-deco pastel studio with soft archway shadows",
+      "conceptSummary": "Retro Vending Machine [hf:poly:vending-machine-0cx6wj64swu | interior=cake-rainbow] | blade=Iridescent rainbow titanium heavy cleaver with polished white resin handle | board=Matte lilac purple terrazzo slab with speckled confetti marble chips | studio=Sunlit mint and apricot art-deco pastel studio with soft archway shadows",
+      "rounds": [
+        10,
+        100,
+        1000
+      ],
+      "maxCubes": 20269557,
+      "durationSec": 18.6,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-poly-vending-machine-0cx6wj64-sunlit-mint-and-apricot-art-deco-2026-11-27T22-59-34.mp4",
+      "caption": "Wait until you see what's hidden inside this Retro Vending Machine at 1,000 cuts 🤯\n\nDrop 1 object below — top comment gets sliced tomorrow 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-27T23:13:58.346Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869779861684267",
+        "mediaId": "18121534564787719",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869779861684267",
+        "firstCommentId": "18122046064978824",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1693330275747171",
+          "postId": "122104593651557835"
+        },
+        "caption": "Wait until you see what's hidden inside this Retro Vending Machine at 1,000 cuts 🤯\n\nDrop 1 object below — top comment gets sliced tomorrow 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "-CuLYL37X4Q",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/-CuLYL37X4Q"
+        }
+      }
     }
   ]
 }
