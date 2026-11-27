@@ -2428,6 +2428,60 @@
           "url": "https://www.youtube.com/shorts/h1Expk4iqjg"
         }
       }
+    },
+    {
+      "id": "slice-1795753875141",
+      "createdAt": "2026-11-27T04:31:15.141Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-gemini",
+      "objectId": "external-glb",
+      "modelSource": "polyhaven",
+      "modelAssetId": "pocket_watch",
+      "interiorStyle": "clockwork",
+      "solidRatio": 0.4264,
+      "slug": "3d-gold-pocket-watch",
+      "name": "Antique Gold Pocket Watch",
+      "englishName": "Antique Gold Pocket Watch",
+      "cutterId": "custom",
+      "cutterPrompt": "Neon emerald glass nakiri knife with polished brass spine",
+      "surfaceId": "custom",
+      "surfacePrompt": "Royal cobalt blue ceramic tile slab with crisp white grout",
+      "envId": "custom",
+      "envPrompt": "Warm saffron yellow minimalist studio with soft morning sunlight",
+      "conceptSummary": "Antique Gold Pocket Watch [polyhaven:pocket_watch | interior=clockwork] | blade=Neon emerald glass nakiri knife with polished brass spine | board=Royal cobalt blue ceramic tile slab with crisp white grout | studio=Warm saffron yellow minimalist studio with soft morning sunlight",
+      "rounds": [
+        10,
+        100,
+        1000
+      ],
+      "maxCubes": 11288404,
+      "durationSec": 25.433,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-gold-pocket-watch-warm-saffron-yellow-minimalist-s-2026-11-27T04-16-17.mp4",
+      "caption": "You won't believe what's hiding inside this Antique Gold Pocket Watch at 1,000 cuts 🤯\n\nDid you guess what was inside before 0:06? Comment YES or NO 👇\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-27T04:32:05.591Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869628352684267",
+        "mediaId": "18103870067544358",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869628352684267",
+        "firstCommentId": "18022343258957041",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1190163310366499",
+          "postId": "122103806631557835"
+        },
+        "caption": "You won't believe what's hiding inside this Antique Gold Pocket Watch at 1,000 cuts 🤯\n\nDid you guess what was inside before 0:06? Comment YES or NO 👇\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (@atomslice3d) • Create your own via link in bio 🔗\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "PTRzeCzqPzo",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/PTRzeCzqPzo"
+        }
+      }
     }
   ]
 }
