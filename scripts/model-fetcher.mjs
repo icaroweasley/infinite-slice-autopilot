@@ -421,25 +421,54 @@ const DYNAMIC_MEGA_SOURCES = [
   },
 ];
 
+const VIRAL_FOOD_RE = /cake|cupcake|donut|doughnut|cookie|brownie|ice.?cream|waffle|pancake|croissant|bagel|burger|pizza|sushi|taco|ramen|noodle|cheese|steak|salmon|bacon|egg|apple|mango|peach|cherry|berry|strawberry|pineapple|melon|watermelon|banana|pear|orange|lemon|lime|avocado|pumpkin|bread|pie|muffin|pretzel|candy|chocolate|honey|popcorn|fries|hotdog|sandwich|fruit|food|pastry|gelato|sorbet|pudding|macaron|tart/i;
+const VIRAL_ICON_RE = /gold|treasure|crown|gem|diamond|crystal|ruby|emerald|amethyst|rainbow|dragon|dino|triceratops|shark|whale|alien|robot|mario|yoshi|thor|hulk|android|fire.?truck|sports.?car|rocket|genie|coin|money|cash|duck|cat|dog|panda|bear|lion|frog|penguin|octopus|turtle|pokemon|pokeball|pikachu|unicorn|phoenix|sword|katana/i;
+const MUTED_VINTAGE_RE = /vintage|antique|retro|camera|camcorder|cassette|microwave|television|crt|laptop|binoculars|gas.?mask|extinguisher|register|megaphone|lighter|compass|bust|statue|wooden|train|bunny.?racer|toaster|typewriter|gramophone|telephone|wrench|drill|hammer|tool|shoe|sneaker|boot/i;
+
+function computeViralThumbStopScore(item) {
+  const txt = `${item.englishName || ''} ${item.assetId || ''} ${item.slug || ''} ${item.glbPath || ''}`;
+  let score = Number(item.priority || 7);
+  if (VIRAL_FOOD_RE.test(txt)) score += 5;
+  else if (VIRAL_ICON_RE.test(txt)) score += 4;
+  if (MUTED_VINTAGE_RE.test(txt)) score -= 3;
+  // Tiny jitter so same-tier heroes rotate fresh variety
+  return score + Math.random() * 0.75;
+}
+
 /**
  * Returns guaranteed-fresh, NEVER-REPEATED real 3D models combining:
  * 1) Tier 1 Mega-VIP Curated Legends (Poly Haven + Khronos + GSO Mario/TMNT/Dragon + NASA + Fish + Quaternius)
- * 2) Live rotating harvest from 3+ of our 11 dynamic Mega-Sources (35,600+ raw real 3D models!)
- * Set `scanAllSources: true` to harvest ALL 12 sources simultaneously for full inventory audits.
+ * 2) Live rotating harvest from 4+ of our 11 dynamic Mega-Sources (35,600+ raw real 3D models!)
+ * Set `preferViralThumbStop: true` (default) to rank colorful foods, gold/crystal & pop-culture icons first!
  */
-export async function getFresh3DModelCandidates(antiRepeatIndex, { includeDynamic = true, scanAllSources = false, perSourceLimit = 55 } = {}) {
+export async function getFresh3DModelCandidates(
+  antiRepeatIndex,
+  { includeDynamic = true, scanAllSources = false, perSourceLimit = 55, preferViralThumbStop = true } = {}
+) {
   const freshVip = CURATED_3D_MODELS.filter((m) => !checkRepetition(m, antiRepeatIndex).repeated);
   if (!includeDynamic && freshVip.length >= 12) {
-    return freshVip;
+    return preferViralThumbStop
+      ? [...freshVip].sort((a, b) => computeViralThumbStopScore(b) - computeViralThumbStopScore(a))
+      : freshVip;
   }
 
   const seenAssetIds = new Set(freshVip.map((m) => m.assetId.toLowerCase()));
   const dynamicFresh = [];
 
-  // Rotate 4 dynamic Mega-Sources per run (fast < 3s!) or scan ALL 11 sources when requested
-  const chosenSources = scanAllSources
-    ? DYNAMIC_MEGA_SOURCES
-    : [...DYNAMIC_MEGA_SOURCES].sort(() => Math.random() - 0.5).slice(0, 4);
+  // Always include high-CTR food/pop-culture catalogs (kenney-cc0 food-kit + google-poly food/animals) + 3 rotating sources!
+  let chosenSources;
+  if (scanAllSources) {
+    chosenSources = DYNAMIC_MEGA_SOURCES;
+  } else if (preferViralThumbStop) {
+    const pinned = DYNAMIC_MEGA_SOURCES.filter((s) => s.name === 'kenney-cc0' || s.name === 'google-poly');
+    const others = DYNAMIC_MEGA_SOURCES
+      .filter((s) => s.name !== 'kenney-cc0' && s.name !== 'google-poly')
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+    chosenSources = [...pinned, ...others];
+  } else {
+    chosenSources = [...DYNAMIC_MEGA_SOURCES].sort(() => Math.random() - 0.5).slice(0, 4);
+  }
 
   const results = await Promise.allSettled(
     chosenSources.map((src) => src.fetch(antiRepeatIndex, perSourceLimit))
@@ -459,7 +488,11 @@ export async function getFresh3DModelCandidates(antiRepeatIndex, { includeDynami
     }
   }
 
-  return [...freshVip, ...dynamicFresh];
+  const combined = [...freshVip, ...dynamicFresh];
+  if (preferViralThumbStop) {
+    combined.sort((a, b) => computeViralThumbStopScore(b) - computeViralThumbStopScore(a));
+  }
+  return combined;
 }
 
 async function downloadFileTo(url, destPath) {

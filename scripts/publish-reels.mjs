@@ -61,12 +61,13 @@ export function buildEnglishCaption(manifest, config) {
   const ctas = [
     `Rate that final 1,000-cut crunch 1–10 👇`,
     `Drop 1 object below — top comment gets sliced tomorrow 👇`,
-    `Send this to someone who needs 20 seconds of pure stress relief 😌↗️`,
-    `Did you guess what was inside before 0:06? Comment YES or NO 👇`,
+    `Send this to someone who needs 17 seconds of instant stress relief 😌↗️`,
+    `Did you guess what was inside before 0:04? Comment YES or NO 👇`,
   ];
   const cta = ctas[(hash + 1) % ctas.length];
 
-  return `${hook}\n\n${cta}\n\n🎬 Watch our daily 11+ min 60 FPS 3D ASMR on YouTube (${handle}) • Create your own via link in bio 🔗\n\n${hashtags}`;
+  // 100% pure native entertainment caption — ZERO "YouTube" competitor mentions or "link in bio" promo triggers!
+  return `${hook}\n\n${cta}\n\n${hashtags}`;
 }
 
 export function buildInstagramFirstComment(manifest) {
@@ -75,7 +76,7 @@ export function buildInstagramFirstComment(manifest) {
   const prompts = [
     `Be honest — did you expect what was inside this ${objName}? 😳 What impossible object should I slice next? 👇`,
     `Rate that 1,000-cut ASMR crunch from 1 to 10 🎧👇 Top comment gets sliced tomorrow!`,
-    `Most people don't make it to the 1,000-cut reveal 🤯 Drop the next object you want to see sliced 👇`,
+    `Most people don't expect the final 1,000-cut collapse 🤯 Drop the next object you want sliced 👇`,
   ];
   return prompts[hash % prompts.length];
 }
@@ -147,9 +148,9 @@ async function publishViaMetaGraph(videoPath, manifest, caption) {
 
   let creationId = null;
 
-  // Pick a vibrant mid-slice cover frame (~5.8s, right when Round 1 opens the colorful solid interior!)
+  // Pick a vibrant mid-slice cover frame (~4.3s on 17.5s loops, right when Round 1 opens the colorful solid interior!)
   const thumbOffsetMs = Math.round(
-    Math.min(6200, Math.max(4200, Number(manifest.durationSec || 24) * 235))
+    Math.min(5400, Math.max(3600, Number(manifest.durationSec || 17.6) * 245))
   );
 
   if (videoUrl) {

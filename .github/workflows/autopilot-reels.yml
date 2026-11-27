@@ -125,7 +125,7 @@ jobs:
           TIKTOK_MODE: ${{ secrets.TIKTOK_MODE || 'inbox' }}
           TIKTOK_PRIVACY_LEVEL: ${{ secrets.TIKTOK_PRIVACY_LEVEL || 'PUBLIC_TO_EVERYONE' }}
         run: |
-          FLAGS="--res 720x1280 --fps 60 --scale 0.70"
+          FLAGS="--res 720x1280 --fps 60 --scale 0.54"
           if [ "${{ inputs.quick }}" = "true" ]; then
             FLAGS="--quick"
           fi

@@ -118,7 +118,10 @@ async function main() {
   // Fetch enough unique non-repeated models for primary + backup candidates across all slots
   const neededModels = totalSlots * (1 + backupsPerSlot) + 12;
   console.log(`[longform-plan] Episode #${episodeNumber}: fetching ${neededModels} fresh non-repeated 3D models for ${totalSlots} slots...`);
-  const pool = await getFresh3DModelCandidates(antiRepeat, neededModels);
+  const pool = await getFresh3DModelCandidates(antiRepeat, {
+    perSourceLimit: neededModels,
+    preferViralThumbStop: true,
+  });
 
   // Deduplicate strictly across the whole episode (no two slots or backups share assetId or core noun!)
   const usedIds = new Set();
