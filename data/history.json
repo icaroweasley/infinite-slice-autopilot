@@ -2536,6 +2536,60 @@
           "url": "https://www.youtube.com/shorts/I-1OR0f-y2U"
         }
       }
+    },
+    {
+      "id": "slice-1795796987368",
+      "createdAt": "2026-11-27T16:29:47.368Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "gso:COAST_GUARD_BOAT",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.3778,
+      "slug": "3d-rescue-boat",
+      "name": "Coast Guard Rescue Boat",
+      "englishName": "Coast Guard Rescue Boat",
+      "cutterId": "custom",
+      "cutterPrompt": "1000C glowing red-hot chef knife",
+      "surfaceId": "custom",
+      "surfacePrompt": "Sage green pastel Venetian terrazzo stone slab",
+      "envId": "custom",
+      "envPrompt": "Warm terracotta sunset plaster atelier",
+      "conceptSummary": "Coast Guard Rescue Boat [hf:gso:COAST_GUARD_BOAT | interior=cake-rainbow] | blade=1000C glowing red-hot chef knife | board=Sage green pastel Venetian terrazzo stone slab | studio=Warm terracotta sunset plaster atelier",
+      "rounds": [
+        10,
+        150,
+        1000
+      ],
+      "maxCubes": 13622420,
+      "durationSec": 18.7,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-rescue-boat-warm-terracotta-sunset-plaster-a-2026-11-27T16-13-09.mp4",
+      "caption": "Headphones ON 🎧 Slicing a Coast Guard Rescue Boat 1,000 times into dust 🔪✨\n\nDid you guess what was inside before 0:04? Comment YES or NO 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-27T16:30:35.972Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869727115684267",
+        "mediaId": "18133350592879479",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869727115684267",
+        "firstCommentId": "18114977287886379",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1173370345034152",
+          "postId": "122104363395557835"
+        },
+        "caption": "Headphones ON 🎧 Slicing a Coast Guard Rescue Boat 1,000 times into dust 🔪✨\n\nDid you guess what was inside before 0:04? Comment YES or NO 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "pKLUNhp1P7s",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/pKLUNhp1P7s"
+        }
+      }
     }
   ]
 }
