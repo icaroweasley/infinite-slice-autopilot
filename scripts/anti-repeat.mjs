@@ -75,6 +75,7 @@ const CANONICAL_MAP = {
   rosquinha: 'donut',
 
   burger: 'burger',
+  cheeseburger: 'burger',
   hamburger: 'burger',
   hamburguer: 'burger',
   buns: 'burger',
