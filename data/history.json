@@ -2644,6 +2644,60 @@
           "url": "https://www.youtube.com/shorts/-CuLYL37X4Q"
         }
       }
+    },
+    {
+      "id": "slice-1795839903162",
+      "createdAt": "2026-11-28T04:25:03.162Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "gso:Little_Big_Planet_3_Plush_Edition",
+      "interiorStyle": "galaxy-nebula",
+      "solidRatio": 0.9765,
+      "slug": "3d-gso-little-big-planet-3-plush-editio",
+      "name": "Little Big Planet 3 Plush",
+      "englishName": "Little Big Planet 3 Plush",
+      "cutterId": "custom",
+      "cutterPrompt": "Ruby red glowing plasma katana",
+      "surfaceId": "custom",
+      "surfacePrompt": "Walnut wood and coral sunset epoxy resin river board",
+      "envId": "custom",
+      "envPrompt": "Warm fluted wood Japanese minimalist studio",
+      "conceptSummary": "Little Big Planet 3 Plush [hf:gso:Little_Big_Planet_3_Plush_Edition | interior=galaxy-nebula] | blade=Ruby red glowing plasma katana | board=Walnut wood and coral sunset epoxy resin river board | studio=Warm fluted wood Japanese minimalist studio",
+      "rounds": [
+        10,
+        100,
+        1000
+      ],
+      "maxCubes": 32526050,
+      "durationSec": 18.583,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-gso-little-big-planet-3-plush-warm-fluted-wood-japanese-minima-2026-11-28T04-14-18.mp4",
+      "caption": "Is this Little Big Planet 3 Plush real or CAKE? Wait for 0:06 👀✨\n\nRate that final 1,000-cut crunch 1–10 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-28T04:25:48.226Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869811646684267",
+        "mediaId": "18511607980099164",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869811646684267",
+        "firstCommentId": "18402253147160048",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "1164618152783221",
+          "postId": "122104728345557835"
+        },
+        "caption": "Is this Little Big Planet 3 Plush real or CAKE? Wait for 0:06 👀✨\n\nRate that final 1,000-cut crunch 1–10 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "O5IxHbqKWp8",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/O5IxHbqKWp8"
+        }
+      }
     }
   ]
 }
