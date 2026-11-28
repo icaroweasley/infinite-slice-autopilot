@@ -1,9 +1,13 @@
 name: Daily 10+ Min YouTube Long-Form (16:9 60fps)
 
 on:
-  # Runs once every day at 18:00 UTC (14:00 local UTC-4, peak afternoon YouTube traffic)
+  # Primary recommendation: trigger daily via Google Apps Script calling workflow_dispatch at 14:00 local (18:00 UTC)
+  # Multi-slot backup schedules (18:00, 20:30, 23:00 UTC) so if GitHub drops one cron slot, another fires —
+  # the 20h anti-duplicate guard skips extra slots in ~3s once today's episode is published!
   schedule:
     - cron: '0 18 * * *'
+    - cron: '30 20 * * *'
+    - cron: '0 23 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
