@@ -2698,6 +2698,60 @@
           "url": "https://www.youtube.com/shorts/O5IxHbqKWp8"
         }
       }
+    },
+    {
+      "id": "slice-1795861679429",
+      "createdAt": "2026-11-28T10:27:59.429Z",
+      "status": "published",
+      "source": "cloud-autopilot:3d-cc0",
+      "objectId": "external-glb",
+      "modelSource": "hf",
+      "modelAssetId": "gso:FIRE_TRUCK",
+      "interiorStyle": "cake-rainbow",
+      "solidRatio": 0.2854,
+      "slug": "3d-red-fire-truck",
+      "name": "Red Toy Fire Truck",
+      "englishName": "Red Toy Fire Truck",
+      "cutterId": "custom",
+      "cutterPrompt": "Mirror-polished Japanese chef knife with dark walnut handle",
+      "surfaceId": "custom",
+      "surfacePrompt": "Black volcanic stone with glowing orange magma veins",
+      "envId": "custom",
+      "envPrompt": "Turquoise coastal spa hex mosaic studio",
+      "conceptSummary": "Red Toy Fire Truck [hf:gso:FIRE_TRUCK | interior=cake-rainbow] | blade=Mirror-polished Japanese chef knife with dark walnut handle | board=Black volcanic stone with glowing orange magma veins | studio=Turquoise coastal spa hex mosaic studio",
+      "rounds": [
+        10,
+        150,
+        1000
+      ],
+      "maxCubes": 10714147,
+      "durationSec": 18.717,
+      "resolution": "720x1280",
+      "fps": 60,
+      "videoFile": "output/infinite-slice-3d-red-fire-truck-turquoise-coastal-spa-hex-mosaic-2026-11-28T10-14-13.mp4",
+      "caption": "Headphones ON 🎧 Slicing a Red Toy Fire Truck 1,000 times into dust 🔪✨\n\nDid you guess what was inside before 0:04? Comment YES or NO 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+      "publishedAt": "2026-11-28T10:28:46.391Z",
+      "publish": {
+        "provider": "meta-graph",
+        "creationId": "17869855425684267",
+        "mediaId": "18130176295861599",
+        "videoUrl": "https://rupload.facebook.com/ig-api-upload/v27.0/17869855425684267",
+        "firstCommentId": "18229357561341102",
+        "facebook": {
+          "status": "published",
+          "pageId": "1521281724396074",
+          "pageName": "Atomslice3d",
+          "videoId": "2778349129227307",
+          "postId": "122104955097557835"
+        },
+        "caption": "Headphones ON 🎧 Slicing a Red Toy Fire Truck 1,000 times into dust 🔪✨\n\nDid you guess what was inside before 0:04? Comment YES or NO 👇\n\n#oddlysatisfying #asmr #3dart #satisfying #3danimation",
+        "youtube": {
+          "provider": "youtube-api",
+          "videoId": "uoxWKc-_mow",
+          "privacyStatus": "public",
+          "url": "https://www.youtube.com/shorts/uoxWKc-_mow"
+        }
+      }
     }
   ]
 }
